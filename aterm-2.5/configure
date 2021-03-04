@@ -2708,7 +2708,7 @@ am__tar='${AMTAR} chof - "$$tardir"'; am__untar='${AMTAR} xf -'
   ac_config_files="$ac_config_files aterm.pc"
 
 
-        ac_config_files="$ac_config_files ./Makefile ./test/Makefile ./utils/Makefile ./aterm/Makefile ./doc/spec/Makefile ./doc/Makefile ./doc/examples/Makefile"
+        ac_config_files="$ac_config_files ./Makefile ./aterm/Makefile ./doc/Makefile ./doc/examples/Makefile ./doc/spec/Makefile ./test/Makefile ./utils/Makefile"
 
 
   { $as_echo "$as_me:$LINENO: checking whether to enable maintainer-specific portions of Makefiles" >&5
@@ -25917,12 +25917,12 @@ do
   case $ac_config_target in
     "aterm.pc") CONFIG_FILES="$CONFIG_FILES aterm.pc" ;;
     "./Makefile") CONFIG_FILES="$CONFIG_FILES ./Makefile" ;;
-    "./test/Makefile") CONFIG_FILES="$CONFIG_FILES ./test/Makefile" ;;
-    "./utils/Makefile") CONFIG_FILES="$CONFIG_FILES ./utils/Makefile" ;;
     "./aterm/Makefile") CONFIG_FILES="$CONFIG_FILES ./aterm/Makefile" ;;
-    "./doc/spec/Makefile") CONFIG_FILES="$CONFIG_FILES ./doc/spec/Makefile" ;;
     "./doc/Makefile") CONFIG_FILES="$CONFIG_FILES ./doc/Makefile" ;;
     "./doc/examples/Makefile") CONFIG_FILES="$CONFIG_FILES ./doc/examples/Makefile" ;;
+    "./doc/spec/Makefile") CONFIG_FILES="$CONFIG_FILES ./doc/spec/Makefile" ;;
+    "./test/Makefile") CONFIG_FILES="$CONFIG_FILES ./test/Makefile" ;;
+    "./utils/Makefile") CONFIG_FILES="$CONFIG_FILES ./utils/Makefile" ;;
     "depfiles") CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
     "aterm.spec") CONFIG_FILES="$CONFIG_FILES aterm.spec" ;;
 
