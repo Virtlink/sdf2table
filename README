@@ -1,9 +1,31 @@
-The SDF2 Bundle is an easy to install collection of packages related
-to the SDF2 syntax definition formalism. The packages are developed at
-the CWI. The main packages of the sdf2-bundle are:
+# Sdf2table
 
-  pgen - parser generator for SDF2
-  sglr - parser
+To compile:
 
-More info:
-  http://www.syntax-definition.org
+1.  Install the following packages:
+    - `build-essential`
+    - `curl`
+    - `pkg-config`
+    - `graphviz`
+2.  Compile and install ATerm in the default locations (from [Meta Environment][1])
+3.  Ensure `libATerm.so` is on the dynamic library path
+
+    ```
+    find / -name libATerm.so
+    # /usr/local/lib/libATerm.so
+    echo $LD_LIBRARY_PATH
+    # <empty>
+    export $LD_LIBRARY_PATH=/usr/local/lib
+    echo $LD_LIBRARY_PATH
+    /usr/local/bin/baffle --help
+    ```
+
+4.  Configure this project using the following command:
+
+    ```
+    ./configure --with-cflags=-fgnu89-inline
+    ```
+
+5.  N/A
+
+[1]: http://www.meta-environment.org/
