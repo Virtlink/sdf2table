@@ -1,1 +1,12 @@
 .DS_Store
+*.Po
+*.Plo
+Makefile
+*.o
+*.lo
+*.la
+*.log
+*.status
+*.pkg
+*.a
+*-config
