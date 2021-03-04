@@ -548,13 +548,13 @@ void process_restrictions(SDF_RestrictionList restricts)
   int cnt = 0;
 
   while (SDF_hasRestrictionListHead(restricts)) {
-    SDF_Restriction restrictt = SDF_getRestrictionListHead(restricts);
+    SDF_Restriction restrict = SDF_getRestrictionListHead(restricts);
 
     cnt++;
-    if (SDF_isRestrictionFollow(restrictt)) {
-      SDF_Symbols symbols = SDF_getRestrictionSymbols(restrictt);
+    if (SDF_isRestrictionFollow(restrict)) {
+      SDF_Symbols symbols = SDF_getRestrictionSymbols(restrict);
       SDF_SymbolList symbolList = SDF_getSymbolsList(symbols);
-      SDF_Lookaheads lookaheads = SDF_getRestrictionLookaheads(restrictt);
+      SDF_Lookaheads lookaheads = SDF_getRestrictionLookaheads(restrict);
 
       if (SDF_isLookaheadsList(lookaheads)) {
         SDF_LookaheadList lookaheadList = SDF_getLookaheadsList(lookaheads);

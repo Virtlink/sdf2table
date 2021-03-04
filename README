@@ -33,7 +33,7 @@ To compile:
 4.  Configure this project using the following command:
 
     ```
-    ./configure --with-cflags="-fgnu89-inline -std=c89"
+    ./configure --with-cflags="-std=c89"
     make
     make install
     ```
