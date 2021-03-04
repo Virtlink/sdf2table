@@ -9,8 +9,7 @@
 #include <atb-tool.h>
 
 /* Prototypes for functions called from the event handler */
-ATerm open_language(int conn, ATerm, ATerm, const char *);
-ATerm parse_string(int conn, ATerm, const char *, const char *, const char *, ATerm);
+ATerm parse(int conn, const char *, ATerm, const char *, ATerm);
 void rec_terminate(int conn, ATerm);
 extern ATerm sglr_handler(int conn, ATerm term);
 extern ATerm sglr_checker(int conn, ATerm sigs);

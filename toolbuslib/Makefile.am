@@ -1,20 +1,5 @@
-SUBDIRS = aterm
+include $(top_srcdir)/Makefile.top.meta
 
-ACLOCAL_FLAGS = -I .
+SUBDIRS = src
 
-EXTRA_DIST = program-check.m4 reconf \
-             toolbuslib-config.sh.src \
-	     package
-
-bin_SCRIPTS = toolbuslib-config
-
-CLEANFILES = toolbuslib-config ${PACKAGE}-${VERSION}.pkg
-
-% : %.sh.src
-	sed 's@__PREFIX__@$(prefix)@g' < $< > $@ && \
-	chmod +x $@
-
-noinst_SCRIPTS = ${PACKAGE}-${VERSION}.pkg
-
-${PACKAGE}-${VERSION}.pkg: package Makefile
-	cp $< $@
+ACLOCAL_AMFLAGS = -I .

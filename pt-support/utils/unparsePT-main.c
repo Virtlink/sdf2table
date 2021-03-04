@@ -18,7 +18,7 @@
 
 static char myname[] = "unparsePT";
 static char myversion[] = "1.4";
-static char myarguments[] = "ahi:o:vV";
+static char myarguments[] = "hi:o:vV";
 
 /*}}}  */
 
@@ -32,7 +32,6 @@ void usage(void)
 	  "This is *not* a pretty-printer, just an unparser.\n\n" 
 	  "Usage: %s [%s]\n"
 	  "Options:\n"
-	  "\t-a              visualize ambiguity clusters\n"
 	  "\t-h              display help information (usage)\n"
 	  "\t-i filename     input from file (default stdin)\n"
 	  "\t-o filename     output to file (default stdout)\n"
@@ -65,12 +64,13 @@ ATerm unparse_asfix(int cid, ATerm t)
 {
   char *text = NULL;
 
-  text = PT_yieldAny(ATBunpack(t));
+  text = PT_yieldAnyToString(ATBunpack(t), ATfalse);
 
   return ATmake("snd-value(unparsed-text(<str>))", text);
 }
 
 /*}}}  */
+
 
 /*{{{  int main(int argc, char *argv[]) */
 
@@ -78,14 +78,14 @@ int main(int argc, char *argv[])
 {
   int c;
   ATerm bottomOfStack;
-
-  /*  Configuration items  */
-  char   *inputName = "-";
-  char   *outputName = "-";
+  char *ATlibArgv[] = { "unparsePT", "-at-termtable", "21" };
+  char *inputName = "-";
+  char *outputName = "-";
   FILE *outputFile = NULL; 
   ATbool proceed = ATtrue;
   ATbool verbose = ATfalse;
   ATbool visualAmbs = ATfalse;
+
 #ifndef WITHOUT_TOOLBUS
   ATbool use_toolbus = ATfalse;
   int i;
@@ -104,9 +104,6 @@ int main(int argc, char *argv[])
   else
 #endif
   {
-    extern char *optarg;
-    extern int   optind;
-
     while ((c = getopt(argc, argv, myarguments)) != -1) {
       switch (c) {
 	case 'a':
@@ -132,31 +129,34 @@ int main(int argc, char *argv[])
 	  break;
       }
     }
-    argc -= optind;
-    argv += optind;
 
-    ATinit(argc, argv, &bottomOfStack);
+    ATinit(sizeof(ATlibArgv)/sizeof(char *), ATlibArgv, &bottomOfStack);
     PT_initMEPTApi();
+  }
 
-    if (proceed) {
-      ATerm term;
 
-      if (!strcmp(outputName, "") || !strcmp(outputName, "-")) {
-	outputFile = stdout;
-      } 
-      else if (!(outputFile = fopen(outputName, "wb"))) {
-	ATerror("%s: cannot open %s for writing\n", myname, outputName);
-      }
+  if (proceed) {
+    ATerm term;
 
-      term = ATreadFromNamedFile(inputName);
-      if (term == NULL) {
-	ATerror("%s: parse error in input term.\n", myname);
+    if (!strcmp(outputName, "") || !strcmp(outputName, "-")) {
+      outputFile = stdout;
+    } 
+    else if (!(outputFile = fopen(outputName, "wb"))) {
+      ATerror("%s: cannot open %s for writing\n", myname, outputName);
+    }
+
+    term = ATreadFromNamedFile(inputName);
+    if (term == NULL) {
+      ATerror("%s: cannot read term file: %s\n", myname, inputName);
+    }
+    else {
+      PT_yieldAnyToFile(term, outputFile, visualAmbs);
+      if (outputFile == stdout) {
+	fflush(outputFile);
       }
       else {
-	char *text = PT_yieldAnyVisualAmbs(term, visualAmbs);
-	fprintf(outputFile, "%s", text);
 	fclose(outputFile);
-     }
+      }
     }
   }
 

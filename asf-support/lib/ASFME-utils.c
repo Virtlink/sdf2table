@@ -24,99 +24,14 @@ ATbool ASF_isTagDefault(ASF_ASFTag tag)
 {
   if (ASF_isASFTagNotEmpty(tag)) {
     ASF_ASFTagId tagId = ASF_getASFTagASFTagId(tag);
+    ATbool result;
 
-    char *lex = ASF_getCHARLISTString(ASF_getASFTagIdChars(tagId));
-    return streqn(lex, DEFAULT_TAG_PREFIX, strlen(DEFAULT_TAG_PREFIX)) 
-           ||
-           streq(lex, DEFAULT_TAG);
+    const char *lex = PT_yieldTree((PT_Tree)tagId);
+    result = streqn(lex, DEFAULT_TAG_PREFIX, strlen(DEFAULT_TAG_PREFIX)) 
+           || streq(lex, DEFAULT_TAG);
+    return result;
   } 
   return ATfalse;
-}
-
-/*}}}  */
-/*{{{  int ASF_getASFConditionalEquationListLength(ASF_ASFConditionalEquationList eqs) */
-
-int ASF_getASFConditionalEquationListLength(ASF_ASFConditionalEquationList eqs)
-{
-   return (ATgetLength((ATermList)ASF_makeTermFromASFConditionalEquationList(eqs))/2)+1;
-}
-
-/*}}}  */
-/*{{{  int ASF_getCHARListLength(ASF_CHARList list) */
-
-int ASF_getCHARListLength(ASF_CHARList list)
-{
-  return (ATgetLength((ATermList) ASF_makeTermFromCHARList(list)) / 2) + 1;
-}
-
-/*}}}  */
-/*{{{  int ASF_getConditionListLength(ASF_ConditionList list) */
-
-int ASF_getConditionListLength(ASF_ASFConditionList list)
-{
-  return (ATgetLength((ATermList) ASF_makeTermFromASFConditionList(list)) / 2) + 1;
-}
-
-/*}}}  */
-/*{{{  int ASF_getTestEquationListLength(ASF_ASFTestEquationTestList list) */
-
-int ASF_getTestEquationListLength(ASF_ASFTestEquationTestList list)
-{
-  return (ATgetLength((ATermList) 
-      ASF_makeTermFromASFTestEquationTestList(list)) / 2) + 1;
-}
-
-/*}}}  */
-/*{{{  ASF_ASFConditionalEquationList ASF_concatASFConditionalEquationList(ASF_ASFConditionalEquationList l1, l2) */
-
-ASF_ASFConditionalEquationList ASF_concatASFConditionalEquationList(ASF_ASFConditionalEquationList l1,
-						ASF_ASFConditionalEquationList l2)
-{
-  if (!ASF_isASFConditionalEquationListEmpty(l2)) {
-    if (ASF_hasASFConditionalEquationListHead(l1)) {
-      ASF_ASFConditionalEquation head = ASF_getASFConditionalEquationListHead(l1);
-      if (ASF_hasASFConditionalEquationListTail(l1)) {
-        ASF_ASFConditionalEquationList tail = ASF_getASFConditionalEquationListTail(l1);
-      
-        return ASF_makeASFConditionalEquationListMany(head, ASF_makeLayoutEmpty(),
-                 ASF_concatASFConditionalEquationList(tail, l2));
-      }
-      else {
-        return ASF_makeASFConditionalEquationListMany(head, ASF_makeLayoutEmpty(), l2);
-      }
-    }
-    else {
-      return l2;
-    }
-  } 
-
-  return l1;
-}
-
-/*}}}  */
-/*{{{  ASF_ASFTestEquationTestList ASF_concatASFTestEquationList(ASF_ASFTestEquationTestList l1, ASF_ASFTestEquationTestList l2) */
-
-ASF_ASFTestEquationTestList ASF_concatASFTestEquationTestList(ASF_ASFTestEquationTestList l1, ASF_ASFTestEquationTestList l2)
-{
-  if (!ASF_isASFTestEquationTestListEmpty(l2)) {
-    if (ASF_hasASFTestEquationTestListHead(l1)) {
-      ASF_ASFTestEquation head = ASF_getASFTestEquationTestListHead(l1);
-      if (ASF_hasASFTestEquationTestListTail(l1)) {
-        ASF_ASFTestEquationTestList tail = ASF_getASFTestEquationTestListTail(l1);
-      
-        return ASF_makeASFTestEquationTestListMany(head, ASF_makeLayoutEmpty(),
-                 ASF_concatASFTestEquationTestList(tail, l2));
-      }
-      else {
-        return ASF_makeASFTestEquationTestListMany(head, ASF_makeLayoutEmpty(), l2);
-      }
-    }
-    else {
-      return l2;
-    }
-  } 
-
-  return l1;
 }
 
 /*}}}  */
@@ -134,13 +49,12 @@ ASF_ASFConditionalEquationList ASF_unionASFConditionalEquationList(ASF_ASFCondit
       ASF_ASFConditionalEquation ce;
       ASF_ASFConditionalEquationList newCel = ASF_makeASFConditionalEquationListEmpty();
       int maxIndex = 0, index;
-      ATbool ignored;
 
       while (ASF_hasASFConditionalEquationListHead(cel1)) {
         ce = ASF_getASFConditionalEquationListHead(cel1);
         index = ATindexedSetPut(iSet, 
-                                ASF_makeTermFromASFConditionalEquation(ce),
-                                &ignored);
+                                ASF_ASFConditionalEquationToTerm(ce),
+                                NULL);
         if (index > maxIndex) {
           maxIndex = index;
         }
@@ -155,8 +69,8 @@ ASF_ASFConditionalEquationList ASF_unionASFConditionalEquationList(ASF_ASFCondit
       while (ASF_hasASFConditionalEquationListHead(cel2)) {
         ce = ASF_getASFConditionalEquationListHead(cel2);
         index = ATindexedSetPut(iSet, 
-                                ASF_makeTermFromASFConditionalEquation(ce),
-                                &ignored);
+                                ASF_ASFConditionalEquationToTerm(ce),
+                                NULL);
         if (index > maxIndex) {
           maxIndex = index;
         }
@@ -170,7 +84,7 @@ ASF_ASFConditionalEquationList ASF_unionASFConditionalEquationList(ASF_ASFCondit
       }
       
       for (index=0; index <= maxIndex; index++) {
-        ce = ASF_makeASFConditionalEquationFromTerm(ATindexedSetGetElem(iSet, index));
+        ce = ASF_ASFConditionalEquationFromTerm(ATindexedSetGetElem(iSet, index));
         newCel = ASF_makeASFConditionalEquationListMany(ce,
 							separator, 
 							newCel);
@@ -198,42 +112,19 @@ ASF_OptLayout ASF_makeLayoutEmpty()
 
 ASF_OptLayout ASF_makeLayoutNewline()
 {
-  return ASF_makeOptLayoutPresent(ASF_makeCHARLISTString("\n"));
+  return ASF_makeOptLayoutPresent(ASF_makeLayoutLexToCf(ASF_makeLexLayoutListSingle(ASF_makeLexLayoutWhitespace('\n'))));
+} 
+
+/*}}}  */
+/*{{{  ASF_OptLayout ASF_makeLayoutSpace() */
+
+ASF_OptLayout ASF_makeLayoutSpace()
+{
+  return ASF_makeOptLayoutPresent(ASF_makeLayoutLexToCf(ASF_makeLexLayoutListSingle(ASF_makeLexLayoutWhitespace(' '))));
 } 
 
 /*}}}  */
 
-/*{{{  ATbool ASF_isTreeLexicalConstructorFunction(ASF_Tree tree) */
-
-ATbool ASF_isTreeLexicalConstructorFunction(ASF_Tree tree)
-{
-  extern ATerm ASF_patternTreeLexicalConstructor;
-
-  if (ATmatchTerm(ASF_TreeToTerm(tree), ASF_patternTreeLexicalConstructor,
-                  NULL, NULL, NULL, NULL, NULL, NULL, NULL)) {
-    return ATtrue;
-  }
-
-  return ATfalse;
-}
-
-/*}}}  */
-
-/*{{{  ATbool ASF_isTreeAmbConstructorFunction(ASF_Tree tree) */
-
-ATbool ASF_isTreeAmbConstructorFunction(ASF_Tree tree)
-{
-  extern ATerm ASF_patternTreeAmbiguityConstructor;
-
-  if (ATmatchTerm(ASF_TreeToTerm(tree), ASF_patternTreeAmbiguityConstructor,
-                  NULL, NULL, NULL, NULL, NULL, NULL, NULL)) {
-    return ATtrue;
-  }
-
-  return ATfalse;
-}
-
-/*}}}  */
 
 /*{{{  static PT_Attr isAttrTraversal(PT_Attr attr, PT_AttrVisitorData data) */
 
@@ -347,7 +238,8 @@ ASF_ASFTestEquationTestList ASF_getASFModuleTestList(ASF_ASFModule module)
     ASF_ASFSection section = ASF_getASFSectionListHead(sections);
 
     if (ASF_isASFSectionTests(section)) {
-      tests = ASF_concatASFTestEquationTestList(tests, 
+      ASF_OptLayout ws = ASF_makeOptLayoutAbsent();
+      tests = ASF_concatASFTestEquationTestList(tests, ws,
 					    ASF_getASFSectionTestList(section));
     }
 
@@ -361,3 +253,26 @@ ASF_ASFTestEquationTestList ASF_getASFModuleTestList(ASF_ASFModule module)
 }
 
 /*}}}  */
+
+/*{{{  ASF_ASFTagId ASF_makeTagId(const char* str) */
+
+ASF_ASFTagId ASF_makeTagId(const char* str)
+{
+  ASF_LexASFTagId tag;
+
+  if (strlen(str) == 1) {
+    tag = ASF_makeLexASFTagIdOneChar(str[0]);
+  }
+  else {
+    char *tmp = strdup(str);
+    char last = tmp[strlen(str) - 1];
+    tag = ASF_makeLexASFTagIdManyChars(tmp[0], tmp+1, last);
+    free(tmp);
+  }
+
+  return ASF_makeASFTagIdLexToCf(tag);
+}
+
+/*}}}  */
+
+				       

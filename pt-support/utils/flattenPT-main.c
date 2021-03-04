@@ -1,4 +1,4 @@
-/*  $Id: flattenPT-main.c,v 1.5.4.1 2004/03/10 08:41:59 kooiker Exp $  */
+/* $Id: flattenPT-main.c 12897 2004-03-11 12:27:01Z kooiker $ */
 
 #include <stdio.h>
 #include <unistd.h>
@@ -82,17 +82,17 @@ int main(int argc, char **argv)
   PT_initAsFix2Api();
 
   if(proceed) {
-    tree = PT_makeParseTreeFromTerm(ATreadFromNamedFile(input));
+    tree = PT_ParseTreeFromTerm(ATreadFromNamedFile(input));
     flatTree = flattenPT(tree);
 
     if(!flatTree) {
       ATerror("%s: conversion failed.", myname);
     }
     if(bafmode) {
-      ATwriteToNamedBinaryFile(PT_makeTermFromParseTree(flatTree), output);
+      ATwriteToNamedBinaryFile(PT_ParseTreeToTerm(flatTree), output);
     }
     else {
-      ATwriteToNamedTextFile(PT_makeTermFromParseTree(flatTree), output);
+      ATwriteToNamedTextFile(PT_ParseTreeToTerm(flatTree), output);
     }
   }
 

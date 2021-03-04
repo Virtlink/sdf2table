@@ -1,11 +1,10 @@
-# $Id: Makefile.am,v 1.24 2004/01/13 07:39:50 jurgenv Exp $
+# $Id: Makefile.am 20920 2007-01-12 14:46:45Z jurgenv $
 
-# During development, DO NOT COMMIT ME!
-#CFLAGS += -DDISABLE_DYNAMIC_CHECKING
+#AM_CFLAGS = -DDISABLE_DYNAMIC_CHECKING # During development, DO NOT COMMIT ME!
 
 EXTRA_DIST = Sdf.label.def
 
-lib_LIBRARIES = libSDFME.a libSDF2PT.a libPT2SDF.a
+lib_LTLIBRARIES = libSDFME.la libSDF2PT.la libPT2SDF.la
 
 include_HEADERS = \
 	PT2SDF.h \
@@ -14,16 +13,19 @@ include_HEADERS = \
 	SDFME.h \
 	SDFME_dict.h
 
-libSDFME_a_SOURCES = SDFME.c SDFME_dict.c SDFME_bottom.c ${UTILSRCS}
+AM_CPPFLAGS = $(ATERM_CFLAGS) $(ERROR_SUPPORT_CFLAGS) $(PT_SUPPORT_CFLAGS)
 
-libSDF2PT_a_SOURCES = sdf2pt.c
+libSDFME_la_SOURCES = SDFME.c SDFME_dict.c $(UTILSRCS)
+libSDFME_la_LDFLAGS = -avoid-version -no-undefined $(AM_LDFLAGS)
+libSDFME_la_LIBADD  = $(ATERM_LIBS) $(ERROR_SUPPORT_LIBS) $(PT_SUPPORT_LIBS)
 
-libPT2SDF_a_SOURCES = pt2sdf.c
+libSDF2PT_la_SOURCES  = sdf2pt.c
+libSDF2PT_la_LDFLAGS  = -avoid-version -no-undefined $(AM_LDFLAGS)
+libSDF2PT_la_LIBADD  = $(ATERM_LIBS) $(ERROR_SUPPORT_LIBS) $(PT_SUPPORT_LIBS) ./libSDFME.la
 
-INCLUDES = \
-	-I${ATERM}/include \
-	-I${ERROR_SUPPORT}/include \
-	-I${PT_SUPPORT}/include
+libPT2SDF_la_SOURCES  = pt2sdf.c
+libPT2SDF_la_LDFLAGS  = -avoid-version -no-undefined $(AM_LDFLAGS)
+libPT2SDF_la_LIBADD  = $(ATERM_LIBS) $(ERROR_SUPPORT_LIBS) $(PT_SUPPORT_LIBS) ./libSDFME.la
 
 UTILSRCS = \
 	SDFME-utils.c \
@@ -35,9 +37,21 @@ UTILSRCS = \
 	import-operations.c \
 	sort.c 
 
+LIBRARY = ../../sdf-library/library
+ATERM_SDF = $(shell ls $(LIBRARY)/languages/aterm/syntax/*.sdf)
+SDF2_SDF = $(shell ls $(LIBRARY)/languages/sdf2/syntax/*.sdf)
+BASIC_SDF = \
+	$(LIBRARY)/basic/Whitespace.sdf \
+	$(LIBRARY)/basic/StrCon.sdf \
+	$(LIBRARY)/basic/NatCon.sdf \
+	$(LIBRARY)/basic/IdentifierCon.sdf \
+	$(LIBRARY)/basic/Comments.sdf
+
 # Developers only:
-api: Sdf.label.def
-	sdf2-to-c -i $< --compat-term -P SDF_ -o SDFME
+api:
+	(echo definition; cat $(ATERM_SDF) $(SDF2_SDF) $(BASIC_SDF)) \
+	> Sdf.label.def
+	sdf2-to-c --input Sdf.label.def --prefix SDF_ --output SDFME
 
 api-clean:
-	rm -f SDFME.[ch] SDFME_dict.* SDFME.adt SDFME_bottom.c
+	rm -f Sdf.label.def SDFME.[ch] SDFME_dict.* SDFME.adt

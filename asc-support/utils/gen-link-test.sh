@@ -1,6 +1,6 @@
 #! /bin/sh
 #
-# $Id: gen-link-test.sh,v 1.8.4.2 2004/11/02 12:45:41 uid507 Exp $
+# $Id: gen-link-test.sh 15007 2004-11-19 14:49:57Z uid507 $
 #
 
 BUILTIN_NAMES=$*

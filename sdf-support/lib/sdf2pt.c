@@ -6,6 +6,7 @@
 #include "SDFME-utils.h"
 #include "SDF2PT.h"
 
+static const char*   SDFStrConToString(SDF_StrCon str);
 static PT_Symbols    SDFSymbolsToPtSymbols(SDF_Symbols sdfSymbols);
 static PT_Attributes SDFAttributesToPtAttributes(SDF_Attributes sdfAttributes);
 static PT_Attr       SDFAttributeToPtAttr(SDF_Attribute sdfAttribute);
@@ -14,38 +15,111 @@ static PT_CharRanges SDFCharRangesToPtCharRanges(SDF_CharRanges sdfCharRanges);
 static PT_CharRange  SDFCharRangeToPtCharRange(SDF_CharRange sdfCharRange);
 static int           SDFCharacterToInt(SDF_Character sdfCharacter);
 
-static char *unquote_str(char *s)
+static const char *SDFStrCharsToString(SDF_LexStrCharChars list)
 {
-  int len = strlen(s), i, j;
-  static char *rs = NULL;
-  static int   rs_size = 0;
+  int len = SDF_getLexStrCharCharsLength(list);
+  int i;
+  static char result[BUFSIZ];
 
-  if (len > rs_size) {
-    rs = (char *)realloc(rs, len);
-    if(!rs) {
-      ATerror("Run out of memory!\n");
-    }
-    rs_size = len;
+  if (len >= BUFSIZ - 2) {
+    ATwarning("SDFStrConToString: insufficient memory to allocate string\n");
+    return NULL;
   }
 
-  if(s[0] == '\"' && s[len-1] == '\"') {
-    j = 0;
-    for(i=1; i<=len-2; i++) {
-      if((s[i] == '\\' && s[i+1] == '"') ||
-         (s[i] == '\\' && s[i+1] == '\\'))
-        rs[j++] = s[++i];
-      else if (s[i] == '\\' && s[i+1] == 'n') {
-        rs[j++] = '\n';
-        i++;
-      }
-      else
-        rs[j++] = s[i];
+  for (i = 0;
+       !SDF_isLexStrCharCharsEmpty(list);
+       list = SDF_getLexStrCharCharsTail(list),
+       i++) {
+
+    SDF_LexStrChar ch = SDF_getLexStrCharCharsHead(list);
+
+
+    if (SDF_isLexStrCharNewline(ch)) {
+      result[i] = '\n';
     }
-    rs[j] = '\0';
-    return rs;
+    else if (SDF_isLexStrCharTab(ch)) {
+      result[i] = '\t';
+    }
+    else if (SDF_isLexStrCharQuote(ch)) {
+      result[i] = '\"';
+    }
+    else if (SDF_isLexStrCharBackslash(ch)) {
+      result[i] = '\\';
+    }
+    else if (SDF_isLexStrCharNormal(ch)) {
+      result[i] = SDF_getLexStrCharCh(ch);
+    }
+    else if (SDF_isLexStrCharDecimal(ch)) {
+      int a = SDF_getLexStrCharA(ch);
+      int b = SDF_getLexStrCharB(ch);
+      int c = SDF_getLexStrCharC(ch);
+      result[i] = (char) 100*a + 10*b + c;
+    }
   }
-  return s;
+
+  result[len] = '\0'; 
+  return result;
 }
+
+static const char *SDFStrConToString(SDF_StrCon pStr) {
+  SDF_LexStrCon strcon = SDF_getStrConStrCon(pStr);
+  SDF_LexStrCharChars list = SDF_getLexStrConChars(strcon);
+  return SDFStrCharsToString(list);
+}
+
+static const char *SDFSingleQuotedStrCharsToString(SDF_LexSingleQuotedStrCharChars list)
+{
+  int len = SDF_getLexSingleQuotedStrCharCharsLength(list);
+  int i;
+  static char result[BUFSIZ];
+
+  if (len >= BUFSIZ - 2) {
+    ATwarning("SDFStrConToString: insufficient memory to allocate string\n");
+    return NULL;
+  }
+
+  for (i = 0;
+       !SDF_isLexSingleQuotedStrCharCharsEmpty(list);
+       list = SDF_getLexSingleQuotedStrCharCharsTail(list),
+       i++) {
+
+    SDF_LexSingleQuotedStrChar ch = SDF_getLexSingleQuotedStrCharCharsHead(list);
+
+
+    if (SDF_isLexSingleQuotedStrCharNewline(ch)) {
+      result[i] = '\n';
+    }
+    else if (SDF_isLexSingleQuotedStrCharTab(ch)) {
+      result[i] = '\t';
+    }
+    else if (SDF_isLexSingleQuotedStrCharQuote(ch)) {
+      result[i] = '\'';
+    }
+    else if (SDF_isLexSingleQuotedStrCharBackslash(ch)) {
+      result[i] = '\\';
+    }
+    else if (SDF_isLexSingleQuotedStrCharNormal(ch)) {
+      result[i] = SDF_getLexSingleQuotedStrCharCh(ch);
+    }
+    else if (SDF_isLexSingleQuotedStrCharDecimal(ch)) {
+      int a = SDF_getLexSingleQuotedStrCharA(ch);
+      int b = SDF_getLexSingleQuotedStrCharB(ch);
+      int c = SDF_getLexSingleQuotedStrCharC(ch);
+      result[i] = (char) 100*a + 10*b + c;
+    }
+  }
+
+  result[len] = '\0'; 
+  return result;
+}
+
+static const char *SDFCiStrConToString(SDF_SingleQuotedStrCon pStr) {
+  SDF_LexSingleQuotedStrCon strcon = 
+    SDF_getSingleQuotedStrConSingleQuotedStrCon(pStr);
+  SDF_LexSingleQuotedStrCharChars list = SDF_getLexSingleQuotedStrConChars(strcon);
+  return SDFSingleQuotedStrCharsToString(list);
+}
+
 
 PT_Production SDFProductionToPtProduction(SDF_Production sdfProduction)
 {
@@ -54,7 +128,7 @@ PT_Production SDFProductionToPtProduction(SDF_Production sdfProduction)
   PT_Symbols ptSymbols;
   PT_Symbol  ptResult;
   PT_Attributes ptAttributes;
-  
+
   sdfResult  = SDF_getProductionResult(sdfProduction);
   sdfAttributes = SDF_getProductionAttributes(sdfProduction);
   ptResult  = SDFSymbolToPtSymbol(sdfResult);
@@ -65,9 +139,8 @@ PT_Production SDFProductionToPtProduction(SDF_Production sdfProduction)
     ptSymbols = SDFSymbolsToPtSymbols(sdfSymbols);
   }
   else {
-/* This should be a warning instead of an error!!! */
     ATwarning("SDFProductionToPtProduction: unable to convert %s\n", 
-	      PT_yieldTree((PT_Tree) sdfProduction));
+	      PT_yieldTreeToString((PT_Tree) sdfProduction, ATfalse));
     return NULL;
   }
 
@@ -146,13 +219,19 @@ PT_Symbol     SDFSymbolToPtSymbol(SDF_Symbol sdfSymbol)
     result = PT_makeSymbolSort("<Start>"); 
   }
   else if (SDF_isSymbolSort(sdfSymbol)) {
-    char *str = PT_yieldTree((PT_Tree) SDF_getSymbolSort(sdfSymbol));
+    char *str = PT_yieldTreeToString((PT_Tree) SDF_getSymbolSort(sdfSymbol),
+				     ATfalse);
     result = PT_makeSymbolSort(str); 
   }
   else if (SDF_isSymbolLit(sdfSymbol)) {
-    SDF_Literal sdfLit = SDF_getSymbolLiteral(sdfSymbol);
-    char *str = unquote_str(PT_yieldTree((PT_Tree) sdfLit));
+    SDF_StrCon sdfLit = SDF_getSymbolString(sdfSymbol);
+    const char *str = SDFStrConToString(sdfLit);
     result = PT_makeSymbolLit(str);
+  }
+  else if (SDF_isSymbolCiLit(sdfSymbol)) {
+    SDF_SingleQuotedStrCon sdfLit = SDF_getSymbolCiString(sdfSymbol);
+    const char *str = SDFCiStrConToString(sdfLit);
+    result = PT_makeSymbolCilit(str);
   }
   else if (SDF_isSymbolIter(sdfSymbol)) {
     SDF_Symbol sdfIterSymbol = SDF_getSymbolSymbol(sdfSymbol);
@@ -178,22 +257,6 @@ PT_Symbol     SDFSymbolToPtSymbol(SDF_Symbol sdfSymbol)
     PT_Symbol ptSepSymbol = SDFSymbolToPtSymbol(sdfIterSep);
     result = PT_makeSymbolIterStarSep(ptIterSymbol, ptSepSymbol);
   } 
-  else if (SDF_isSymbolIterN(sdfSymbol)) {
-    SDF_Symbol sdfIterSymbol = SDF_getSymbolSymbol(sdfSymbol);
-    SDF_NatCon sdfN = SDF_getSymbolN(sdfSymbol);
-    PT_Symbol ptIterSymbol = SDFSymbolToPtSymbol(sdfIterSymbol);
-    int ptN = atoi(PT_yieldTree((PT_Tree) sdfN));
-    result = PT_makeSymbolIterN(ptIterSymbol,ptN);
-  }
-  else if (SDF_isSymbolIterSepN(sdfSymbol)) {
-    SDF_Symbol sdfIterSymbol = SDF_getSymbolSymbol(sdfSymbol);
-    SDF_Symbol sdfIterSep = SDF_getSymbolSep(sdfSymbol);
-    SDF_NatCon sdfN = SDF_getSymbolN(sdfSymbol);
-    PT_Symbol ptIterSymbol = SDFSymbolToPtSymbol(sdfIterSymbol);
-    PT_Symbol ptSepSymbol = SDFSymbolToPtSymbol(sdfIterSep);
-    int ptN = atoi(PT_yieldTree((PT_Tree) sdfN));
-    result = PT_makeSymbolIterSepN(ptIterSymbol,ptSepSymbol,ptN);
-  }
   else if (SDF_isSymbolCf(sdfSymbol)) {
     SDF_Symbol sdfSym = SDF_getSymbolSymbol(sdfSymbol);
     PT_Symbol ptSym = SDFSymbolToPtSymbol(sdfSym);
@@ -222,19 +285,12 @@ PT_Symbol     SDFSymbolToPtSymbol(SDF_Symbol sdfSymbol)
     SDF_Symbols sdfSymbols = SDF_makeSymbolsDefault(sdfTail);
     PT_Symbol ptHead = SDFSymbolToPtSymbol(sdfHead);
     PT_Symbols ptTail = SDFSymbolsToPtSymbols(sdfSymbols);
-    result = PT_makeSymbolSeq(PT_makeSymbolsList(ptHead, ptTail));
+    result = PT_makeSymbolSeq(PT_makeSymbolsMany(ptHead, ptTail));
   }
   else if (SDF_isSymbolOpt(sdfSymbol)) {
     SDF_Symbol sdfSym = SDF_getSymbolSymbol(sdfSymbol);
     PT_Symbol ptSym = SDFSymbolToPtSymbol(sdfSym);
     result = PT_makeSymbolOpt(ptSym);
-  }
-  else if (SDF_isSymbolPair(sdfSymbol)) {
-    SDF_Symbol sdfLeft = SDF_getSymbolLeft(sdfSymbol);
-    SDF_Symbol sdfRight = SDF_getSymbolRight(sdfSymbol);
-    PT_Symbol ptLeft = SDFSymbolToPtSymbol(sdfLeft);
-    PT_Symbol ptRight = SDFSymbolToPtSymbol(sdfRight);
-    result = PT_makeSymbolTuple(ptLeft, PT_makeSymbolsList(ptRight,PT_makeSymbolsEmpty()));
   }
   else if (SDF_isSymbolTuple(sdfSymbol)) {
     SDF_Symbol sdfHead = SDF_getSymbolHead(sdfSymbol);
@@ -254,7 +310,7 @@ PT_Symbol     SDFSymbolToPtSymbol(SDF_Symbol sdfSymbol)
     SDF_Sort sdfSort = SDF_getSymbolSort(sdfSymbol);
     SDF_SymbolParameters sdfParameters = SDF_getSymbolParameters(sdfSymbol);
     PT_Symbols ptParameters = SDFSymbolParametersToPtSymbols(sdfParameters);
-    char *ptSort = PT_yieldTree((PT_Tree) sdfSort);
+    char *ptSort = PT_yieldTreeToString((PT_Tree) sdfSort, ATfalse);
     result = PT_makeSymbolParameterizedSort(ptSort, ptParameters);
   }
   else if (SDF_isSymbolAlt(sdfSymbol)) {
@@ -286,7 +342,7 @@ PT_Symbol     SDFSymbolToPtSymbol(SDF_Symbol sdfSymbol)
   }
   else {
     ATerror("SDFSymbolToPtSymbol: unable to convert symbol %t: %s\n", 
-	    sdfSymbol, PT_yieldTree((PT_Tree) sdfSymbol));
+	    sdfSymbol, PT_yieldTreeToString((PT_Tree) sdfSymbol, ATfalse));
     result = NULL;
   }
 	    
@@ -357,7 +413,7 @@ static PT_Attr SDFAttributeToPtAttr(SDF_Attribute sdfAttribute)
   else if (SDF_isAttributeId(sdfAttribute)) {
     SDF_ModuleName sdfModuleName = SDF_getAttributeModuleName(sdfAttribute);
     SDF_ModuleId  sdfModuleId = SDF_getModuleNameModuleId(sdfModuleName);
-    char *str = unquote_str(PT_yieldTree((PT_Tree) sdfModuleId));
+    char *str = PT_yieldTree((PT_Tree) sdfModuleId);
     ptAttr = PT_makeAttrId(str);         
   }
   else if (SDF_isAttributeAssoc(sdfAttribute)) {
@@ -380,14 +436,14 @@ static PT_Attr SDFAttributeToPtAttr(SDF_Attribute sdfAttribute)
     ptAttr = PT_makeAttrAssoc(ptAssoc);
   }
   else if (SDF_isAttributeId(sdfAttribute)) {
-    char *moduleName = PT_yieldTree((PT_Tree) sdfAttribute);
+    char *moduleName = PT_yieldTreeToString((PT_Tree) sdfAttribute, ATfalse);
     ptAttr = PT_makeAttrId(moduleName);
   }
   else if (SDF_isAttributeTerm(sdfAttribute)) {
-    ATerm term = ATmake(PT_yieldTree((PT_Tree) sdfAttribute));
+    ATerm term = ATmake(PT_yieldTreeToString((PT_Tree) sdfAttribute, ATfalse));
     if (term == NULL) {
       ATerror("SDFAttributeToPtAttr (term): unable to convert %s\n",
-	      PT_yieldTree((PT_Tree) sdfAttribute));
+	      PT_yieldTreeToString((PT_Tree) sdfAttribute, ATfalse));
       ptAttr = NULL;
     }
     else {
@@ -396,7 +452,7 @@ static PT_Attr SDFAttributeToPtAttr(SDF_Attribute sdfAttribute)
   }
   else {
      ATerror("SDFAttributeToPtAttr: unable to convert %s\n", 
-	     PT_yieldTree((PT_Tree) sdfAttribute));
+	     PT_yieldTreeToString((PT_Tree) sdfAttribute, ATfalse));
      ptAttr = NULL;
   }
 
@@ -409,12 +465,12 @@ static int SDFCharacterToInt(SDF_Character sdfCharacter)
 
   if (SDF_isCharacterNumeric(sdfCharacter)) {
     SDF_NumChar sdfNumChar = SDF_getCharacterNumChar(sdfCharacter);
-    char *numchar = PT_yieldTree((PT_Tree) sdfNumChar);
+    char *numchar = PT_yieldTreeToString((PT_Tree) sdfNumChar, ATfalse);
     result = atoi(numchar+1); /* remove leading backslash */ 
   }
   else if (SDF_isCharacterShort(sdfCharacter)) {
     SDF_ShortChar sdfShortChar = SDF_getCharacterShortChar(sdfCharacter);
-    char *numchar = PT_yieldTree((PT_Tree) sdfShortChar);
+    char *numchar = PT_yieldTreeToString((PT_Tree) sdfShortChar, ATfalse);
     if (numchar[0] != '\\') {
       result = (int) numchar[0];
     } 
@@ -424,7 +480,7 @@ static int SDFCharacterToInt(SDF_Character sdfCharacter)
   }
   else {
     ATerror("SDFCharacterToInt: unable to convert %s\n",
-	    PT_yieldTree((PT_Tree) sdfCharacter));
+	    PT_yieldTreeToString((PT_Tree) sdfCharacter, ATfalse));
     result = -1;
   }
 
@@ -449,7 +505,7 @@ static PT_CharRange SDFCharRangeToPtCharRange(SDF_CharRange sdfCharRange)
   }
   else {
     ATerror("SDFCharRangeToPtCharRange: unable to convert %s\n",
-	    PT_yieldTree((PT_Tree) sdfCharRange));
+	    PT_yieldTreeToString((PT_Tree) sdfCharRange, ATfalse));
     result = NULL;
   } 
  
@@ -460,10 +516,11 @@ static PT_CharRanges SDFCharRangesToPtCharRanges(SDF_CharRanges sdfCharRanges)
 {
   PT_CharRanges result = PT_makeCharRangesEmpty();
 
+
   if (SDF_isCharRangesDefault(sdfCharRanges)) {
     SDF_CharRange sdfCharRange = SDF_getCharRangesCharRange(sdfCharRanges);
     PT_CharRange ptCharRange = SDFCharRangeToPtCharRange(sdfCharRange);
-    result = PT_makeCharRangesList(ptCharRange, result);
+    result = PT_makeCharRangesMany(ptCharRange, result);
   }
   else if (SDF_isCharRangesConc(sdfCharRanges)) {
     SDF_CharRanges sdfLeft = SDF_getCharRangesLeft(sdfCharRanges);
@@ -474,7 +531,7 @@ static PT_CharRanges SDFCharRangesToPtCharRanges(SDF_CharRanges sdfCharRanges)
   }
   else {
     ATerror("SDFCharRangesToPtCharRanges: unable to convert %s\n",
-	    PT_yieldTree((PT_Tree) sdfCharRanges));
+	    PT_yieldTreeToString((PT_Tree) sdfCharRanges, ATfalse));
     result = NULL;
   }
 
@@ -498,7 +555,7 @@ static PT_CharRanges SDFCharClassToPtCharRanges(SDF_CharClass sdfCharClass)
   }
   else {
     ATerror("SDFCharClassToPtCharRanges: unable to convert characterclass: %s\n",
-	    PT_yieldTree((PT_Tree) sdfCharClass));
+	    PT_yieldTreeToString((PT_Tree) sdfCharClass, ATfalse));
     result = NULL;
   }
   

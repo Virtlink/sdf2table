@@ -1,4 +1,4 @@
-/* $Id: pt2sdf-test.c,v 1.3 2003/02/04 09:25:31 jong Exp $ */
+/* $Id: pt2sdf-test.c 8430 2003-02-04 09:25:31Z jong $ */
 
 /*{{{  includes */
 

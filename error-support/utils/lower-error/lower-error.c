@@ -1,4 +1,4 @@
-/* $Id: lower-error.c,v 1.2.2.1 2004/03/09 16:01:50 kooiker Exp $ */
+/* $Id: lower-error.c 12896 2004-03-11 12:21:39Z kooiker $ */
 
 /*{{{  includes */
 

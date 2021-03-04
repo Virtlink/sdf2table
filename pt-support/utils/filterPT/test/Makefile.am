@@ -24,7 +24,7 @@ TESTS = $(TEST_SET:%=%.sh)
 
 FILTER=$(top_builddir)/utils/filterPT/filterPT
 IMPLODE=$(top_builddir)/utils/implodePT/implodePT
-ATDIFF=${ATERM}/bin/atdiff
+ATDIFF=${ATERM_PREFIX}/bin/atdiff
 
 EXTRA_DIST = template.sh
 
@@ -39,12 +39,12 @@ testsetclean:
 	$(RM) sdf/*.def sdf/*.tbl in/*.in out/*.out 
 
 %.sh : 
-	sed 	's@__GRAMMAR__@$*@g;\
+	sed 	"s@__GRAMMAR__@$*@g;\
 	 	 s@__GRAMMAR_FLAGS__@$($*_flags)@g;\
 		 s@__FILTER__@${FILTER}@g;\
 		 s@__IMPLODE__@${IMPLODE}@g;\
 		 s@__SRCDIR__@${srcdir}@g;\
-		 s@__ATDIFF__@${ATDIFF}@g;' < ${srcdir}/template.sh > $@ && chmod +x $@
+		 s@__ATDIFF__@${ATDIFF}@g;" < ${srcdir}/template.sh > $@ && chmod +x $@
 
 # To use these targets you need to have sglr and sdf2table in your path
 # These targets are used at 'testset-generation-time' only!

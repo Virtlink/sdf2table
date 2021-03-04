@@ -1,5 +1,5 @@
 /*
- $Id: dump-skel.h,v 1.6 2001/11/07 14:01:49 markvdb Exp $
+ $Id: dump-skel.h 6010 2001-11-07 14:02:35Z markvdb $
  */
 
 #include <stdlib.h>

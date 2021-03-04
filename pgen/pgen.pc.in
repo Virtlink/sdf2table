@@ -1,0 +1,7 @@
+prefix=@prefix@
+Maintainers=economop@cwi.nl,jurgenv@cwi.nl
+Name: pgen
+Version: 2.4
+Description:
+Requires: asc-support,aterm,error-support,pt-support,sdf-support,sglr,toolbuslib
+ToolBusFlags=-I${prefix}/share/pgen

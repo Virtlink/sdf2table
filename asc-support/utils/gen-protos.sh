@@ -1,6 +1,6 @@
 #! /bin/sh
 #
-# $Id: gen-protos.sh,v 1.7.4.1 2004/11/01 16:53:54 uid507 Exp $
+# $Id: gen-protos.sh 15007 2004-11-19 14:49:57Z uid507 $
 #
 # This script generates an include file
 

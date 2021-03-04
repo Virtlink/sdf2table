@@ -1,18 +1,142 @@
-$Id: ChangeLog,v 1.134.2.9 2004/12/17 08:24:52 uid508 Exp $
+$Id: ChangeLog 20932 2007-01-16 12:32:23Z kooiker $
 
-Fri Dec 17 09:24:16 CET 2004 <kooiker@cwi.nl>
- * Bumped to 3.14 
+Tue Jan 16 13:30:20 CET 2007 <jong@metamud.org,kooiker@cwi.nl>
+ * libsglr/{parser,stack}.c:
+   - Fixed warning: dereferencing type-punned pointer will break strict-aliasing
+   rules by using the convenience macros in aterm1.h that circumvent this
+   warning
 
-Wed Dec  8 20:18:03 CET 2004 <markvdb@cwi.nl>
- * Fixed a serious bug wrt obtaining a parse table for a grammar
-   without start symbols for restoring brackets.
+Mon Nov 13 14:30:44 CET 2006 <economop@cwi.nl>
+ * libsglr/sglr.h, libsglr/sglr-interface.c: Applied Martin Bravenboer's patch
+   that allows clients to set the log FILE* of libsglr; resolves bug 658.
 
-Tue Nov 30 09:20:16 CET 2004 <jurgenv@cwi.nl>
- * Fixed a bug. The global ptErrorList was not always initialized and never
-   protected from the garbage collector.
+Mon Nov 13 14:13:02 CET 2006 <economop@cwi.nl>
+ * libsglr/forest.c: Applied Martin Bravenboer's patch that allows a lexical 
+   sort to be defined as start symbol; resolves bug 657.
 
-Thu Sep 16 11:58:59 CEST 2004 <jurgenv@cwi.nl>
- * Bumped to 3.13
+Tue Oct 10 10:46:48 CEST 2006 <{economop,jurgenv}@cwi.nl>
+ * libsglr/sglr-interface.c: introduced a workaround function
+   to be able to call sglr from another C binary. This is
+   much better in Rob's branches which will be merged sometime
+   this year.
+
+Wed May  3 14:02:25 CEST 2006 <jurgenv@cwi.nl>
+ * Bumped to 3.16
+
+Thu Apr 13 16:35:17 CEST 2006 <jurgenv@cwi.nl>
+ * libsglr/parser.c: removed ambiguity tracking from sglr. This
+   is very expensive, and makes the whole error handling thing
+   more complex. With the -a flag I now return a simple error message
+   about the fact that more than zero ambiguities occur in the term.:
+
+Thu Apr 13 17:53:58 CEST 2006 <jurgenv@cwi.nl>
+ * test/terms/bi.cycle: replaced test by previous version
+ * test/terms/bi.asfix2.org: replaced by newer test, due to sharing
+   the number of ambiguities has gone down from 9 to 3. Not really of
+   course, but that was the ambiguity counting mechanism thinks. Which
+   has never been trustworthy.
+
+Thu Apr 13 17:53:58 CEST 2006 <jurgenv@cwi.nl>
+ * libsglr/forest.c: YieldTree was exponential in the number of ambiguities.
+   <sigh>. Added memoization.
+
+Thu Apr 13 17:53:58 CEST 2006 <jurgenv@cwi.nl>
+ * Added -a option to restore brackets (adds all possible brackets,
+   not just the necessary ones).
+
+Thu Mar 30 17:53:58 CEST 2006 <economop@cwi.nl>
+ * Updated parse tables. Pgen now treats priorities slightly differently which
+   causes SGLR to create different parse trees. It still accepts the same
+   strings, but may produce different derivations, as is the case for 
+   |booleans.lst|.
+
+Fri Mar 10 11:27:36 CET 2006 <kooiker@cwi.nl>
+ * **/Makefile.am:
+   - Maintainers use ATerm-dbg library
+
+Thu Feb 16 18:15:40 CET 2006 <jurgenv@cwi.nl>
+ * sglr/{sglr.idef,sglr-main.c}: added quick workaround to be able to
+   toggle the heuristics filters from the ToolBus interface.
+
+Wed Dec 21 09:08:56 CET 2005 <kooiker@cwi.nl>
+ * test/erroneous/bi.{cycle,asfix2.org}:
+   - removed because these are no errors anymore
+
+Tue Dec 20 11:02:55 CET 2005 <kooiker@cwi.nl>
+ * test/erroneous/bi.{cycle,asfix2.org}:
+   - Readded: distcheck complained about missing tests
+
+Mon Dec 19 09:35:54 CET 2005 <jurgenv@cwi.nl>
+ * Brought regress-terms.sh up-to-date with error-diff tool.
+
+Thu Nov 10 14:40:28 CET 2005 <jurgenv@cwi.nl>
+ * The 'maximum ambiguities reached' upperbound has dissappeared now,
+   since the flattening was the bottleneck here. It used to behave
+   exponentially, but with the memoization we are back at a feasible
+   algorithm. The maximum is not needed anymore. 
+   (note that tree2graph is still an exponential algorithm if you
+    do not turn sharing on).
+
+Tue Jun  7 12:00:29 CEST 2005 <jurgenv@cwi.nl>
+ * Flattening to AsFix2ME significantly optimized by applying memoization
+   (actual optimization is located in the pt-support package)
+
+Sun Jun  5 10:51:38 CEST 2005 <jurgenv@cwi.nl>
+ * Added new filter: 'Remove cycles' under the '-fc' option.
+   If the filter is active, all cycles are removed from all
+   ambiguity clusters. The filter is set default to off  by default. 
+
+Mon May 30 14:11:44 CEST 2005 <jurgenv@cwi.nl>
+ * Adapted SGLR to produce cyclic parse trees using a new constructor
+ * Merged separate cycle detection phase into filtering phase
+
+Fri Nov 18 12:42:11 CET 2005 <jurgenv@cwi.nl>
+ * Bumped to 3.14
+
+Mon Sep 12 11:15:21 CEST 2005 <{markvdb,jurgenv}@cwi.nl>
+ * restorebrackets.c: generate structured literal representation
+   of brackets instead of casting a symbol to a tree. This
+   fixes a bug.
+
+Fri Aug 19 14:48:33 CEST 2005 <jurgenv@cwi.nl>
+ * restorebrackets/Makefile.am: removed superfluous linking flag
+   that triggered a build error.
+
+Mon Aug 15 15:08:29 CEST 2005 <jong@cwi.nl>
+ * configure.in:
+   - add libtool support
+
+Tue Mar 15 13:57:38 CET 2005 <jurgenv@cwi.nl>
+ * Bumped version to 3.13 since sglr links to a much changed
+   version of libmept (no more flattening of lexicals and layout).
+
+Wed Dec  1 13:24:18 CET 2004 <markvdb@cwi.nl,kooiker@cwi.nl>
+ * Fixed the handling of illegal parse tables, closes bug #406.
+
+Sun Oct 24 11:48:15 CEST 2004 <jong@cwi.nl>
+ * package:
+   - bump version to 3.12.1 as 3.12 was apparently already
+     released (says daybuild)
+ * libsglr/parse-table.c:
+   - fix variable declaration not at the beginning of a block
+
+Fri Oct 22 11:42:47 CEST 2004 <jong@cwi.nl>
+ * libsglr/parse-table.c:
+   - fix SG_addParseTableErrorError did not deal with a NULL path.
+     This happens when it is invoked by the Meta Environment, as
+     opposed to commandline.
+
+Sat Aug 21 16:46:32 CEST 2004 <markvdb@cwi.nl>
+ * Fixed a bug in the reporting of non existing start states.
+ * Regenerated the test.
+
+Fri Aug 20 10:39:07 CEST 2004 <markvdb@cwi.nl>
+ * Fixed a small bug wrt reading in parsetables.
+
+Tue Aug  3 10:05:01 CEST 2004 <{kooiker,jurgenv}@cwi.nl>
+ * libsglr/parse-table.c: added protect of global list of errors,
+   and more calls to initialization function for this list of errors.
+ * restorebrackets/src/main.c: added call to initErrApi();
 
 Thu Jul 15 15:49:40 CEST 2004 <markvdb@cwi.nl>
  * Introduced the Error-api for the situation the parse table
@@ -22,15 +146,31 @@ Thu Jul 15 15:49:40 CEST 2004 <markvdb@cwi.nl>
    - parse table does not contain a start state.
  * Added a test for the latter case.
 
+Fri Jul  9 15:12:11 CEST 2004 <markvdb@cwi.nl>
+ * Removed every left-/right-/assoc-/non-assoc-prio.
+ * Increased the parse table version number to 6.
+ * Regenerated all tests and adapted the corresponding
+   grammars, because start-symbols were missing. 
+   Regenerated some tests because attributes are no longer 
+   quoted.
+
 Fri Jul  2 10:20:58 CEST 2004 <jurgenv@cwi.nl>
  * Bumped to 3.12
+
+Mon May 17 15:07:52 CEST 2004 <{markvdb,jurgenv}@cwi.nl>
+ * Introduced priorities on specific arguments as a filter.
 
 Tue Apr 27 17:26:14 CEST 2004 <markvdb@cwi.nl>
  * Restore brackets improved with respect to the interaction
    between left/right/non-associativity and priorities.
 
-Fri Apr 16 15:35:45 CEST 2004 <jurgenv@cwi.nl>
- * SGLR idef allows parsing without the counting filters
+Mon Apr  5 10:45:46 CEST 2004 <{jong,kooiker}@cwi.nl>
+ * change error-handling in sglr and update erroneous tests accordingly
+ * remove debug-spam in sglr-main.c
+
+Tue Mar 23 09:24:25 CET 2004 <{jong,kooiker}@cwi.nl>
+ * libsglr/parser.c, restorebrackets/src/restorebrackets-main.c:
+   Updated wrt to new MEPT API
 
 Wed Mar 10 09:47:15 CET 2004 <{jong,kooiker}@cwi.nl>
  * Use new Error API

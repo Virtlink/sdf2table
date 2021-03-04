@@ -1,4 +1,4 @@
-/* $Id: liftPT-main.c,v 1.2.4.1 2004/03/10 08:41:59 kooiker Exp $ */
+/* $Id: liftPT-main.c 12897 2004-03-11 12:27:01Z kooiker $ */
 
 /*{{{  standard includes */
 

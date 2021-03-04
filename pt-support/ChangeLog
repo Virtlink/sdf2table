@@ -1,34 +1,225 @@
-$Id: ChangeLog,v 1.131.2.12 2004/12/16 08:27:55 uid507 Exp $
+$Id: ChangeLog 21423 2007-02-20 14:38:05Z jurgenv $
 
-Thu Dec 16 09:26:06 CET 2004 <jurgenv@cwi.nl>
- * Fixed implosion of alternative literals. "-" | "+" becomes alt(1,[])
-   or alt(2,[]) because a literal does not have a representation in an
-   imploded tree. This fixes a core dump.
- * Bumped to 1.4
+Tue Feb 20 15:35:09 CET 2007 <{martin.bravenboer@gmail.com,jurgenv@cwi.nl}>
+ * libmept/MEPT-posinfo.c: added a magic volatile to solve a serious bug
+   with the ATerm garbage collector on Darwin. 
 
-Mon Nov 15 10:19:02 CET 2004 <markvdb@cwi.nl>
- * Added the description when printing ambiguities in ambtracker:
-   fixes bug #268.
+Mon Feb 19 23:13:23 CET 2007 <jurgenv@cwi.nl>
+ * utils/filterPT: added filterPT tool by copying it from the 1.5 branch.
+   Had to regenerate the tests, since the parse tree format had changed
+   since then. Something rather peculiar happened though, the parser
+   generates less ambiguities for the same terms. However, the old filterPT
+   filters the new terms the same as the new filterPT. So, the bug is not
+   in filterPT and therefore I have regenerated the tests for filterPT with
+   some confidence.
+ * TODO: analyze why sglr from 1.5 produces different parse forests than
+   the sglr from the trunk for the grammars in utils/filterPT/sdf
 
-Tue Nov  2 13:24:50 CET 2004 <markvdb@cwi.nl>
- * Improved the implosion of sequences, this fixes bug #402 reported
-   by Martin Bravenboer.
+Wed Jan 24 16:10:17 CET 2007 <jurgenv@cwi.nl>
+ * libmept/MEPT-yield.c: fixed a bug in the yielder (unparser)
+   with cycles. Cycles should not prevent the yielding of 
+   non-cyclic alternatives in an ambiguity cluster.
 
-Mon Oct 18 10:45:34 CEST 2004 <jurgenv@cwi.nl,rob@ricardis.tudelft.nl>
- * Added a new tool: filterPT. It filters parse forests based on some
-   command line arguments. Currently, we have one filter to find trees
-   with a maximum or minumum number of occurrences of a certain non-terminal.
-   The tool will always execute one filter at a time, such that the user
-   can implement his own scheduling by repeatedly using this tool.
- * Added a number of regression tests for filterPT. 
+Fri Jul 21 00:49:31 CEST 2006 <martin.bravenboer@gmail.com>
+ * test/Makefile.am:  replaced noinst_ with check_: these
+   programs and libraries are used for testing, so they should not be
+   build in a normal build (problem popped up when creating a dist
+   directly from Subversion, which failed).
 
-Thu Sep 16 11:57:30 CEST 2004 <jurgenv@cwi.nl>
- * Bumped to 1.3 to be sure. I assume something must have changed 
-   in this package between the 1.2 release and now, but there are
-   no ChangeLog entries...
+ * test/terms/Makefile.am: replaced noinst_ with check_: these
+   programs and libraries are used for testing, so they should not be
+   build in a normal build (problem popped up when creating a dist
+   directly from Subversion, which failed).
 
-Fri Jul  2 10:18:39 CEST 2004 <jurgenv@cwi.nl>
- * Bumped to 1.2
+ * test/terms/Makefile.am: indicate that terms_dict.h is
+   constructed from terms.dict, otherwise make does not know how to
+   build terms_dict.h if it wants to create the headers first.
+
+Fri Jun 30 21:43:04 CEST 2006 <jurgenv@cwi.nl>
+ * libmept/MEPT-utils.[ch]: reorganized this long file into a number
+   of smaller files that each deal with a specific topic.
+ * libmept/*.c: added much documentation.
+
+Thu Jun 29 15:12:34 CEST 2006 <jurgenv@cwi.nl>
+ * doc: removed doc directory and moved generation of Doxygen 
+   documentation to toplevel. Will copy this design to all
+   other C based packages.
+
+Tue Jun 27 22:26:54 CEST 2006 <jurgenv@cwi.nl>
+ * libmept/MEPT.[ch]: regenerated the API, with new doxygen markup
+   automatically added in.
+
+Tue Jun 27 15:55:04 CEST 2006 <jurgenv@cwi.nl>
+ * doc: added generation of doxygen site in MAINTAINER_MODE
+ * libmept/flattenPT.c: changed flattening of ambiguous star lists,
+   before it would contain nested PLUS lists if they were children
+   of an ambiguity node. Changed this to STAR lists for type consistency
+   after flattening.
+
+Wed Jun 14 09:45:43 CEST 2006 <kooiker@cwi.nl>
+ * libmept/reportAmbs.c:
+   - fixed declaration after statement
+
+Thu May 18 13:42:56 CEST 2006 <jurgenv@cwi.nl>
+ * utils/implodePT/test/out/*.out: changed .out suffixes to .ref
+   to prevent triggering a GNU make implicit rule (which copies
+   <stem> to <stem>.out when <stem>.out is older than <stem>.
+ * Bumped version to 2.1   
+
+Thu Apr 20 05:48:54 CEST 2006 <jurgenv@cwi.nl>
+ * libmept/apply.c: added a new API function for applying functions
+   that returns a more complex non-terminal than just a sort.
+
+Thu Apr 13 21:22:47 CEST 2006 <jurgenv@cwi.nl>
+ * utils/ambtracker-main.c: ambtracker is now a ToolBus tool
+ * utils/ambtracker-main.c: changed use of error display
+ * libmept/reportAmbs.c: fixed several issues in report ambs.
+
+Thu Apr  13 17:14:44 EDT 2006 <jurgenv@cwi.nl>
+ * libmept/reportAmbs.c: fixed to use memoization, was exponential
+   in number of ambiguities
+ * libmept/MEPT-utils.c: findTreeParent, same thing, this also was
+   an exponential algorithm. Which is why the structure editor would
+   collapse when you clicked in an ambiguous term.
+
+Thu Apr  6 17:14:44 EDT 2006 <jurgenv@cwi.nl>
+ * libmept/reportAmbs.c: added stack overflow protection.
+ * libmept/reportAmbs.c: fixed a major recursion bug in it too.
+
+Tue Apr  4 20:20:20 CEST 2006 <jurgenv@cwi.nl>
+ * libptmept/lower.c: fixed major error in lowering sequence symbols.
+ * libmept.c/flatten.c: fixed bug in layout flattener. Existing layout
+   was flattened to a list of lexical layout nodes, but non-existing layout
+   was not flattened to an empty list of lexical layout nodes. This skewed
+   representation then lead to matching problems in ASF.
+
+Fri Mar 10 11:39:54 CET 2006 <kooiker@cwi.nl>
+ * **/Makefile.am:
+   - Maintainers use ATerm-dbg library
+
+Mon Dec 19 09:15:14 CET 2005 <{kooiker,jurgenv}@cwi.nl>
+ * libptmept/lower.c: Fixed a nice bug, forgot an 'else' before an
+   'if'.
+
+Fri Dec 16 10:33:44 CET 2005 <kooiker@cwi.nl>
+ * utils/apply-function.idef:
+   - return result of tree-equal with surrounding function application
+
+Thu Nov 17 10:01:57 CET 2005 <jurgenv@cwi.nl>
+ * */*.c: Added AsFix representation for case insensitive literals
+
+Thu Nov 10 12:52:01 CET 2005 <jurgenv@cwi.nl>
+ * Generalized the definition of a cycle tree node. A cycle tree node 
+   now has a type and a length. The length is the length of a cycle. The
+   meaning of a cycle is an edge (reduction) that points back |length-1| 
+   nodes upwards in the tree to construct a cycle.
+
+Fri Aug 19 09:21:04 CEST 2005 <jurgenv@cwi.nl>
+ * MEPT.adt: changed field <character(int)> in CharRange to
+             <start(int)>, to streamline coding with CharRanges.
+ * character-classes.c: Added functionality in MEPT-utils.h to
+   check whether a char-class symbol is a subset of another.
+
+Mon Aug 15 15:08:29 CEST 2005 <jong@cwi.nl>
+ * configure.in:
+   - add libtool support
+
+Tue Jun 14 09:01:00 CEST 2005 <kooiker@cwi.nl>
+ * libmept/posInfo.c:
+   - Change findTree to find a tree with an offset or a line-column pair
+
+Fri Jun 10 15:27:05 CEST 2005 <M328@cwi.nl>
+ * libmept/ordering.c:
+   - Add parameters for ordering alternatives in ambiguity-clusters and ignoring     layout-trees while comparing
+ * test:
+   - Add tests for checking new options
+
+Wed Jun  8 10:46:50 CEST 2005 <jurgenv@cwi.nl>
+ * NOTE: Having cycles in parse trees has some effects on how one can 
+   interpret ambiguity clusters. Not all members of the cluster will
+   yield the same string anymore. Principally they still do, because
+   a cycle points back to the amb node, but in practise this means that
+   you can't select a random amb node to compute the width of an
+   ambiguity cluster anymore. You must pick one that is not a cycle to do
+   this. 
+ * libmept/posInfo.c: dealt with previous remark in implementation of 
+   addPosInfo.
+
+Wed Jun  8 10:21:52 CEST 2005 <M336@cwi.nl>
+ * tests/test_mept.c: Added unit test for posInfo.
+
+Mon May 30 13:26:37 CEST 2005 <jurgenv@cwi.nl>
+ * As an experiment, added the 'cycle' Tree constructor, it models an
+   edge that goes back to the previous ambiguity cluster to form a cycle.
+
+Wed Feb 23 11:18:18 CET 2005 <jurgenv@cwi.nl>
+ * libmept/flattenPT.c: fixed AsFix2 list patterns for lexical lists. They
+   only worked with either lists of char-classes, or directly sort names,
+   not more complex symbols.
+
+Wed Feb  2 16:59:50 CET 2005 <jurgenv@cwi.nl>
+ * When renaming literals (the actual parameter, or the goal of the
+   symbol renaming being a literal), we now have to construct a full literal
+   tree.
+
+Thu Jan 27 09:25:45 CET 2005 <jurgenv@cwi.nl>
+ * Bumped to 2.0
+
+Mon Dec 27 16:13:04 CET 2004 <jurgenv@cwi.nl>
+ * Having "structured lexicals" result in many changes:
+	- flattening reimplemented; only lists are flattened. One routine
+ 	  implements flattening for all kinds of lists.
+	- NB: literals are not flattened anymore, LAYOUT is not flattened
+	  anymore either.
+	- Changed flattening of functions that return lists. They are
+	  treated as SUBLISTS; so, if the function is a sibling of other
+   	  elements in the list they will both be child of a single list
+ 	  node. If the function is alone in a list, it will also be 
+	  a child of a list node. No exceptions. The same holds for
+	  list variables, but that was already the case before this change.
+	- removed 'lit(Symbol)' from MEPT.adt, and regenerated the API
+	- implemented PT_isTreeLit manually, and went by all calls to
+	  PT_isTreeLit in the environment to check correctness of the code.
+	- removed PT_isTreeFlatLexical function and related functions.
+	- Fixed functions that deal with variable tree to also work
+          with lexical variables
+	- addPosinfo and reportAmbs simplified because literal trees 
+	  dissappeared.
+	- Deescaping functionality dissappeared.
+	- PT_yieldAny fixed, the order of if-then-else excluded some cases.
+	- Regenerated PTPT API's.
+	- Reimplemented lifting and lowering of parse trees. Added
+	  caching possibility between lifting and lowering of trees, 
+	  because they are each others inverse operation.
+	- Regenerated implodePT tests (after checking them manually),
+	  they changed because the representation of a literal changed
+          from lit(<>) to appl(prod([...],lit(<>),no-attrs),[...]).
+	- TODO: check PT_makeTreeLit for completeness of escaping and
+	  deescaping functionality.
+	- TODO: check symbol-renaming.c because literals dissappeared!
+	
+
+Wed Sep  8 16:50:12 CEST 2004 <jurgenv@cwi.nl>
+ * Redefined Attrs in MEPT.adt using the list() construction instead
+   of the manual single and many patterns.
+
+Fri Aug 27 13:58:33 CEST 2004 <{jong,kooiker}@cwi.nl>
+ * configure.in:
+   - version 1.3
+ * libmept, utils:
+   - refactored and implemented unparseToString and unparseToFile
+
+Thu Aug 19 11:01:07 CEST 2004 <{jong,markvdb}@cwi.nl>
+ * libmept: regenerated MEPT API to reflect removal of "flat layout"
+ * libmept/yieldPT.c: remove call to non-existant PT_isTreeFlatLayout
+
+Thu Jul  8 09:35:01 CEST 2004 <{jurgenv,kooiker}@cwi.nl>
+ * libmept/posInfo.c: 
+   - findTreeAtOffset does not go into ambiguity clusters because an arbitrary
+     choice has te be made otherwise
+
+Thu Jun 24 12:49:47 CEST 2004 <{jong,kooiker}@cwi.nl>
+ * libmept/reportAmbs.c: add PT_findTopAmbiguity 
 
 Sun Jun  6 09:20:48 CEST 2004 <jurgenv@cwi.nl>
  * Changed flattening of variables. The old flattened variables were 
@@ -37,6 +228,19 @@ Sun Jun  6 09:20:48 CEST 2004 <jurgenv@cwi.nl>
    specifications crash when trying to reconstuct an AsFix term from a muASF
    term, because one of the assumptions of that algorithm is that the
    production indicates the number of arguments.
+
+Tue May  4 09:16:04 CEST 2004 <kooiker@cwi.nl>
+ * utils/Makefile.am: removed trailing backslash 
+
+Fri Apr 23 10:46:40 CEST 2004 <{jong,kooiker}@cwi.nl>
+ * utils/unparse.idef: unparsed text is a "str", not a "term" !
+
+Mon Apr 19 11:08:21 CEST 2004 <{jong,kooiker}@cwi.nl>
+ * origins: account for the fact that there is no origin
+ * libmept/posInfo.c: PT_containsAreaOffset count start upto and including end
+
+Fri Apr 16 15:40:14 CEST 2004 <kooiker@cwi.nl>
+ * libmept/posInfo.c: PT_findTreeAtOffset checks child is not FlatLexical
 
 Fri Apr 16 14:09:54 CEST 2004 <jurgenv@cwi.nl>
  * Reimplemented flattening of LAYOUT and lexicals. New algorithm generically
@@ -47,12 +251,51 @@ Fri Apr 16 14:09:54 CEST 2004 <jurgenv@cwi.nl>
 Wed Apr 14 13:00:50 CEST 2004 <jurgenv@cwi.nl>
  * Fixed core dump for optional literals in implodePT
 
+Fri Apr 16 13:43:14 CEST 2004 <{jong,kooiker}@cwi.nl>
+ * libmept: add origin.c
+ * libmept/origin.c: add PT_promotePosInfoToOrigin so we can have
+   both origintracking and pos-info in the same term.
+ * utils/ add calls to promote and get-origin
+
+Wed Apr 14 13:00:25 CEST 2004 <jurgenv@cwi.nl>
+ * Fixed core dump for optional literals in implodePT
+
+Mon Apr  5 10:52:55 CEST 2004 <{jong,kooiker}@cwi.nl>
+ * assert valid parsetree in PT_addParseTreePosInfoToDepth
+
+Wed Mar 24 10:31:40 CET 2004 <{jong,kooiker}@cwi.nl>
+ * libmept/{posInfo,MEPT-utils}.c:
+   - add PT_findArgsWithLocation
+   - move PT_findTreeParent from posInfo to MEPT-utils
+ * utils/addPosInfo: use Location API instead of Error API
+
+Tue Mar 23 09:37:57 CET 2004 <{jong,kooiker}@cwi.nl>
+ * libmept:
+   - remove flat-layout from MEPT.adt, regenerated
+   - add PT_findTreeAtOffset
+ * libptmept: remove list reverse functions that are now generated
+
+Mon Mar 22 13:12:24 CET 2004 <{jong,kooiker}@cwi.nl>
+ * libmept/MEPT.adt: "upgrade-adt"'ed and API regenerated
+ * *.[ch]: updated wrt new API
+
+Fri Mar 19 08:34:16 CET 2004 <jong@cwi.nl>
+ * libptmept:
+   - API regenerated
+   - lift.c/lower.c: no need to use handwritten _bottom functions anymore
+   - PTMEPT_bottom.c removed
+ * libptmept/PTMEPT_bottom.c removed
+
 Fri Mar 12 17:13:32 CET 2004 <markvdb@cwi.nl>
  * Fixed bug 197, ambtracker returned NULL if there are
    no ambiguities.
 
 Wed Mar 10 09:06:33 CET 2004 <kooiker@cwi.nl>
  * Use new error-api 
+
+Mon Mar  8 14:20:01 CET 2004 <{jong,kooiker}@cwi.nl>
+ * regenerated using APIgen that generates 'const char *'
+ * removed legacy calls to "makeXXXToTerm" and "makeTermToXXX"
 
 Tue Feb 10 15:27:49 CET 2004 <m336@cwi.nl>
  * upgrade auto* to: autoconf 2.59, automake 1.7.9, libtool 1.5.2

@@ -1,4 +1,4 @@
-/* $Id: lift-error.c,v 1.3.2.1 2004/03/09 16:01:50 kooiker Exp $ */
+/* $Id: lift-error.c 12896 2004-03-11 12:21:39Z kooiker $ */
 
 /*{{{  includes */
 

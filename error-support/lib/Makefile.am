@@ -1,10 +1,11 @@
-# $Id: Makefile.am,v 1.17.2.3 2004/03/09 16:01:47 kooiker Exp $
+# $Id: Makefile.am 19283 2006-07-25 08:19:08Z jurgenv $
+include $(top_srcdir)/Makefile.meta
 
-pkgdata_DATA = errorapi-${VERSION}.jar locationapi-${VERSION}.jar
+pkgdata_DATA = errorapi.jar locationapi.jar
 
-EXTRA_DIST = errorapi-${VERSION}.jar locationapi-${VERSION}.jar
+EXTRA_DIST = errorapi.jar locationapi.jar
 
-lib_LIBRARIES = libErrorAPI.a libLocationAPI.a
+lib_LTLIBRARIES = libErrorAPI.la libLocationAPI.la
 
 include_HEADERS = \
 	Location.h \
@@ -15,9 +16,13 @@ include_HEADERS = \
 	Error_dict.h \
 	ParsedError.h \
 	ParsedError_dict.h \
-	Error-utils.h
+	Error-utils.h \
+	Error-manager.h
 
-libErrorAPI_a_SOURCES = \
+libErrorAPI_la_CPPFLAGS = $(ATERM_CFLAGS)
+libErrorAPI_la_LDFLAGS  = -avoid-version -no-undefined $(AM_LDFLAGS)
+libErrorAPI_la_LIBADD = $(ATERM_LIBS)
+libErrorAPI_la_SOURCES = \
 	Error.c \
 	Error_dict.c \
 	ParsedError.c \
@@ -25,19 +30,23 @@ libErrorAPI_a_SOURCES = \
 	init.c \
 	display.c \
 	lift.c \
-	lower.c
+	lower.c \
+	manager.c
 
-libLocationAPI_a_SOURCES = \
+libLocationAPI_la_CPPFLAGS = $(ATERM_CFLAGS)
+libLocationAPI_la_LDFLAGS  = -avoid-version -no-undefined $(AM_LDFLAGS)
+libLocationAPI_la_LIBADD = $(ATERM_LIBS)
+libLocationAPI_la_SOURCES = \
 	Location.c \
 	Location_dict.c \
 	ParsedLocation.c \
 	ParsedLocation_dict.c
 
-#CFLAGS += -DDISABLE_DYNAMIC_CHECKING
-INCLUDES = -I${ATERM}/include
+if MAINTAINER_MODE
+#AM_CFLAGS += -DDISABLE_DYNAMIC_CHECKING
 
-BASIC_MODULES = StrCon NatCon
-LOCATION_MODULES = Locations Areas
+BASIC_MODULES = StrCon NatCon Whitespace
+LOCATION_MODULES = Locations Areas Slices
 ERROR_MODULES = Errors
 
 api: error-api location-api
@@ -45,7 +54,7 @@ api: error-api location-api
 ABS_ERROR_MODULES = \
 	$(foreach i, \
 	${BASIC_MODULES} ${ERROR_MODULES} ${LOCATION_MODULES}, \
-	${top_srcdir}/../asf-library/library/basic/$i.sdf)
+	${top_srcdir}/../sdf-library/library/basic/$i.sdf)
 
 MetaErrors.def: Makefile
 	@(echo "definition"; cat ${ABS_ERROR_MODULES}) > $@
@@ -67,11 +76,12 @@ java-error-api: MetaErrors.def Makefile
 		--name errorapi \
 		--output . \
 		--version ${VERSION}
+	mv errorapi-${VERSION}.jar errorapi.jar
 
 ABS_LOCATION_MODULES = \
 	$(foreach i, \
 	${BASIC_MODULES} ${LOCATION_MODULES}, \
-	${top_srcdir}/../asf-library/library/basic/$i.sdf)
+	${top_srcdir}/../sdf-library/library/basic/$i.sdf)
 
 Location.def: Makefile
 	@(echo "definition"; cat ${ABS_LOCATION_MODULES}) > $@
@@ -93,3 +103,5 @@ java-location-api: Location.def Makefile
 		--name locationapi \
 		--output . \
 		--version ${VERSION}
+	mv locationapi-${VERSION}.jar locationapi.jar
+endif

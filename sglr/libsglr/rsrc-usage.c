@@ -1,5 +1,5 @@
 /*
- $Id: rsrc-usage.c,v 1.10 2001/07/11 10:53:56 markvdb Exp $
+ $Id: rsrc-usage.c 5413 2001-07-11 10:53:56Z markvdb $
  */
 
 #include <unistd.h>

@@ -1,0 +1,14 @@
+%%% $Id: Renaming.sdf 17765 2006-02-13 12:54:52Z jurgenv $
+                                                              
+module languages/sdf2/syntax/Renaming
+
+imports languages/sdf2/syntax/Kernel
+
+exports
+  sorts Renaming Renamings
+  context-free syntax 
+    "[" list:Renaming* "]" -> Renamings  {cons("renamings")}
+
+    from:Symbol "=>" to:Symbol                   -> Renaming  {cons("symbol")}
+    from-prod:Production "=>" to-prod:Production -> Renaming  {cons("production")}
+

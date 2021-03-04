@@ -1,25 +1,31 @@
-# $Id: Makefile.am,v 1.2 2004/01/13 07:39:52 jurgenv Exp $
+# $Id: Makefile.am 19684 2006-07-25 23:23:25Z martinrw $
 
-include ${top_srcdir}/make_rules
+include $(top_srcdir)/Makefile.meta
 
-EXTRA_DIST = sdf-renaming.idef
+EXTRA_DIST = sdf-renaming.idef.src
+
+CLEANFILES += sdf-renaming.idef
+
 pkgdata_DATA = sdf-renaming.idef
 
 bin_PROGRAMS = sdf-renaming
 
 sdf_renaming_SOURCES = sdf-renaming.c sdf-renaming.tif.c
 sdf_renaming_LDADD = -L$(top_builddir)/lib -lSDFME -lSDF2PT \
-		 -L$(PT_SUPPORT)/lib -lmept \
-		 -L$(ERROR_SUPPORT)/lib -lErrorAPI \
-                 -L$(TOOLBUSLIB)/lib -lATB \
-                 -L$(ATERM)/lib -lATerm \
-                 $(SOCKLIBS)
+		 $(PT_SUPPORT_LIBS) \
+		 $(ERROR_SUPPORT_LIBS) \
+                 $(TOOLBUSLIB_LIBS) \
+                 $(ATERM_LIBS) 
 
-noinst_HEADERS		= sdf-renaming.tif.h
+noinst_HEADERS = sdf-renaming.tif.h
 
-INCLUDES	        = -I$(top_srcdir)/lib \
-                          -I$(ATERM)/include  \
-                          -I$(TOOLBUSLIB)/include \
-                          -I$(SDF_SUPPORT)/include \
-                          -I$(ERROR_SUPPORT)/include \
-                          -I$(PT_SUPPORT)/include
+AM_CPPFLAGS += \
+  -I$(top_srcdir)/lib \
+  $(ATERM_CFLAGS) \
+  $(TOOLBUSLIB_CFLAGS) \
+  $(SDF_SUPPORT_CFLAGS) \
+  $(ERROR_SUPPORT_CFLAGS) \
+  $(PT_SUPPORT_CFLAGS)
+
+%.idef: %.idef.src Makefile
+	sed 's@__PREFIX__@${prefix}@g' < $< > $@

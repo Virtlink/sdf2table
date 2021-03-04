@@ -1,5 +1,5 @@
 /*
- * $Id: apply-function.c,v 1.11 2004/02/09 16:43:20 jurgenv Exp $
+ * $Id: apply-function.c 19031 2006-07-03 10:54:59Z jurgenv $
  */
 
 #include <stdio.h>
@@ -63,13 +63,13 @@ ATerm get_argument_given_nr(int cid, ATerm tree, int argNr)
   PT_Args args;
   PT_Tree argTree;
 
-  parseTree = PT_makeParseTreeFromTerm(tree);
+  parseTree = PT_ParseTreeFromTerm(tree);
   args = PT_getTreeArgs(PT_getParseTreeTree(parseTree));
-  argTree = PT_getArgsArgumentAt(args, argNr);
+  argTree = PT_getArgsTreeAt(args, argNr);
   newParseTree = PT_makeValidParseTreeFromTree(argTree);
 
   return ATmake("snd-value(tree(<term>))", 
-                PT_makeTermFromParseTree(newParseTree));
+                PT_ParseTreeToTerm(newParseTree));
 }
 
 ATerm apply_function_to_args(int cid, const char *function, const char *sort, ATerm args)
@@ -80,15 +80,15 @@ ATerm apply_function_to_args(int cid, const char *function, const char *sort, AT
 
   while (!ATisEmpty(argsList)) {
     ATerm arg = ATgetFirst(argsList);
-    PT_ParseTree parseTree = PT_makeParseTreeFromTerm(ATBunpack(arg));
+    PT_ParseTree parseTree = PT_ParseTreeFromTerm(ATBunpack(arg));
     argsList = ATgetNext(argsList);
-    ptArgs = PT_makeArgsList(PT_getParseTreeTree(parseTree), ptArgs);
+    ptArgs = PT_makeArgsMany(PT_getParseTreeTree(parseTree), ptArgs);
   }
  
   newParseTree = PT_applyFunctionToArgsParseTree(function, sort, ptArgs);
  
   return ATmake("snd-value(tree(<term>))", 
-                ATBpack(PT_makeTermFromParseTree(newParseTree)));
+                ATBpack(PT_ParseTreeToTerm(newParseTree)));
 }
 
 int 
@@ -166,17 +166,17 @@ main (int argc, char **argv)
     args = PT_makeArgsEmpty(); 
   
     for (--nInputs; nInputs >= 0; nInputs--) {
-      parseTree = PT_makeParseTreeFromTerm(ATreadFromNamedFile(inputs[nInputs]));
+      parseTree = PT_ParseTreeFromTerm(ATreadFromNamedFile(inputs[nInputs]));
       if (parseTree == NULL) {
         ATerror("Unable to read in %s\n", inputs[nInputs]);
         exit(1);
       }
-      args = PT_makeArgsList(PT_getParseTreeTree(parseTree), args);
+      args = PT_makeArgsMany(PT_getParseTreeTree(parseTree), args);
     }
    
     newParseTree = PT_applyFunctionToArgsParseTree(function, sort, args);
 
-    ATwriteToNamedBinaryFile(PT_makeTermFromParseTree(newParseTree), output);
+    ATwriteToNamedBinaryFile(PT_ParseTreeToTerm(newParseTree), output);
   }
   return 0;
 }

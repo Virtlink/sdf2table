@@ -1,28 +1,24 @@
-# $Id: Makefile.am,v 1.23 2004/01/13 07:47:48 jurgenv Exp $
+# $Id: Makefile.am 19685 2006-07-25 23:46:34Z martinrw $
 
-include $(top_srcdir)/make_rules
+include $(top_srcdir)/Makefile.meta
 
-INCLUDES			= -I$(top_srcdir)/libsglr \
-				-I$(ATERM)/include \
-				-I$(TOOLBUSLIB)/include \
-				-I$(ERROR_SUPPORT)/include \
-				-I${PT_SUPPORT}/include
+AM_CPPFLAGS += \
+  -I$(top_srcdir)/libsglr \
+  $(ATERM_CFLAGS) \
+  $(TOOLBUSLIB_CFLAGS) \
+  $(ERROR_SUPPORT_CFLAGS) \
+  $(PT_SUPPORT_CFLAGS)
 
-bin_PROGRAMS			= dump-actions dump-gotos dump-priorities \
-				dump-productions
+bin_PROGRAMS = dump-actions dump-gotos dump-priorities dump-productions
 
-dump_actions_SOURCES		= dump-actions.c dump-skel.c dump-skel.h
+dump_actions_SOURCES     = dump-actions.c dump-skel.c dump-skel.h
+dump_gotos_SOURCES       = dump-gotos.c dump-skel.c dump-skel.h
+dump_priorities_SOURCES  = dump-priorities.c dump-skel.c dump-skel.h
+dump_productions_SOURCES = dump-productions.c dump-skel.c dump-skel.h
 
-dump_gotos_SOURCES		= dump-gotos.c dump-skel.c dump-skel.h
-
-dump_priorities_SOURCES		= dump-priorities.c dump-skel.c dump-skel.h
-
-dump_productions_SOURCES	= dump-productions.c dump-skel.c dump-skel.h
-
-
-LDADD     = -L$(top_builddir)/libsglr -lsglr \
-            -L$(PT_SUPPORT)/lib -lmept \
-            -L$(TOOLBUSLIB)/lib -lATB \
-            -L$(ERROR_SUPPORT)/lib -lErrorAPI \
-            -L$(ATERM)/lib -lATerm \
-            $(SOCKLIBS)
+LDADD += \
+  -L$(top_builddir)/libsglr -lsglr \
+  $(PT_SUPPORT_LIBS) \
+  $(TOOLBUSLIB_LIBS) \
+  $(ERROR_SUPPORT_LIBS) \
+  $(ATERM_LIBS)

@@ -1,7 +1,7 @@
 /*{{{  file header */
 
 /*
- $Id: stack.c,v 1.17 2003/08/08 07:50:19 markvdb Exp $
+ $Id: stack.c 20932 2007-01-16 12:32:23Z kooiker $
  */
 
 
@@ -336,7 +336,7 @@ st_link *SG_NewLink(tree t, size_t tl, stack *st)
 
   if ((lk = SG_MallocLink())) {
     lk->tree = t;
-    ATprotect((ATerm *) &(lk->tree));
+    ATprotectAppl(&(lk->tree));
     lk->length = tl;
     lk->stack = st;
     lk->rejected = ATfalse;

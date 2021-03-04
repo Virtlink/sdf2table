@@ -55,7 +55,7 @@ static TA_Location tree_to_ta_location(PT_Tree tree)
 static PT_Tree tide_connect(PT_Tree name, PT_Tree init_location)
 {
   int cid;
-  char* str = PT_yieldTree(name);
+  char* str = PT_yieldTreeToString(name, ATfalse);
 
   cid = TA_connect(ATBgetPort(getCid()));
   pid = TA_createProcess(cid, str);

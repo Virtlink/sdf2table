@@ -1,5 +1,5 @@
 /*
-  $Id: asc-traversals.h,v 1.1 2001/12/13 12:47:06 jurgenv Exp $
+  $Id: asc-traversals.h 6327 2001-12-13 12:47:06Z jurgenv $
  */
 
 #ifndef TRAVERSALS_H

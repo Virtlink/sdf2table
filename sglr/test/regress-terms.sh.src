@@ -1,11 +1,12 @@
 #!/bin/sh
-# $Id: regress-terms.sh.src,v 1.8 2004/02/17 15:28:48 markvdb Exp $
-Revision='$Revision: 1.8 $'
+# $Id: regress-terms.sh.src 18251 2006-03-30 15:58:37Z economop $
+Revision='$Revision: 18251 $'
 
 ###
 #  Some global variables, that might require occasional modification
 ###
 
+#set -x
 verbose=0
 update=0
 
@@ -180,12 +181,12 @@ do
 		asfile=`basename $base .$ext`.asfix2
 		org=$dir/$asfile.org
 		out=${TMPDIR:-/var/tmp}/$asfile.$$
-		$SGLR $VERBOSE --cycle -2 -p $ptbl -i $file -o $out	2>/dev/null
+		$SGLR $VERBOSE -2 -p $ptbl -i $file -o $out	2>/dev/null
 	        if $COMPARE $VERBOSE $out $org	> /dev/null
 	        then
 			Notify "Regression test for error term $base succeeded"
 		else
-	        	if $ERRORCOMPARE -1 $out -2 $org		> /dev/null
+	        	if $ERRORCOMPARE $out $org		> /dev/null
 	        	then
 				if [ $update -eq 0 ] ; then
 	                		${RM} -f $out

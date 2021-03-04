@@ -1,7 +1,4 @@
-/* Mark van den Brand, Pieter Olivier, Jurgen Vinju 
- * $Id: asc-support.c,v 1.34.2.6 2004/07/14 15:39:16 uid509 Exp $
- */
-
+/* $Id: asc-support.c 21097 2007-01-26 09:35:12Z jurgenv $ */
 
 /*{{{  standard includes */
 
@@ -24,6 +21,8 @@
 #include "asc-traversals.h"
 #include "asc-muasf2pt.h"
 #include "asc-prod2str.h"
+#include "asc-ambiguity.h"
+#include "asc-termstore.h"
 
 /*}}}  */
 
@@ -33,43 +32,31 @@ unsigned int rewrite_steps = 0;
 
 #ifdef MEMO_PROFILING
 ATermTable prof_table = NULL;
-Symbol record_sym = -1;
+AFun record_sym = -1;
 #endif
 
 /*}}}  */
 /*{{{  global variables */
 
-/* This term_store is used for temporary storage of
- * list elements, e.g. used in slice.
- */
-#define MAX_STORE 10240
-static ATerm term_store[MAX_STORE];
-
 /* A table to convert integers to ATermInts. 
  */
 ATerm char_table[256] = {NULL};
 
-/* These quoted symbols are used in combination with
- * outermost evaluation! So, 
- * "if" Bool "then" S "else" S "fi" -> S {delay2, delay3}
- * Symbols are quoted to prevent innermost reduction of
- * functions. Also symbols related to list (matching)
- * have to be quoted: make_listsym, concsym and conssym.
+AFun tuplesym;
+AFun make_listsym;
+AFun concsym;    
+
+/* The ambiguity cache is needed to prevent exponential 
+ * behavior in case of nested ambiguities.
  */
-Symbol sym_quote0;
-Symbol sym_quote1;
-Symbol sym_quote2;
-Symbol sym_quote3;
-Symbol sym_quote4;
-Symbol sym_quote5;
-Symbol sym_quote6;
-Symbol sym_quote7;
+ATermTable ambiguityCache = NULL;
 
-Symbol tuplesym;
-Symbol make_listsym;
-Symbol concsym;    
-
+/* 
+ * configuration options that guide the mapping
+ * from parse trees to muasf terms and back
+ */
 ATbool keep_annotations = ATfalse;
+ATbool keep_layout = ATfalse;
 
 /*}}}  */
 /*{{{  declarations for memotables */
@@ -121,6 +108,22 @@ void print_memo_table_sizes()
 
 /*}}}  */
 
+//*{{{  void setKeepLayout(ATbool on)  */
+
+void setKeepLayout(ATbool on) 
+{
+  keep_layout = on;
+}
+
+/*}}}  */
+/*{{{  ATbool getKeepLayout()  */
+
+ATbool getKeepLayout(ATbool on) 
+{
+  return keep_layout;
+}
+
+/*}}}  */
 /*{{{  void setKeepAnnotations(ATbool on)  */
 
 void setKeepAnnotations(ATbool on) 
@@ -143,10 +146,13 @@ ATerm innermost(PT_Tree tree)
   ATerm result = (ATerm) tree;
   ATerm annos = keep_annotations ? PT_getTreeAnnotations(tree) : NULL;
 
-  if (PT_isTreeLayout(tree)) {
+  if (!keep_layout && PT_isTreeLayout(tree)) {
     result = NULL;
   }
   else if (PT_isTreeLit(tree)) {
+    result = NULL;
+  }
+  else if (PT_isTreeCilit(tree)) {
     result = NULL;
   }
   else if (PT_isTreeAppl(tree)) {
@@ -154,29 +160,32 @@ ATerm innermost(PT_Tree tree)
     PT_Args args = PT_getTreeArgs(tree);
 
     if (PT_hasProductionBracketAttr(prod)) {
-      result = innermost(PT_getArgsArgumentAt(args, 2));    
-    }
-    else if (ASF_isTreeTraversalFunction((ASF_Tree) tree)) {
-      PT_Production origProd = PT_getTreeProd(tree);
-      PT_Production prod;
-      PT_Args args;
-
-      tree = ASC_transformTraversalFunction(tree);
-      prod = PT_getTreeProd(tree);
-      args = PT_getTreeArgs(tree);
-
-      result = call(prod, innermost_list(args));
-
-      if (ATgetAFun((ATermAppl) result) == tuplesym) {
-       result = correct_tuple(result, (ATerm) PT_getProductionRhs(origProd));
-      }       
+      result = innermost(PT_getArgsTreeAt(args, 2));    
     }
     else {
+      if (ASF_isTreeTraversalFunction((ASF_Tree) tree)) {
+	ATwarning("Warning: traversal functions are not activated in input term\n");
+      }
+
+      if (PT_isTreeApplList(tree) 
+	  && PT_prodHasIterSepAsRhs(PT_getTreeProd(tree))) {
+	/* remove separators */
+	args = PT_removeArgsLiterals(args);
+      }
+
       result = call(prod, innermost_list(args));
     }
   } else if (PT_isTreeAmb(tree)) {
-    ATerror("Ambiguous parse tree not supported\n");
-    return NULL;
+    ATerm memo = ATtableGet(ambiguityCache, (ATerm) tree);
+
+    if (memo == NULL) {
+      PT_Tree constructor = ASC_ambToConstructor(tree);
+      result = innermost(constructor);
+      ATtablePut(ambiguityCache, (ATerm) tree, result);
+    }
+    else {
+      result = memo;
+    }
   }
 
   if (annos != NULL && result != NULL) {
@@ -201,47 +210,31 @@ static ATermList innermost_list(PT_Args args)
   ATermList result = ATempty;
   int length = PT_getArgsLength(args);
   ATerm el;
- 
-  /* When a list is shorter than 16 elements, we assume that
-     it is not worth it to malloc a buffer. We use ATreverse
-     to restore the correct list order. */
-  if(length < 16) {
-    while(PT_hasArgsHead(args)) {
-      el = innermost(PT_getArgsHead(args));
-      if(el)  
-	result = ATinsert(result, el); 
-      args = PT_getArgsTail(args);
-    }
-    return ATreverse(result);
-  } else {
+  int idx = 0;
 
-    /* We don't use term_store here because of the
-     * recursive calls to innermost, and the fact that
-     * slice (which uses term_store) may be called by
-     * the generated code.
-     */
-    int idx = 0;
-    ATerm *elems = (ATerm *)malloc(sizeof(ATerm)*length);
-    if(!elems) {
-      ATabort("innermost_list: no room for %d elements.\n", length);
-    }
-
+  if (length > 0) {
+    TERM_STORE_FRAME(length,
     while(PT_hasArgsHead(args)) {
-      elems[idx++] = PT_makeTermFromTree(PT_getArgsHead(args));
+      TERM_STORE[idx++] = PT_TreeToTerm(PT_getArgsHead(args));
       args = PT_getArgsTail(args);
     }
     assert(idx == length);
 
     for(--idx; idx>=0; idx--) {
-      el = innermost(PT_makeTreeFromTerm(elems[idx]));
-      if(el) {
-	result = ATinsert(result, el);
+      el = innermost(PT_TreeFromTerm(TERM_STORE[idx]));
+      if (el) {
+	if (ATgetType(el) == AT_LIST) {
+	  /* happens only when a function returns a list directly */
+	  result = ATconcat(result, (ATermList) el);
+	}
+	else {
+	  result = ATinsert(result, el);
+	}
       }
     }
-		
-    free(elems);
-    return result;
+    )		
   }
+  return result;
 }
 
 /*}}}  */
@@ -252,7 +245,7 @@ static ATerm call_unknown(PT_Production prod, ATermList args)
   char *escaped = prodToEscapedString(prod);
   ATerm result = NULL;
   int arity;
-  Symbol sym;
+  AFun sym;
   
   if (PT_isProductionDefault(prod)) {
     arity = ATgetLength(args);
@@ -394,6 +387,132 @@ static ATerm call_using_array(funcptr func, ATerm *arg, int arity)
 			  arg[18],arg[19],arg[20],arg[21],arg[22],arg[23],
 			  arg[24],arg[25],arg[26],arg[27],arg[28],arg[29],
 			  arg[30],arg[31],arg[32]);
+  case 34: return (*func)(arg[0],arg[1],arg[2],arg[3],arg[4],arg[5],arg[6],
+			  arg[7],arg[8],arg[9],arg[10],arg[11],arg[12],
+			  arg[13],arg[14],arg[15],arg[16],arg[17],arg[18],
+			  arg[19],arg[20],arg[21],arg[22],arg[23],arg[24],
+			  arg[25],arg[26],arg[27],arg[28],arg[29],arg[30],
+			  arg[31],arg[32],arg[33]);
+  case 35: return (*func)(arg[0],arg[1],arg[2],arg[3],arg[4],arg[5],arg[6],
+			  arg[7],arg[8],arg[9],arg[10],arg[11],arg[12],
+			  arg[13],arg[14],arg[15],arg[16],arg[17],arg[18],
+			  arg[19],arg[20],arg[21],arg[22],arg[23],arg[24],
+			  arg[25],arg[26],arg[27],arg[28],arg[29],arg[30],
+			  arg[31],arg[32],arg[33],arg[34]);
+  case 36: return (*func)(arg[0],arg[1],arg[2],arg[3],arg[4],arg[5],arg[6],
+			  arg[7],arg[8],arg[9],arg[10],arg[11],arg[12],
+			  arg[13],arg[14],arg[15],arg[16],arg[17],arg[18],
+			  arg[19],arg[20],arg[21],arg[22],arg[23],arg[24],
+			  arg[25],arg[26],arg[27],arg[28],arg[29],arg[30],
+			  arg[31],arg[32],arg[33],arg[34],arg[35]);
+  case 37: return (*func)(arg[0],arg[1],arg[2],arg[3],arg[4],arg[5],arg[6],
+			  arg[7],arg[8],arg[9],arg[10],arg[11],arg[12],
+			  arg[13],arg[14],arg[15],arg[16],arg[17],arg[18],
+			  arg[19],arg[20],arg[21],arg[22],arg[23],arg[24],
+			  arg[25],arg[26],arg[27],arg[28],arg[29],arg[30],
+			  arg[31],arg[32],arg[33],arg[34],arg[35],arg[36]
+			 );
+  case 38: return (*func)(arg[0],arg[1],arg[2],arg[3],arg[4],arg[5],arg[6],
+			  arg[7],arg[8],arg[9],arg[10],arg[11],arg[12],
+			  arg[13],arg[14],arg[15],arg[16],arg[17],arg[18],
+			  arg[19],arg[20],arg[21],arg[22],arg[23],arg[24],
+			  arg[25],arg[26],arg[27],arg[28],arg[29],arg[30],
+			  arg[31],arg[32],arg[33],arg[34],arg[35],arg[36],
+			  arg[37]);
+  case 39: return (*func)(arg[0],arg[1],arg[2],arg[3],arg[4],arg[5],arg[6],
+			  arg[7],arg[8],arg[9],arg[10],arg[11],arg[12],
+			  arg[13],arg[14],arg[15],arg[16],arg[17],arg[18],
+			  arg[19],arg[20],arg[21],arg[22],arg[23],arg[24],
+			  arg[25],arg[26],arg[27],arg[28],arg[29],arg[30],
+			  arg[31],arg[32],arg[33],arg[34],arg[35],arg[36],
+			  arg[37],arg[38]);
+  case 40: return (*func)(arg[0],arg[1],arg[2],arg[3],arg[4],arg[5],arg[6],
+			  arg[7],arg[8],arg[9],arg[10],arg[11],arg[12],
+			  arg[13],arg[14],arg[15],arg[16],arg[17],arg[18],
+			  arg[19],arg[20],arg[21],arg[22],arg[23],arg[24],
+			  arg[25],arg[26],arg[27],arg[28],arg[29],arg[30],
+			  arg[31],arg[32],arg[33],arg[34],arg[35],arg[36],
+			  arg[37],arg[38],arg[39]);
+  case 41: return (*func)(arg[0],arg[1],arg[2],arg[3],arg[4],arg[5],arg[6],
+			  arg[7],arg[8],arg[9],arg[10],arg[11],arg[12],
+			  arg[13],arg[14],arg[15],arg[16],arg[17],arg[18],
+			  arg[19],arg[20],arg[21],arg[22],arg[23],arg[24],
+			  arg[25],arg[26],arg[27],arg[28],arg[29],arg[30],
+			  arg[31],arg[32],arg[33],arg[34],arg[35],arg[36],
+			  arg[37],arg[38],arg[39],arg[40]);
+  case 42: return (*func)(arg[0],arg[1],arg[2],arg[3],arg[4],arg[5],arg[6],
+			  arg[7],arg[8],arg[9],arg[10],arg[11],arg[12],
+			  arg[13],arg[14],arg[15],arg[16],arg[17],arg[18],
+			  arg[19],arg[20],arg[21],arg[22],arg[23],arg[24],
+			  arg[25],arg[26],arg[27],arg[28],arg[29],arg[30],
+			  arg[31],arg[32],arg[33],arg[34],arg[35],arg[36],
+			  arg[37],arg[38],arg[39],arg[40],arg[41]);
+  case 43: return (*func)(arg[0],arg[1],arg[2],arg[3],arg[4],arg[5],arg[6],
+			  arg[7],arg[8],arg[9],arg[10],arg[11],arg[12],
+			  arg[13],arg[14],arg[15],arg[16],arg[17],arg[18],
+			  arg[19],arg[20],arg[21],arg[22],arg[23],arg[24],
+			  arg[25],arg[26],arg[27],arg[28],arg[29],arg[30],
+			  arg[31],arg[32],arg[33],arg[34],arg[35],arg[36],
+			  arg[37],arg[38],arg[39],arg[40],arg[41],arg[42]
+			 );
+  case 44: return (*func)(arg[0],arg[1],arg[2],arg[3],arg[4],arg[5],arg[6],
+			  arg[7],arg[8],arg[9],arg[10],arg[11],arg[12],
+			  arg[13],arg[14],arg[15],arg[16],arg[17],arg[18],
+			  arg[19],arg[20],arg[21],arg[22],arg[23],arg[24],
+			  arg[25],arg[26],arg[27],arg[28],arg[29],arg[30],
+			  arg[31],arg[32],arg[33],arg[34],arg[35],arg[36],
+			  arg[37],arg[38],arg[39],arg[40],arg[41],arg[42],
+			  arg[43]);
+  case 45: return (*func)(arg[0],arg[1],arg[2],arg[3],arg[4],arg[5],arg[6],
+			  arg[7],arg[8],arg[9],arg[10],arg[11],arg[12],
+			  arg[13],arg[14],arg[15],arg[16],arg[17],arg[18],
+			  arg[19],arg[20],arg[21],arg[22],arg[23],arg[24],
+			  arg[25],arg[26],arg[27],arg[28],arg[29],arg[30],
+			  arg[31],arg[32],arg[33],arg[34],arg[35],arg[36],
+			  arg[37],arg[38],arg[39],arg[40],arg[41],arg[42],
+			  arg[43],arg[44]);
+  case 46: return (*func)(arg[0],arg[1],arg[2],arg[3],arg[4],arg[5],arg[6],
+			  arg[7],arg[8],arg[9],arg[10],arg[11],arg[12],
+			  arg[13],arg[14],arg[15],arg[16],arg[17],arg[18],
+			  arg[19],arg[20],arg[21],arg[22],arg[23],arg[24],
+			  arg[25],arg[26],arg[27],arg[28],arg[29],arg[30],
+			  arg[31],arg[32],arg[33],arg[34],arg[35],arg[36],
+			  arg[37],arg[38],arg[39],arg[40],arg[41],arg[42],
+			  arg[43],arg[44],arg[45]);
+  case 47: return (*func)(arg[0],arg[1],arg[2],arg[3],arg[4],arg[5],arg[6],
+			  arg[7],arg[8],arg[9],arg[10],arg[11],arg[12],
+			  arg[13],arg[14],arg[15],arg[16],arg[17],arg[18],
+			  arg[19],arg[20],arg[21],arg[22],arg[23],arg[24],
+			  arg[25],arg[26],arg[27],arg[28],arg[29],arg[30],
+			  arg[31],arg[32],arg[33],arg[34],arg[35],arg[36],
+			  arg[37],arg[38],arg[39],arg[40],arg[41],arg[42],
+			  arg[43],arg[44],arg[45],arg[46]);
+  case 48: return (*func)(arg[0],arg[1],arg[2],arg[3],arg[4],arg[5],arg[6],
+			  arg[7],arg[8],arg[9],arg[10],arg[11],arg[12],
+			  arg[13],arg[14],arg[15],arg[16],arg[17],arg[18],
+			  arg[19],arg[20],arg[21],arg[22],arg[23],arg[24],
+			  arg[25],arg[26],arg[27],arg[28],arg[29],arg[30],
+			  arg[31],arg[32],arg[33],arg[34],arg[35],arg[36],
+			  arg[37],arg[38],arg[39],arg[40],arg[41],arg[42],
+			  arg[43],arg[44],arg[45],arg[46],arg[47]);
+  case 49: return (*func)(arg[0],arg[1],arg[2],arg[3],arg[4],arg[5],arg[6],
+			  arg[7],arg[8],arg[9],arg[10],arg[11],arg[12],
+			  arg[13],arg[14],arg[15],arg[16],arg[17],arg[18],
+			  arg[19],arg[20],arg[21],arg[22],arg[23],arg[24],
+			  arg[25],arg[26],arg[27],arg[28],arg[29],arg[30],
+			  arg[31],arg[32],arg[33],arg[34],arg[35],arg[36],
+			  arg[37],arg[38],arg[39],arg[40],arg[41],arg[42],
+			  arg[43],arg[44],arg[45],arg[46],arg[47],arg[48]
+			 );
+  case 50: return (*func)(arg[0],arg[1],arg[2],arg[3],arg[4],arg[5],arg[6],
+			  arg[7],arg[8],arg[9],arg[10],arg[11],arg[12],
+			  arg[13],arg[14],arg[15],arg[16],arg[17],arg[18],
+			  arg[19],arg[20],arg[21],arg[22],arg[23],arg[24],
+			  arg[25],arg[26],arg[27],arg[28],arg[29],arg[30],
+			  arg[31],arg[32],arg[33],arg[34],arg[35],arg[36],
+			  arg[37],arg[38],arg[39],arg[40],arg[41],arg[42],
+			  arg[43],arg[44],arg[45],arg[46],arg[47],arg[48],
+			  arg[49]);
   default:
     ATabort("too many arguments: %d\n", arity);
   }
@@ -403,16 +522,17 @@ static ATerm call_using_array(funcptr func, ATerm *arg, int arity)
 /*}}}  */
 /*{{{  static ATerm call_using_list(funcptr func, ATermList arg) */
 
-static ATerm call_using_list(funcptr func, ATermList args)
+ATerm call_using_list(funcptr func, ATermList args)
 {
   ATermList list = args;
-  ATerm arg[33];
+  ATerm arg[55];
   int idx = 0;
 
   while(!ATisEmpty(list)) {
     arg[idx++] = ATgetFirst(list);
     list = ATgetNext(list);
   }
+
 
   return call_using_array(func, arg, ATgetLength(args));
 }
@@ -422,7 +542,7 @@ static ATerm call_using_list(funcptr func, ATermList args)
 /* This function is used in innermost to call a c function for
  * a given AsFix production. Note that the arguments are in normal form
  * because of the innermost reduction strategy. Apparently there is
- * an upper limit on the number of arguments of a production (32)!
+ * an upper limit on the number of arguments of a production (55)!
  *
  * The functionality of this function is to convert the argument list in
  * ATermList form to a c function call and to lookup the actual funcptr.
@@ -432,7 +552,7 @@ static ATerm call_using_list(funcptr func, ATermList args)
 
 static ATerm call(PT_Production prod, ATermList args)
 {
-  funcptr func = basic_lookup_func(PT_makeTermFromProduction(prod));
+  funcptr func = basic_lookup_func(PT_ProductionToTerm(prod));
  
   if (func == NULL) {
     return call_unknown(prod, args); 
@@ -451,6 +571,27 @@ static ATerm call(PT_Production prod, ATermList args)
 
 /*}}}  */
 
+/*{{{  ATerm callLiteralConstructor(PT_Symbol symbol)  */
+
+ATerm callLiteralConstructor(PT_Symbol symbol) 
+{
+  PT_Production fake = PT_makeProductionDefault(PT_makeSymbolsEmpty(),
+						symbol,
+						PT_makeAttributesNoAttrs());
+
+  if (basic_lookup_func((ATerm) fake) == NULL) {
+    /* TODO: fix this incomplete function */
+    PT_Tree tree = PT_makeTreeLit(PT_getSymbolString(symbol));
+    ATwarning("new tree: %t\n", tree);
+    return innermost(tree);
+  }
+  else {
+    return call(fake, ATempty);
+  }
+}
+
+/*}}}  */
+
 /*{{{  ATerm unquote(ATerm t) */
 
 /* Code to unqoute delayed reduction of terms, in order to implement
@@ -461,7 +602,7 @@ static ATerm call(PT_Production prod, ATermList args)
 
 ATerm unquote(ATerm t)
 {
-  Symbol s;
+  AFun s;
   ATerm a0,a1,a2,a3,a4,a5,a6;
 
   if (ATmatch(t,"quote(<int>)",&s)) {
@@ -523,31 +664,30 @@ ATerm unquote(ATerm t)
 
 ATerm slice(ATerm l1, ATerm l2)
 {
-  ATermList result;
+  ATermList result = ATempty;
   int i, len;
 
   if(ATisEmpty((ATermList)l2)) {
     return l1;
   }
 
-  len = slice_length(l1, l2);
-  if( MAX_STORE < len )
-    len = MAX_STORE;
+  len = slice_length((ATermList) l1, (ATermList) l2);
+  if (len > 0) {
+  TERM_STORE_FRAME(len,
 
   for(i=0; i<len; i++) {
-    term_store[i] = ATgetFirst((ATermList)l1);
+    TERM_STORE[i] = ATgetFirst((ATermList)l1);
     l1 = (ATerm)ATgetNext((ATermList)l1);
   }
 
   result = ATempty;
 
-  while(l1 != l2) {
-    result = ATappend(result, ATgetFirst((ATermList)l1));
-    l1 = (ATerm)ATgetNext((ATermList)l1); 
-  }
+  assert(l1 == l2);
 
   for(i=len-1; i>=0; i--) {
-    result = ATinsert(result, term_store[i]);
+    result = ATinsert(result, TERM_STORE[i]);
+  }
+  )
   }
  
   return (ATerm)result;
@@ -579,17 +719,46 @@ static ATermList call_kids_trafo_list(funcptr trav, ATermList args,
 				 ATermList extra_args)
 {
   ATermList result = ATempty;
-  ATerm el;
+  int length = ATgetLength(args);
 
-  for (; !ATisEmpty(args); args = ATgetNext(args)) {
-    el = call_using_list(trav,ATinsert(extra_args,ATgetFirst(args)));
-    
-    if (el) {
-      result = ATinsert(result, el);
+  if (length > 0) {
+    int i = 0;
+    ATbool changed = ATfalse;
+    ATermList origArgs = args;
+
+    TERM_STORE_FRAME(length,
+    for ( ; !ATisEmpty(args); args = ATgetNext(args)) {
+      ATerm arg = ATgetFirst(args);
+      ATerm tmp = call_using_list(trav, ATinsert(extra_args, arg));
+      if (tmp != arg) {
+        changed = ATtrue;
+      }
+      TERM_STORE[i++] = tmp;
     }
+
+    assert(i == length);
+
+    if (changed) {
+      for (--i; i >= 0; i--) {
+        ATerm el = TERM_STORE[i];
+  
+        if (el) {
+    	  if (ATgetType(el) == AT_LIST) {
+  	    result = ATconcat(result, (ATermList) el);
+	  }
+	  else {
+	    result = ATinsert(result, el);
+  	  }
+        }
+      }
+    }
+    else {
+      result = origArgs;
+    }
+    )
   }
 
-  return ATreverse(result);
+  return result;
 }
 /*}}}  */
 /*{{{  static ATermList call_kids_accu_list(funcptr trav, ATermList args,  */
@@ -614,22 +783,46 @@ static ATerm call_kids_accutrafo_list(funcptr trav, ATermList args, ATerm accu,
 {
   ATerm tuple;
   ATermList result = ATempty;
-  ATerm el;
+  int length = ATgetLength(args);
 
-  for(;!ATisEmpty(args); args = ATgetNext(args)) {
-    tuple = call_using_list(trav,ATinsert(
-				  ATinsert(extra_args, accu),
-				    ATgetFirst(args)));
+  if (length > 0) {
+    TERM_STORE_FRAME(length,
+    int i = 0;
+    ATbool changed = ATfalse;
+    ATermList origArgs = args;
 
-    el = ATgetArgument((ATermAppl) tuple, 0);
-    accu = ATgetArgument((ATermAppl) tuple, 1);
+    for(;!ATisEmpty(args); args = ATgetNext(args)) {
+      ATerm arg = ATgetFirst(args);
+      ATerm tmp;
+      tuple = call_using_list(trav,ATinsert(
+					    ATinsert(extra_args, accu),
+					    arg));
 
-    if (el) {
-      result = ATinsert(result, el);
+      tmp = ATgetArgument((ATermAppl) tuple, 0);
+      TERM_STORE[i++] = tmp;
+
+      if (tmp != arg) {
+        changed = ATtrue;
+      }
+      accu = ATgetArgument((ATermAppl) tuple, 1);
     }
-  }
 
-  result = ATreverse(result);
+    assert(i == length);
+
+    if (changed) {
+      for (--i; i >=0; i--) {
+        ATerm el = TERM_STORE[i];
+    
+        if (el) {
+        result = ATinsert(result, el);
+        }
+      }
+    }
+    else {
+      result = origArgs;
+    }
+    )
+  }
 
   return (ATerm) ATmakeAppl2(tuplesym, (ATerm) result,accu);
 }
@@ -644,7 +837,7 @@ ATerm call_kids_trafo(funcptr trav, ATerm arg0, ATermList extra_args)
   ATerm annos = keep_annotations ? ATgetAnnotations(arg0) : NULL;
 
   if (type == AT_APPL) {
-    Symbol sym;
+    AFun sym;
     funcptr func;
     ATerm arg[33];
     int idx;
@@ -660,11 +853,17 @@ ATerm call_kids_trafo(funcptr trav, ATerm arg0, ATermList extra_args)
       switch(ATgetType(arg[idx])) {
 	case AT_APPL:
 	  arg[idx] = call_using_list(trav, ATinsert(extra_args,arg[idx]));
+
+	  if (ATgetType(arg[idx]) == AT_LIST) {
+	    ATwarning("Zie je wel!\n"); 
+	  }
 	  break;
 	case AT_LIST:
 	  assert(idx == 0 && "a list production has only 1 child (a list)");
 	  arg[idx] = (ATerm) call_kids_trafo_list(trav, (ATermList) arg[idx],
-						  extra_args);
+					  extra_args);
+	  break;
+	case AT_INT:
 	  break;
 	default:
 	  ATerror("Unexpected term type %d in call_kids_trafo\n", ATgetType(arg[idx]));
@@ -720,6 +919,8 @@ ATerm call_kids_accu(funcptr trav, ATerm arg0, ATerm arg1, ATermList extra_args)
 	  assert(idx == 0 && "a list production has only 1 child (a list)");
 	  arg1 = call_kids_accu_list(trav, (ATermList) head, arg1, extra_args);
 	  break;
+	case AT_INT:
+	  break;
 	default:
 	  ATerror("Unexpected term type %d in call_kids_accu\n", ATgetType(head));
 	  return NULL;
@@ -734,7 +935,7 @@ ATerm call_kids_accu(funcptr trav, ATerm arg0, ATerm arg1, ATermList extra_args)
 }
 
 /*}}}  */
-/*{{{  ATerm call_kids_accutrafo(funcptr trav, Symbol tuple, ATerm arg0, ATerm arg1,  */
+/*{{{  ATerm call_kids_accutrafo(funcptr trav, AFun tuple, ATerm arg0, ATerm arg1,  */
 
 ATerm call_kids_accutrafo(funcptr trav, ATerm arg0, ATerm arg1, 
 			  ATermList extra_args)
@@ -745,7 +946,7 @@ ATerm call_kids_accutrafo(funcptr trav, ATerm arg0, ATerm arg1,
   if (type == AT_APPL) {
     int idx;
     ATermList args;
-    Symbol sym;
+    AFun sym;
     funcptr func;
     ATerm arg[33];
     ATermList list;
@@ -766,6 +967,9 @@ ATerm call_kids_accutrafo(funcptr trav, ATerm arg0, ATerm arg1,
 	  assert(idx == 0 && "a list production has only 1 child (a list)");
 	  tuple = call_kids_accutrafo_list(trav, (ATermList) arg[idx], arg1,
 					   extra_args);
+	  break;
+	case AT_INT:
+	  tuple = (ATerm) ATmakeAppl2(tuplesym , arg[idx],arg1);
 	  break;
 	default:
 	  ATerror("Unexpected term type %d in call_kids_accutrafo\n", ATgetType(arg[idx]));
@@ -809,25 +1013,43 @@ static ATermList call_kids_trafo_list_with_fail(funcptr trav, ATermList args,
 						ATermList extra_args)
 {
   ATermList result = ATempty;
-  ATerm el;
   ATbool fail = ATtrue;
+  int length = ATgetLength(args);
 
-  for (; !ATisEmpty(args); args = ATgetNext(args)) {
-    ATerm head = ATgetFirst(args);
-    el = call_using_list(trav,ATinsert(extra_args,head));
-    
-    if (el) {
-      fail = ATfalse;
+  if (length > 0) {
+    int i = 0;
+    ATermList origArgs = args;
+
+    TERM_STORE_FRAME(length,
+    for (; !ATisEmpty(args); args = ATgetNext(args)) {
+      ATerm head = ATgetFirst(args);
+      ATerm tmp = call_using_list(trav,ATinsert(extra_args,head));
+
+      if (tmp) {
+	fail = ATfalse;
+	TERM_STORE[i++] = tmp;
+      }
+      else {
+	TERM_STORE[i++] = head;
+      }
+    }
+
+    assert(i == length);
+
+    if (!fail) {
+      for (--i; i >= 0; i--) {
+        ATerm el = TERM_STORE[i];
+        result = ATinsert(result, el);
+      }
     }
     else {
-      el = head;
+      result = origArgs;
     }
-
-    result = ATinsert(result, el);
+    )
   }
 
   if (!fail) {
-    return ATreverse(result);
+    return result;
   }
   else {
     return NULL;
@@ -870,29 +1092,41 @@ static ATerm call_kids_accutrafo_list_with_fail(funcptr trav, ATermList args,
 {
   ATerm tuple;
   ATermList result = ATempty;
-  ATerm el;
   ATbool fail = ATtrue;
+  int length = ATgetLength(args);
 
-  for(;!ATisEmpty(args); args = ATgetNext(args)) {
-    ATerm head = ATgetFirst(args);
-    tuple = call_using_list(trav,ATinsert(
-				  ATinsert(extra_args, accu), head));
+  if (length > 0) {
+    int i = 0;
+    ATermList origArgs = args;
 
-    if (tuple) {
-      fail = ATfalse;
-      el = ATgetArgument((ATermAppl) tuple, 0);
-      accu = ATgetArgument((ATermAppl) tuple, 1);
+    TERM_STORE_FRAME(length,
+    for(;!ATisEmpty(args); args = ATgetNext(args)) {
+      ATerm head = ATgetFirst(args);
+      tuple = call_using_list(trav,ATinsert(
+					    ATinsert(extra_args, accu), head));
+
+      if (tuple) {
+	fail = ATfalse;
+	TERM_STORE[i++] = ATgetArgument((ATermAppl) tuple, 0);
+	accu = ATgetArgument((ATermAppl) tuple, 1);
+      }
+      else {
+	TERM_STORE[i++] = head;
+      }
+    }
+
+    assert(i == length);
+
+    if (!fail) {
+      for (--i; i >= 0; i--) {
+        result = ATinsert(result, TERM_STORE[i]);
+      }
     }
     else {
-      el = head;
+      result = origArgs;
     }
-
-    if (el) {
-      result = ATinsert(result, el);
-    }
+    )
   }
-
-  result = ATreverse(result);
 
   if (!fail) {
     return (ATerm) ATmakeAppl2(tuplesym, (ATerm) result,accu);
@@ -911,7 +1145,7 @@ ATerm call_kids_trafo_with_fail(funcptr trav, ATerm arg0, ATermList extra_args)
   ATbool fail = ATtrue;
 
   if (type == AT_APPL) {
-    Symbol sym;
+    AFun sym;
     funcptr func;
     ATerm arg[33];
     int idx;
@@ -935,6 +1169,8 @@ ATerm call_kids_trafo_with_fail(funcptr trav, ATerm arg0, ATermList extra_args)
 	  arg[idx] = (ATerm) call_kids_trafo_list_with_fail(trav, 
 							    (ATermList)arg[idx],
 							    extra_args);
+	  break;
+	case AT_INT:
 	  break;
 	default:
 	  ATerror("Unexpected term type %d in call_kids_trafo\n", ATgetType(arg[idx]));
@@ -1043,7 +1279,7 @@ ATerm call_kids_accu_with_fail(funcptr trav, ATerm arg0, ATerm arg1,
 }
 
 /*}}}  */
-/*{{{  ATerm call_kids_accutrafo(funcptr trav, Symbol tuple, ATerm arg0, ATerm arg1,  */
+/*{{{  ATerm call_kids_accutrafo(funcptr trav, AFun tuple, ATerm arg0, ATerm arg1,  */
 
 ATerm call_kids_accutrafo_with_fail(funcptr trav, ATerm arg0, ATerm arg1, 
 				    ATermList extra_args)
@@ -1055,7 +1291,7 @@ ATerm call_kids_accutrafo_with_fail(funcptr trav, ATerm arg0, ATerm arg1,
   if (type == AT_APPL) {
     int idx;
     ATermList args;
-    Symbol sym;
+    AFun sym;
     funcptr func;
     ATerm arg[33];
     ATermList list;
@@ -1143,7 +1379,7 @@ void write_memo_profile()
   while(!ATisEmpty(keys)) {
     ATerm key = ATgetFirst(keys);
     ATermAppl stats = (ATermAppl)ATtableGet(prof_table, key);
-    ATerm asfix = lookup_prod(ATgetSymbol((ATermAppl)key));
+    ATerm asfix = lookup_prod(ATgetAFun((ATermAppl)key));
 		
     ATfprintf(f, "%t ", stats);
     AFsourceToFile(asfix, f);
@@ -1171,63 +1407,52 @@ void ASC_initRunTime(int tableSize)
     char_table[i] = (ATerm) ATmakeInt(i);
   }
 
-  sym_quote0 = ATmakeSymbol("quote", 1, ATfalse);
-  ATprotectSymbol(sym_quote0);
-  sym_quote1 = ATmakeSymbol("quote", 2, ATfalse);
-  ATprotectSymbol(sym_quote1);
-  sym_quote2 = ATmakeSymbol("quote", 3, ATfalse);
-  ATprotectSymbol(sym_quote2);
-  sym_quote3 = ATmakeSymbol("quote", 4, ATfalse);
-  ATprotectSymbol(sym_quote3);
-  sym_quote4 = ATmakeSymbol("quote", 5, ATfalse);
-  ATprotectSymbol(sym_quote4);
-  sym_quote5 = ATmakeSymbol("quote", 6, ATfalse);
-  ATprotectSymbol(sym_quote5);
-  sym_quote6 = ATmakeSymbol("quote", 7, ATfalse);
-  ATprotectSymbol(sym_quote6);
-  sym_quote7 = ATmakeSymbol("quote", 8, ATfalse);
-  ATprotectSymbol(sym_quote7);
-  make_listsym = ATmakeSymbol("make_list", 1, ATfalse);
-  ATprotectSymbol(make_listsym);
-  tuplesym = ATmakeSymbol("tuple", 2, ATfalse);
-  ATprotectSymbol(tuplesym);
+   make_listsym = ATmakeSymbol("make_list", 1, ATfalse);
+   ATprotectSymbol(make_listsym);
+   tuplesym = ATmakeSymbol("tuple", 2, ATfalse);
+   ATprotectSymbol(tuplesym);
 
 #ifdef MEMO_PROFILING
   prof_table = ATtableCreate(2048, 80);
-  record_sym = ATmakeSymbol("stats", 2, ATfalse);
-  ATprotectSymbol(record_sym);
+  record_sym = ATmakeAFun("stats", 2, ATfalse);
+  ATprotectAFun(record_sym);
 
   atexit(write_memo_profile);
 #endif
 
   PT_initMEPTApi();
+  ASF_initASFMEApi();
   initBuiltins();
+  TS_create();
 
+  ambiguityCache = ATtableCreate(1024, 75);
   c_rehash(tableSize);
 }
 
 /*}}}  */
 /*{{{  PT_ParseTree toasfix(ATerm term) */
 
-PT_ParseTree toasfix(ATerm term)
+PT_Tree toasfix(ATerm term)
 {
   PT_Tree tree;
 
+  assert(term != NULL && "parameter check");
+
   tree = muASFToTree(term);
 
-  return PT_makeValidParseTreeFromTree(tree);
+  return tree;
 }
 
 /*}}}  */
 /*{{{  PT_ParseTree toasfixNoLayout(ATerm term) */
 
-PT_ParseTree toasfixNoLayout(ATerm term)
+PT_Tree toasfixNoLayout(ATerm term)
 {
   PT_Tree tree;
 
   tree = muASFToTreeWithLayout(term, PT_makeTreeLayoutEmpty());
 
-  return PT_makeValidParseTreeFromTree(tree);
+  return tree;
 }
 
 /*}}}  */
@@ -1237,7 +1462,7 @@ PT_ParseTree toasfixNoLayout(ATerm term)
 ATerm get_sort(ATerm tree)
 {
   if (ATgetType(tree) == AT_APPL) {
-    Symbol sym = get_sym(tree);
+    AFun sym = get_sym(tree);
 
     if (sym) {
       return PT_SymbolToTerm(PT_getProductionRhs(PT_ProductionFromTerm(lookup_prod(sym)))); 
@@ -1271,16 +1496,15 @@ ATerm correct_tuple(ATerm arg, ATerm rhs)
   left = PT_getSymbolLhs(rhsSymbol);
   right = PT_getSymbolsHead(PT_getSymbolRest(rhsSymbol));
 
-  lhs = PT_makeSymbolsList(PT_makeSymbolLit("<"),
-        PT_makeSymbolsList(l,
-        PT_makeSymbolsList(PT_makeSymbolCf(left),
-        PT_makeSymbolsList(l,
-        PT_makeSymbolsList(PT_makeSymbolLit(","),
-        PT_makeSymbolsList(l,
-        PT_makeSymbolsList(PT_makeSymbolCf(right),
-        PT_makeSymbolsList(l,
-        PT_makeSymbolsList(PT_makeSymbolLit(">"),
-			   PT_makeSymbolsEmpty())))))))));
+  lhs = PT_makeSymbolsMany(PT_makeSymbolLit("<"),
+        PT_makeSymbolsMany(l,
+        PT_makeSymbolsMany(PT_makeSymbolCf(left),
+        PT_makeSymbolsMany(l,
+        PT_makeSymbolsMany(PT_makeSymbolLit(","),
+        PT_makeSymbolsMany(l,
+        PT_makeSymbolsMany(PT_makeSymbolCf(right),
+        PT_makeSymbolsMany(l,
+        PT_makeSymbolsSingle(PT_makeSymbolLit(">"))))))))));
 
   prod = PT_makeProductionDefault(lhs,PT_makeSymbolCf(rhsSymbol),
 				  PT_makeAttributesNoAttrs());

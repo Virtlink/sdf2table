@@ -1,15 +1,6 @@
-# $Id: Makefile.am,v 1.6.2.2 2004/09/16 12:59:22 jurgenv Exp $
+# $Id: Makefile.am 19776 2006-07-27 11:12:31Z jurgenv $
+include $(top_srcdir)/Makefile.top.meta
 
 SUBDIRS = lib utils doc
 
-ACLOCAL_FLAGS = -I .
-
-CLEANFILES = ${PACKAGE}-${VERSION}.pkg
-
-EXTRA_DIST=package
-
-noinst_SCRIPTS = ${PACKAGE}-${VERSION}.pkg
-
-${PACKAGE}-${VERSION}.pkg: package Makefile
-	cp $< $@
-
+ACLOCAL_AMFLAGS = -I .

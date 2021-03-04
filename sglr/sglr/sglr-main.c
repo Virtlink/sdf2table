@@ -1,10 +1,11 @@
-/*  $Id: sglr-main.c,v 1.56.2.4 2004/07/15 13:52:49 uid509 Exp $  */
+/*  $Id: sglr-main.c 18312 2006-04-13 19:25:38Z jurgenv $  */
 
 /*{{{  includes */
 
-#include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
+#include <assert.h>
 
 #include <MEPT-utils.h>
 #include <Error-utils.h>
@@ -30,13 +31,12 @@
 int     outputflag                       = ATtrue;
 int     binaryflag                       = ATtrue;
 int     filterflag                       = ATtrue;
-int     filter_associativityflag         = ATtrue;
+int     filter_removecyclesflag          = ATfalse;  /* heuristic filter */
 int     filter_directeagernessflag       = ATtrue;
-int     filter_eagernessflag             = ATtrue;
-int     filter_injectioncountflag        = ATtrue;
+int     filter_eagernessflag             = ATtrue; /* heuristic filter */
+int     filter_injectioncountflag        = ATtrue; /* heuristic filter */
 int     filter_priorityflag              = ATtrue;
 int     filter_rejectflag                = ATtrue;
-int     cycleflag                        = ATtrue;
 int     verboseflag                      = ATfalse;
 int     debugflag                        = ATfalse;
 int     statisticsflag                   = ATfalse;
@@ -53,39 +53,55 @@ char   *parse_table_name  = NULL;
 
 /*}}}  */
 
-/*{{{  ATerm parse_string(int conn, ATerm L, const char *G, const char *S, const char *path) */
+/*{{{  ATerm parse(int cid, const char *input, ATerm parseTable, const char *topSort) */
 
-ATerm parse_string(int conn, ATerm L, const char *G, const char *S, const char *path, ATerm countingFiltersOn)
+ATerm parse(int cid, const char *input, ATerm parseTable, const char *topSort, ATerm heuristics)
 {
+  parse_table *pt;
   ATerm tree = NULL;
-  ATerm amb = NULL;
+  int ambiguityCount;
   ATerm result;
 
-  if (ATmatch(countingFiltersOn, "true")) {
-    SG_FILTER_INJECTIONCOUNT_ON();
+  if (ATisEqual(heuristics, ATparse("on"))) {
     SG_FILTER_EAGERNESS_ON();
+    SG_FILTER_INJECTIONCOUNT_ON();
+  }
+  else if (ATisEqual(heuristics, ATparse("off"))) {
+    SG_FILTER_EAGERNESS_OFF();
+    SG_FILTER_INJECTIONCOUNT_OFF();
   }
   else {
-    SG_FILTER_INJECTIONCOUNT_OFF();
-    SG_FILTER_EAGERNESS_OFF();
+    ATwarning("Heuristics argument should be either 'on' or 'off'\n");
   }
 
-  result = SGparseStringAsAsFix(L, G, S, path);
+  pt = SG_BuildParseTable((ATermAppl) ATBunpack(parseTable), NULL);
 
-  if (ATmatch(result, "parsetree(<term>,<term>)", &tree, &amb)) {
-    return ATmake("snd-value(parsetree(<term>,<term>))", ATBpack(tree), amb);
+
+  if (pt != NULL) {
+    result = SGparseStringAsAsFix(input, (SGLR_ParseTable)pt, topSort, NULL);
+
+    if (ERR_isValidError(ERR_ErrorFromTerm(result))) {
+      result = ATmake("parse-error(<term>)", result);
+    }
+    else if (ATgetAFun((ATermAppl)result) == SG_AmbiguousTree_AFun) {
+      ATerm error = ATgetArgument((ATermAppl)result, 1);
+      tree = ATgetArgument((ATermAppl)result, 0);
+      result = ATmake("parse-forest(<term>,<term>)", ATBpack(tree), error);
+    }
+    else if (ATmatch(result, "parsetree(<term>,<int>)", &tree, &ambiguityCount)) {
+      result = ATmake("parse-tree(parsetree(<term>,<int>))",
+		        ATBpack(tree), ambiguityCount);
+    }
+    else {
+      ATwriteToNamedBinaryFile(result, "parse.out");
+      ATabort("sglr-main.c:unhandled parse result (see parse.out)\n");
+    }
   }
-
-  return result;
-}
-
-/*}}}  */
-
-/*{{{  ATerm open_language(int conn, ATerm L, ATerm tbl) */
-
-ATerm open_language(int conn, ATerm L, ATerm tbl, const char *path)
-{
-  return SGopenLanguageFromTerm(L, ATBunpack(tbl), path);
+  else {
+    result = ERR_ErrorToTerm(SG_makeParseTableErrorError());
+    result = ATmake("parse-error(<term>)", result);
+  }
+  return ATmake("snd-value(<term>)", result);
 }
 
 /*}}}  */
@@ -99,16 +115,12 @@ void term_to_file(ATerm t, char *FN)
 
 /*}}}  */
 
-/*
- The function |SG_Usage| writes a short summary of the usage of the program.
- */
-
 #define DEFAULTMODE(b) (b ? "on" : "off")
 
 void SG_Usage(FILE *stream, ATbool long_message)
 {
   const char usage[] = "Usage:\n\t%s\t-p file [-2?bcdhlmnPtvV] "
-  "[-f[adeirp]] [-i file] [-o file] \\"
+  "[-f[deirp]] [-i file] [-o file] \\"
   "\n\t\t[-s sort]\n";
 
   ATfprintf(stream, usage, program_name);
@@ -118,10 +130,9 @@ void SG_Usage(FILE *stream, ATbool long_message)
               "\t-2         : use AsFix2 output format             [%s]\n"
               "\t-A         : ambiguities are treated as errors    [%s]\n"
               "\t-b         : output AsFix in binary format (BAF)  [%s]\n"
-              "\t-c         : toggle cycle detection               [%s]\n"
               "\t-d         : toggle debug mode                    [%s]\n"
-              "\t-f[adeipr] : toggle filtering, or specific filter [%s]\n"
-              "\t  a : associativity                               [%s]\n"
+              "\t-f[deipr] : toggle filtering, or specific filter [%s]\n"
+              "\t  c : remove cycles                               [%s]\n"
               "\t  d : direct eagerness                            [%s]\n"
               "\t  e : eagerness                                   [%s]\n"
               "\t  i : injection count                             [%s]\n"
@@ -141,10 +152,9 @@ void SG_Usage(FILE *stream, ATbool long_message)
               DEFAULTMODE(!asfix2meflag),
               DEFAULTMODE(ambiguityerrorflag),
               DEFAULTMODE(binaryflag), 
-              DEFAULTMODE(cycleflag),
               DEFAULTMODE(debugflag), 
               DEFAULTMODE(filterflag),
-              DEFAULTMODE(filter_associativityflag),
+              DEFAULTMODE(filter_removecyclesflag),
               DEFAULTMODE(filter_directeagernessflag),
               DEFAULTMODE(filter_eagernessflag),
               DEFAULTMODE(filter_injectioncountflag),
@@ -180,7 +190,6 @@ struct option longopts[] =
   {"asfix2",          no_argument,       &asfix2meflag,        ATtrue},
   {"debug",           no_argument,       &debugflag,           ATtrue},
   {"no-filter",       optional_argument, &filterflag,          ATfalse},
-  {"cycle-detect",    no_argument,       &cycleflag,           ATtrue},
   {"help",            no_argument,       NULL,                 'h'},
   {"input",           required_argument, NULL,                 'i'},
   {"log",             no_argument,       NULL,                 'l'},
@@ -204,9 +213,9 @@ void handle_filter_options(void)
   else {
     if (strlen(optarg) == 1) {
       switch(optarg[0]) {
-	case 'a':
-          filter_associativityflag = !filter_associativityflag;
-          break; 
+	case 'c':
+	  filter_removecyclesflag = !filter_removecyclesflag;
+	  break;
         case 'd':
           filter_directeagernessflag = !filter_directeagernessflag;
           break;
@@ -256,7 +265,6 @@ void handle_options (int argc, char **argv)
       case '?':   show_help        = ATtrue;              break;
       case 'A':   ambiguityerrorflag = !ambiguityerrorflag; break;
       case 'b':   binaryflag       = ATtrue;              break;
-      case 'c':   cycleflag        = !cycleflag;          break;
       case 'd':   debugflag        = !debugflag;          break;
       case 'f':   handle_filter_options();                break;     
       case 'h':   show_help        = ATtrue;              break;
@@ -288,13 +296,12 @@ ATbool set_global_options(void)
   if(debugflag)                    SG_DEBUG_ON();
   if(verboseflag)                  SG_VERBOSE_ON();
   if(filterflag)                   SG_FILTER_ON();
-  if(filter_associativityflag)     SG_FILTER_ASSOCIATIVITY_ON();
+  if(filter_removecyclesflag)      SG_FILTER_REMOVECYCLES_OFF();
   if(filter_directeagernessflag)   SG_FILTER_DIRECTEAGERNESS_ON();
   if(filter_eagernessflag)         SG_FILTER_EAGERNESS_ON();
   if(filter_injectioncountflag)    SG_FILTER_INJECTIONCOUNT_ON();
   if(filter_priorityflag)          SG_FILTER_PRIORITY_ON();
   if(filter_rejectflag)            SG_FILTER_REJECT_ON();
-  if(cycleflag)                    SG_CYCLE_ON();
   if(start_symbol)                 SG_STARTSYMBOL_ON();
   if(statisticsflag)               SG_SHOWSTAT_ON();
   if(outputflag)                   SG_OUTPUT_ON();
@@ -355,9 +362,8 @@ int SG_Batch (int argc, char **argv)
     return 2;
   }
 
-  if (SGisParseError(parse_tree)) {
-    ERR_Summary summary = ERR_SummaryFromTerm(parse_tree);
-    ERR_displaySummary(summary);
+  if (ERR_isValidError(ERR_ErrorFromTerm(parse_tree))) {
+    ERR_fdisplayError(stderr, ERR_ErrorFromTerm(parse_tree),"sglr");
     return 1;
   }
   else if(!SGisParseTree(parse_tree)) {

@@ -1,4 +1,4 @@
-/* $Id: unparseProd-main.c,v 1.3.4.1 2004/03/10 08:41:59 kooiker Exp $  */
+/* $Id: unparseProd-main.c 12897 2004-03-11 12:27:01Z kooiker $ */
 
 #include <stdio.h>
 #include <unistd.h>
@@ -87,7 +87,7 @@ int main(int argc, char **argv)
       ATerror("asource: parse error in input term.\n");
     }
     else {
-      char *text = PT_yieldProduction(PT_makeProductionFromTerm(term));
+      char *text = PT_yieldProduction(PT_ProductionFromTerm(term));
       fprintf(outputFile, "%s", text);
       fclose(outputFile);
    }

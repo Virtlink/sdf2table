@@ -1,7 +1,7 @@
 #!/bin/sh
-# $Id: regress-lang.sh.src,v 1.8 2003/02/11 13:07:29 markvdb Exp $
+# $Id: regress-lang.sh.src 17213 2006-01-05 08:16:16Z jurgenv $
 
-Revision='$Revision: 1.8 $'
+Revision='$Revision: 17213 $'
 
 ###
 #  Some global variables, that might require occasional modification
@@ -161,6 +161,7 @@ for dir in $dirs
 do
 #	cd $dir
         for stx in `ls $dir/*.sdf` ; do
+	    echo "Checking: $stx"
 	        RegressGenTable $stx
         done
 	${RM} -f $dir/*.asfix[12]

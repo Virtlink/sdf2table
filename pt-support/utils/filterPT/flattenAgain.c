@@ -50,7 +50,7 @@ static PT_Args flattenListAgain(PT_Production prod, PT_Args elems)
       }
     }
     
-    newElems = PT_makeArgsList(arg, newElems);
+    newElems = PT_makeArgsMany(arg, newElems);
   }
 
   return PT_reverseArgs(newElems);
@@ -65,7 +65,7 @@ static PT_Args flattenArgsAgain(PT_Args args)
 
   for ( ; !PT_isArgsEmpty(args); args = PT_getArgsTail(args)) {
     PT_Tree arg = PT_getArgsHead(args);
-    newArgs = PT_makeArgsList(flattenTreeAgain(arg), newArgs);
+    newArgs = PT_makeArgsMany(flattenTreeAgain(arg), newArgs);
   }
 
   return PT_reverseArgs(newArgs);

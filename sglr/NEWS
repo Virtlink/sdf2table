@@ -16,7 +16,7 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 
-$Id: NEWS,v 1.5 2001/05/23 11:33:42 markvdb Exp $
+$Id: NEWS 4895 2001-05-23 11:33:42Z markvdb $
 
 version 3.2.2
    Fixed bug in prefer/avoid filtering. Trees with equal avoids and prefers

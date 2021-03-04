@@ -1,7 +1,0 @@
-equations
-
-[get-filename-0]
-  get-filename(area-in-file(Filename, Area)) = Filename
-
-[get-area-0]
-  get-area(area-in-file(Filename, Area)) = Area

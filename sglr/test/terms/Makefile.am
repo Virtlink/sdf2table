@@ -1,4 +1,4 @@
-# $Id: Makefile.am,v 1.15 2003/08/01 10:59:33 markvdb Exp $
+# $Id: Makefile.am 17022 2005-11-16 15:19:39Z jurgenv $
 
 EXTRA_DIST = Path.asfix2.org Path.casl Point.asfix2.org Point.casl \
              Weird.asfix2.org Weird.casl all-chars.asfix2.org \
@@ -9,5 +9,6 @@ EXTRA_DIST = Path.asfix2.org Path.casl Point.asfix2.org Point.casl \
              lit.pfr lit.asfix2.org skips.acts skips.asfix2.org \
              test.cobisl test.asfix2.org rec.acts2 rec.asfix2.org \
 	     f.pre f.asfix2.org sin.exp sin.asfix2.org \
-             expression.chi expression.asfix2.org ar.ambrule ar.asfix2.org
+             expression.chi expression.asfix2.org ar.ambrule ar.asfix2.org \
+	     bi.cycle bi.asfix2.org
 

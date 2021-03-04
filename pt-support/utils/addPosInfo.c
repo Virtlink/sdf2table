@@ -1,13 +1,15 @@
-/* $Id: addPosInfo.c,v 1.15.2.2 2004/03/10 08:41:59 kooiker Exp $ */
+/* $Id: addPosInfo.c 13294 2004-04-19 09:29:48Z jong $ */
 
 /*{{{  includes */
 
 #include <stdio.h>
 #include <assert.h>
-#include "MEPT-utils.h"
-#include <Error-utils.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include <MEPT-utils.h>
+#include <Error-utils.h>
+
 #include "position-annotator.tif.h"
 
 /*}}}  */
@@ -18,7 +20,7 @@ static char version[] = "1.3";
 #define streq(str1, str2) (!strcmp(str1, str2))
 #endif
 
-/*{{{  ATerm addPosInfo(int cid, char* path, ATerm t) */
+/*{{{  ATerm add_posinfo(int cid, const char* path, ATerm t) */
 
 ATerm add_posinfo(int cid, const char* path, ATerm t)
 {
@@ -30,7 +32,7 @@ ATerm add_posinfo(int cid, const char* path, ATerm t)
 }
 
 /*}}}  */
-/*{{{  ATerm add_posinfo_packed(int cid, char* path, ATerm t) */
+/*{{{  ATerm add_posinfo_packed(int cid, const char* path, ATerm t) */
 
 ATerm add_posinfo_packed(int cid, const char* path, ATerm t)
 {
@@ -43,7 +45,7 @@ ATerm add_posinfo_packed(int cid, const char* path, ATerm t)
 }
 
 /*}}}  */
-/*{{{  ATerm add_posinfo_to_depth(int cid, char* path, ATerm t, int depth) */
+/*{{{  ATerm add_posinfo_to_depth(int cid, const char* path, ATerm t, int depth) */
 
 ATerm add_posinfo_to_depth(int cid, const char* path, ATerm t, int depth)
 {
@@ -52,6 +54,35 @@ ATerm add_posinfo_to_depth(int cid, const char* path, ATerm t, int depth)
 						   depth, ATfalse, ATfalse);
 
   return ATmake("snd-value(tree-with-pos-info(<term>))", ATBpack((ATerm) result));
+}
+
+/*}}}  */
+/*{{{  ATerm promote_posinfo_to_origin(int cid, ATerm t) */
+
+ATerm promote_posinfo_to_origin(int cid, ATerm t)
+{
+  PT_ParseTree parseTree = PT_ParseTreeFromTerm(ATBunpack(t));
+  PT_Tree tree = PT_getParseTreeTop(parseTree);
+  tree = PT_promotePosInfoToOrigin(tree);
+  parseTree = PT_setParseTreeTop(parseTree, tree);
+
+  return ATmake("snd-value(tree(<term>))", ATBpack((ATerm)parseTree));
+}
+
+/*}}}  */
+/*{{{  ATerm get_origin(int cid, ATerm t) */
+
+ATerm get_origin(int cid, ATerm t)
+{
+  PT_Tree tree = PT_TreeFromTerm(ATBunpack(t));
+  LOC_Location origin = PT_getTreeOrigin(tree);
+
+  if (origin == NULL) {
+    return ATmake("snd-value(no-origin)");
+  }
+  else {
+    return ATmake("snd-value(origin(<term>))", LOC_LocationToTerm(origin));
+  }
 }
 
 /*}}}  */
@@ -133,7 +164,7 @@ int main(int argc, char *argv[])
     int cid;
     ATBinit(argc, argv, &bottomOfStack);
     PT_initMEPTApi();
-    initErrorApi();
+    LOC_initLocationApi();
 
     cid = ATBconnect(NULL, NULL, -1, position_annotator_handler);
     ATBeventloop();
@@ -143,7 +174,7 @@ int main(int argc, char *argv[])
   {
     ATinit(argc, argv, &bottomOfStack);
     PT_initMEPTApi();
-    initErrorApi();
+    LOC_initLocationApi();
 
     if (argc == 1) {
       /* no arguments */
@@ -207,7 +238,7 @@ int main(int argc, char *argv[])
     contents = ATreadFromNamedFile(input);
     assert(contents != NULL);
 
-    parseTree =  PT_makeParseTreeFromTerm(contents);
+    parseTree =  PT_ParseTreeFromTerm(contents);
 
     if (!offset) {
       parseTree = PT_addParseTreePosInfoSome(path, parseTree, depth, 
@@ -215,10 +246,10 @@ int main(int argc, char *argv[])
     }
 
     if (text) {
-      ATwriteToNamedTextFile(PT_makeTermFromParseTree(parseTree), output);
+      ATwriteToNamedTextFile(PT_ParseTreeToTerm(parseTree), output);
     }
     else {
-      ATwriteToNamedBinaryFile(PT_makeTermFromParseTree(parseTree), output);
+      ATwriteToNamedBinaryFile(PT_ParseTreeToTerm(parseTree), output);
     }
 
   }

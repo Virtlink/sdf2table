@@ -1,5 +1,6 @@
 #include "SDFME-utils.h"
 #include "module-table.h"
+#include <MEPT-utils.h>
 #include <assert.h>
 #include <aterm2.h>
 #include <atb-tool.h>
@@ -83,6 +84,7 @@ static void collect_imports_list(SDF_Grammar grammar, SDF_ImportList *imports)
   if (SDF_hasGrammarImpSection(grammar)) {
     SDF_ImpSection impsection = SDF_getGrammarImpSection(grammar);
     *imports = SDF_concatImportList(*imports, 
+				    SDF_makeLayoutSpace(),
 				    getImpsectionImportsList(impsection));
   }
 }
@@ -294,6 +296,23 @@ static SDF_SymbolTail renameSymbolTail(SDF_Symbol from,
 }
 
 /*}}}  */
+
+static SDF_SymbolRest renameSymbolRest(SDF_Symbol from,
+				       SDF_Symbol into,
+                                       SDF_SymbolRest symbols)
+{
+  if (SDF_hasSymbolRestHead(symbols)) {
+    SDF_Symbol head = SDF_getSymbolRestHead(symbols);
+    SDF_Symbol newHead = renameSymbol(from, into, head);
+    symbols = SDF_setSymbolRestHead(symbols, newHead);
+  }
+  if (SDF_hasSymbolRestTail(symbols)) {
+    SDF_SymbolRest tail = SDF_getSymbolRestTail(symbols);
+    SDF_SymbolRest newTail = renameSymbolRest(from, into, tail);
+    symbols = SDF_setSymbolRestTail(symbols, newTail);
+  }
+  return symbols;
+}
 /*{{{  static SDF_SymbolList renameSymbolList(SDF_Symbol from, */
 
 static SDF_SymbolList renameSymbolList(SDF_Symbol from,
@@ -365,6 +384,11 @@ static SDF_Symbol renameSymbol(SDF_Symbol from, SDF_Symbol into,
     argSymbol = SDF_getSymbolHead(symbol);
     newArgSymbol = renameSymbol(from, into, argSymbol);
     symbol = SDF_setSymbolHead(symbol, newArgSymbol);
+  }
+  if (SDF_hasSymbolRest(symbol)) {
+    SDF_SymbolRest rest = SDF_getSymbolRest(symbol);
+    SDF_SymbolRest result = renameSymbolRest(from, into, rest);
+    symbol = SDF_setSymbolRest(symbol, result);  
   }
   if (SDF_hasSymbolTail(symbol)) {
     SDF_SymbolTail argSymbols = SDF_getSymbolTail(symbol);
@@ -565,7 +589,7 @@ static SDF_Renamings concatRenamings(SDF_Renamings r1, SDF_Renamings r2)
   SDF_OptLayout space = SDF_makeLayoutSpace();
 
   return SDF_makeRenamingsRenamings(space,
-				    SDF_concatRenamingList(l1, l2),
+				    SDF_concatRenamingList(l1, space, l2),
 				    space);
 }
 
@@ -740,8 +764,7 @@ static ATermList get_depending_module_ids(SDF_ModuleId moduleId)
     SDF_ImportList imports = do_get_transitive_imports(module);
 
     if (imports_contains_id(imports, moduleId)) {
-      ATerm mid = ATmake("<str>", 
-			 SDF_getCHARLISTString(SDF_getModuleIdChars(module)));
+      ATerm mid = ATmake("<str>", PT_yieldTree((PT_Tree) moduleId));
       dependingModules = ATinsert(dependingModules, mid);
     }
   }

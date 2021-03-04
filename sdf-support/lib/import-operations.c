@@ -1,37 +1,12 @@
 #include "SDFME-utils.h"
-#include <string.h>
 
-/*{{{  SDF_Import SDF_makeImport(char *moduleName) */
+/*{{{  SDF_Import SDF_makeImport(const char *moduleName) */
 
-SDF_Import SDF_makeImport(char *moduleName)
+SDF_Import SDF_makeImport(const char *moduleName)
 {
   return SDF_makeImportModule(
            SDF_makeModuleNameUnparameterized(
-	     SDF_makeModuleIdWord(SDF_makeCHARLISTString(moduleName))));
-}
-
-/*}}}  */
-/*{{{  SDF_ImportList SDF_concatImportList(SDF_ImportList l1, */
-
-SDF_ImportList SDF_concatImportList(SDF_ImportList l1,
-                                    SDF_ImportList l2)
-{
-  SDF_ImportList reversed = SDF_reverseImportList(l1);
-
-  while (!SDF_isImportListEmpty(reversed)) {
-    SDF_Import import = SDF_getImportListHead(reversed);
-
-    l2 = SDF_insertImport(import, l2);
-
-    if (SDF_hasImportListTail(reversed)) {
-      reversed = SDF_getImportListTail(reversed);
-    }
-    else {
-      break;
-    }
-  }
-
-  return l2;
+	     SDF_makeModuleId(moduleName)));
 }
 
 /*}}}  */
@@ -55,16 +30,6 @@ SDF_ImportList SDF_mergeImportList(SDF_ImportList l1, SDF_ImportList l2)
   }
 
   return l2;
-}
-
-/*}}}  */
-/*{{{  SDF_ImportList SDF_reverseImportList(SDF_ImportList l) */
-
-SDF_ImportList SDF_reverseImportList(SDF_ImportList l)
-{
-  return SDF_ImportListFromTerm((ATerm)
-				ATreverse((ATermList)
-					  SDF_ImportListToTerm(l)));
 }
 
 /*}}}  */
@@ -109,9 +74,6 @@ SDF_Module SDF_addModuleImport(SDF_Module module, SDF_Import import)
 }
 
 /*}}}  */
-
-/*{{{  static SDF_ImportList SDF_removeImportFromImportList( */
-
 static SDF_ImportList SDF_removeImportFromImportList(
 			    SDF_ImportList orgImports,
 			    SDF_ModuleId moduleId)
@@ -144,10 +106,6 @@ static SDF_ImportList SDF_removeImportFromImportList(
   }
   return orgImports;
 }
-
-/*}}}  */
-/*{{{  static SDF_ImpSection SDF_removeImportFromImportSection( */
-
 static SDF_ImpSection SDF_removeImportFromImportSection(
 			    SDF_ImpSection orgImpSection,
 			    SDF_ModuleId moduleId)
@@ -167,9 +125,6 @@ static SDF_ImpSection SDF_removeImportFromImportSection(
 
   return SDF_setImpSectionList(orgImpSection, newImports);
 }
-
-/*}}}  */
-/*{{{  static SDF_ImpSectionList SDF_removeImportFromImportSectionList( */
 
 static SDF_ImpSectionList SDF_removeImportFromImportSectionList(
 			    SDF_ImpSectionList orgImpSections,
@@ -206,10 +161,6 @@ static SDF_ImpSectionList SDF_removeImportFromImportSectionList(
   }
   return orgImpSections;
 }
-
-/*}}}  */
-/*{{{  static SDF_Grammar SDF_removeImportFromGrammar( */
-
 static SDF_Grammar SDF_removeImportFromGrammar(
                          SDF_Grammar orgGrammar,
                          SDF_ModuleId moduleId)
@@ -250,9 +201,6 @@ static SDF_Grammar SDF_removeImportFromGrammar(
   return orgGrammar;
 }
 
-/*}}}  */
-/*{{{  static SDF_Section SDF_removeImportFromSection( */
-
 static SDF_Section SDF_removeImportFromSection(
                          SDF_Section orgSection,
                          SDF_ModuleId moduleId)
@@ -271,9 +219,6 @@ static SDF_Section SDF_removeImportFromSection(
   }     
   return orgSection;
 }
-
-/*}}}  */
-/*{{{  static SDF_SectionList SDF_removeImportFromSectionList( */
 
 static SDF_SectionList SDF_removeImportFromSectionList(
                          SDF_SectionList orgSections,
@@ -309,7 +254,6 @@ static SDF_SectionList SDF_removeImportFromSectionList(
   return orgSections;
 }
 
-/*}}}  */
 /*{{{  SDF_Module SDF_removeModuleImport(SDF_Module module, SDF_Import import) */
 
 SDF_Module SDF_removeModuleImport(SDF_Module module, SDF_Import import)
@@ -331,242 +275,6 @@ SDF_Module SDF_removeModuleImport(SDF_Module module, SDF_Import import)
     SDF_SectionList sectionList = SDF_getSectionsList(sections);
     SDF_SectionList newSectionList =
        SDF_removeImportFromSectionList(sectionList, moduleId);
-    SDF_Sections newSections = SDF_setSectionsList(sections, newSectionList);
-    module = SDF_setModuleSections(module, newSections);
-  }
-
-  return module;
-}
-
-/*}}}  */
-
-/*{{{  static SDF_Import SDF_renameImportFromImport( */
-
-static SDF_Import SDF_renameImportFromImport(
-			    SDF_Import orgImport,
-                            const char *from, const char *into)
-{
-  SDF_ModuleName moduleName = SDF_getImportModuleName(orgImport);
-  SDF_ModuleId moduleId = SDF_getModuleNameModuleId(moduleName);
-  SDF_CHARLIST moduleChars = SDF_getModuleIdChars(moduleId);
-  char *orgFrom = SDF_getCHARLISTString(moduleChars);
-
-  if (strcmp(orgFrom, from) == 0) {
-    SDF_CHARLIST newModuleChars = SDF_setCHARLISTString(moduleChars, (char *)into);
-    SDF_ModuleId newModuleId = SDF_setModuleIdChars(moduleId, newModuleChars);
-    SDF_ModuleName newModuleName = SDF_setModuleNameModuleId(moduleName, newModuleId);
-
-    orgImport = SDF_setImportModuleName(orgImport, newModuleName);
-  }
-  return orgImport;
-}
-
-/*}}}  */
-/*{{{  static SDF_ImportList SDF_renameImportFromImportList( */
-
-static SDF_ImportList SDF_renameImportFromImportList(
-			    SDF_ImportList orgImports,
-                            const char *from, const char *into)
-{
-  if (!SDF_isImportListEmpty(orgImports)) {
-    SDF_Import import = SDF_getImportListHead(orgImports);
-    SDF_Import newImport = SDF_renameImportFromImport(import, from, into);
-
-    if (SDF_hasImportListTail(orgImports)) {
-      SDF_ImportList imports = SDF_getImportListTail(orgImports);
-      SDF_ImportList newImports =
-        SDF_renameImportFromImportList(imports, from, into);
-      if (!SDF_isEqualImportList(newImports, imports)) {
-        orgImports = SDF_setImportListTail(orgImports, newImports);
-      }
-    }
-    if (!SDF_isEqualImport(newImport, import)) {
-      orgImports = SDF_setImportListHead(orgImports, newImport);
-    }
-  }
-  return orgImports;
-}
-
-/*}}}  */
-/*{{{  static SDF_ImpSection SDF_renameImportFromImportSection( */
-
-static SDF_ImpSection SDF_renameImportFromImportSection(
-			    SDF_ImpSection orgImpSection,
-                            const char *from, const char *into)
-{
-  SDF_Imports    imports     = SDF_getImpSectionList(orgImpSection);
-  SDF_ImportList importsList = SDF_getImportsList(imports);
-
-  SDF_ImportList newImportsList =
-    SDF_renameImportFromImportList(importsList, from, into);
-  SDF_Imports newImports;
-
-  if (SDF_isImportListEmpty(newImportsList)) {
-    return NULL;
-  }
-
-  newImports = SDF_setImportsList(imports, newImportsList);
-
-  return SDF_setImpSectionList(orgImpSection, newImports);
-}
-
-/*}}}  */
-/*{{{  static SDF_ImpSectionList SDF_renameImportFromImportSectionList( */
-
-static SDF_ImpSectionList SDF_renameImportFromImportSectionList(
-			    SDF_ImpSectionList orgImpSections,
-                            const char *from, const char *into)
-{
-  if (!SDF_isImpSectionListEmpty(orgImpSections)) {
-    SDF_ImpSection impSection  = SDF_getImpSectionListHead(orgImpSections);
-    SDF_ImpSection newImpSection =
-      SDF_renameImportFromImportSection(impSection, from, into);
-
-    if (SDF_hasImpSectionListTail(orgImpSections)) {
-      SDF_ImpSectionList impSections =
-      SDF_getImpSectionListTail(orgImpSections);
-      SDF_ImpSectionList newImpSections =
-        SDF_renameImportFromImportSectionList(impSections, from, into);
-      if (!SDF_isEqualImpSectionList(newImpSections, impSections)) {
-        orgImpSections = SDF_setImpSectionListTail(orgImpSections,
-                                                   newImpSections);
-      }
-    }
-
-    if (newImpSection == NULL) {
-      if (SDF_hasImpSectionListTail(orgImpSections)) {
-        orgImpSections = SDF_getImpSectionListTail(orgImpSections);
-      }
-      else {
-        orgImpSections = SDF_makeImpSectionListEmpty();
-      }
-    }
-    else if (!SDF_isEqualImpSection(newImpSection, impSection)) {
-      orgImpSections = SDF_setImpSectionListHead(orgImpSections,
-                                                 newImpSection);
-    }
-  }
-  return orgImpSections;
-}
-
-/*}}}  */
-/*{{{  static SDF_Grammar SDF_renameImportFromGrammar( */
-
-static SDF_Grammar SDF_renameImportFromGrammar(
-                         SDF_Grammar orgGrammar,
-                         const char *from, const char *into)
-{    
-  if (SDF_isGrammarImpSection(orgGrammar)) {
-    SDF_ImpSection impSection = SDF_getGrammarImpSection(orgGrammar);
-    SDF_ImpSection newImpSection =
-      SDF_renameImportFromImportSection(impSection, from, into);
-    if (newImpSection != NULL) {
-      orgGrammar = SDF_setGrammarImpSection(orgGrammar, newImpSection);
-    }
-    else {
-      return NULL;
-    }
-  }
-  if (SDF_isGrammarConcGrammars(orgGrammar)) {
-    SDF_Grammar leftGrammar = SDF_getGrammarLeft(orgGrammar);
-    SDF_Grammar rightGrammar = SDF_getGrammarRight(orgGrammar);
-    SDF_Grammar newLeftGrammar =
-      SDF_renameImportFromGrammar(leftGrammar, from, into);
-    SDF_Grammar newRightGrammar =
-      SDF_renameImportFromGrammar(rightGrammar, from, into);
-
-    if (newLeftGrammar == NULL && newRightGrammar == NULL) {
-      orgGrammar = NULL;
-    }
-    else if (newLeftGrammar == NULL) {
-      orgGrammar = newRightGrammar;
-    }
-    else if (newRightGrammar == NULL) {
-      orgGrammar = newLeftGrammar;
-    }
-    else {
-      orgGrammar = SDF_setGrammarLeft(orgGrammar, newLeftGrammar);
-      orgGrammar = SDF_setGrammarRight(orgGrammar, newRightGrammar);
-    }
-  }
-  return orgGrammar;
-}
-
-/*}}}  */
-/*{{{  static SDF_Section SDF_renameImportFromSection( */
-
-static SDF_Section SDF_renameImportFromSection(
-                         SDF_Section orgSection,
-                         const char *from, const char *into)
-{       
-  if (SDF_hasSectionGrammar(orgSection)) {
-    SDF_Grammar grammar  = SDF_getSectionGrammar(orgSection);
-    SDF_Grammar newGrammar = 
-      SDF_renameImportFromGrammar(grammar, from, into);
-  
-    if (newGrammar != NULL) {
-      orgSection = SDF_setSectionGrammar(orgSection, newGrammar);
-    }   
-    else {
-      orgSection = NULL;
-    } 
-  }     
-  return orgSection;
-}
-
-/*}}}  */
-/*{{{  static SDF_SectionList SDF_renameImportFromSectionList( */
-
-static SDF_SectionList SDF_renameImportFromSectionList(
-                         SDF_SectionList orgSections,
-                         const char *from, const char *into)
-{       
-  if (!SDF_isSectionListEmpty(orgSections)) {
-    SDF_Section section  = SDF_getSectionListHead(orgSections);
-    SDF_Section newSection = 
-      SDF_renameImportFromSection(section, from, into);
-
-    if (SDF_hasSectionListTail(orgSections)) {
-      SDF_SectionList sections =
-        SDF_getSectionListTail(orgSections);
-      SDF_SectionList newSections =
-        SDF_renameImportFromSectionList(sections, from, into);
-      if (!SDF_isEqualSectionList(newSections, sections)) {
-        orgSections = SDF_setSectionListTail(orgSections, newSections);
-      }
-    }
-
-    if (newSection == NULL) {
-      if (SDF_hasSectionListTail(orgSections)) {
-        orgSections = SDF_getSectionListTail(orgSections);
-      }
-      else {
-        orgSections = SDF_makeSectionListEmpty();
-      }
-    }
-    else if (!SDF_isEqualSection(newSection, section)) {
-      orgSections = SDF_setSectionListHead(orgSections, newSection);
-    }
-  }
-  return orgSections;
-}
-
-/*}}}  */
-/*{{{  SDF_Module SDF_renameModuleImport(SDF_Module module, const char *from, const char *into) */
-
-SDF_Module SDF_renameModuleImport(SDF_Module module, const char *from, const char *into)
-{
-  SDF_Sections sections = SDF_getModuleSections(module);
-  SDF_ImpSectionList impSections = SDF_getModuleList(module);
-  SDF_ImpSectionList newImpSections =
-    SDF_renameImportFromImportSectionList(impSections, from, into);
-
-  module = SDF_setModuleList(module, newImpSections);
-
-  if (SDF_hasSectionsList(sections)) {
-    SDF_SectionList sectionList = SDF_getSectionsList(sections);
-    SDF_SectionList newSectionList =
-       SDF_renameImportFromSectionList(sectionList, from, into);
     SDF_Sections newSections = SDF_setSectionsList(sections, newSectionList);
     module = SDF_setModuleSections(module, newSections);
   }

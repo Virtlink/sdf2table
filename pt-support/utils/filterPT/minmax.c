@@ -41,7 +41,7 @@ static PT_Args minmaxAmb(PT_Args ambs, Count *counter)
     }
     else {
       if (count == extreme) {
-	newAmbs = PT_makeArgsList(arg, newAmbs);
+	newAmbs = PT_makeArgsMany(arg, newAmbs);
       }
       else {
 	if (minimize && count < extreme) {
@@ -79,7 +79,7 @@ static PT_Args minmaxArgs(PT_Args args, Count *counter)
 
     arg = minmaxTree(arg, &count); 
     sum += count;
-    newArgs = PT_makeArgsList(arg, newArgs);
+    newArgs = PT_makeArgsMany(arg, newArgs);
   }
 
   *counter = sum;

@@ -1,19 +1,22 @@
-# $Id: Makefile.am,v 1.3.4.1 2004/04/14 11:07:07 jurgenv Exp $
+# $Id: Makefile.am 20142 2006-08-09 12:45:19Z jurgenv $
+
+include $(top_srcdir)/Makefile.meta
 
 SUBDIRS=terms
 
 TESTS=mept-test
 
-noinst_PROGRAMS=mept-test
+check_PROGRAMS=mept-test
 
 mept_test_SOURCES=mept-test.c
 mept_test_LDADD=\
 	-L$(top_builddir)/libmept -lmept\
-	-L$(top_builddir)/test/terms -ltestTerms\
-	-L$(ATERM)/lib -lATerm
+	$(ERROR_SUPPORT_LIBS) \
+	-L$(top_builddir)/test/terms -ltestTerms \
+	$(ATERM_LIBS) 
 
 INCLUDES =\
-	-I${top_srcdir}/libmept\
-	-I${top_srcdir}/test/terms\
-	-I${ERROR_SUPPORT}/include \
-	-I${ATERM}/include
+	-I$(top_srcdir)/libmept\
+	-I$(top_builddir)/test/terms\
+	$(ERROR_SUPPORT_CFLAGS) \
+	$(ATERM_CFLAGS)

@@ -1,15 +1,7 @@
-include $(top_srcdir)/make_rules
+include $(top_srcdir)/Makefile.meta
+include $(top_srcdir)/man_make_rules
 
-TESTS		= test-chars
-
-INCLUDES	= -I${ATERM}/include \
-		-I${TOOLBUSLIB}/include \
-		-I${ERROR_SUPPORT}/include \
-		-I${PT_SUPPORT}/include \
-		-I${SDF_SUPPORT}/include \
-		-I${ASF_SUPPORT}/include \
-		-I${ASC_SUPPORT}/include
-
+TESTS		= $(check_PROGRAMS)
 check_PROGRAMS	= test-chars
 bin_PROGRAMS	= parsetablegen
 bin_SCRIPTS	= sdf2table parse-sdf2
@@ -17,7 +9,7 @@ noinst_SCRIPTS	= sdf2table.test
 pkgdata_DATA	= parsetablegen.idef
 man_MANS	= sdf2table.1
 
-EXTRA_DIST	= parsetablegen.idef \
+EXTRA_DIST	= parsetablegen.idef.src \
                   sdf2table.src \
                   parse-sdf2.src \
                   sdf2table.pod \
@@ -33,49 +25,59 @@ HDRS         = parsetablegen.tif.h atsets.h ksdf2table.h statistics.h \
 		characters.h item.h first.h priorities.h itemset.h \
 		pgen-symbol.h
 
+AM_CPPFLAGS += \
+	$(ASC_SUPPORT_CFLAGS) \
+	$(SDF_SUPPORT_CFLAGS) \
+	$(PT_SUPPORT_CFLAGS) \
+	$(ASF_SUPPORT_CFLAGS) \
+	$(ERROR_SUPPORT_CFLAGS) \
+	$(TOOLBUSLIB_CFLAGS) \
+	$(ATERM_CFLAGS)
+
 test_chars_SOURCES	= test-chars.c characters.c pgen-symbol.c
-test_chars_LDADD	= -L$(ATERM)/lib -lATerm \
-                        $(SOCKLIBS)
+test_chars_LDADD	= $(ATERM_LIBS) 
 
 parsetablegen_SOURCES = $(SRCS) $(HDRS)
-parsetablegen_LDADD   = -L$(ASC_SUPPORT)/lib -lasc-support-me \
-                        -L$(SGLR)/lib -lsglr \
-                        -L$(TIDE_SUPPORT)/lib -ltide-adapter \
-                        -L$(SDF_SUPPORT)/lib -lSDFME -lSDF2PT \
-                        -L$(ASF_SUPPORT)/lib -lASFME \
-                        -L$(PT_SUPPORT)/lib -lmept -lPTMEPT \
-                        -L$(ERROR_SUPPORT)/lib -lErrorAPI \
-                        -L$(TOOLBUSLIB)/lib -lATB \
-                        -L$(ATERM)/lib -lATerm \
-                        $(SOCKLIBS)
+parsetablegen_DEPENDENCIES = 
+parsetablegen_LDADD = \
+	$(ASC_SUPPORT_LIBS) \
+	$(SDF_SUPPORT_LIBS) \
+	$(PT_SUPPORT_LIBS) \
+	$(ASF_SUPPORT_LIBS) \
+	$(ERROR_SUPPORT_LIBS) \
+	$(TOOLBUSLIB_LIBS) \
+	$(ATERM_LIBS)
 
-CLEANFILES = \
+CLEANFILES += \
 	parse-sdf2 \
 	sdf2table \
 	sdf2table.1 \
-	sdf2table.test 
+	sdf2table.test \
+	parsetablegen.idef
 
-TESTREPLACE = 's@__BINDIR__@$(top_builddir)/src@g;\
-             s@__ACTIVATE__@0@g;\
-             s@__SGLR__@$(SGLR)@g;\
-             s@__PT_SUPPORT__@$(PT_SUPPORT)@g;\
-             s@__DATADIR__@$(top_srcdir)/grammar@g;'
-
-BINREPLACE = 's@__BINDIR__@$(bindir)@g;\
-             s@__ACTIVATE__@1@g;\
-             s@__SGLR__@$(SGLR)@g;\
-             s@__PT_SUPPORT__@$(PT_SUPPORT)@g;\
-             s@__DATADIR__@$(pkgdatadir)@g;'
+%.idef: %.idef.src Makefile
+	sed 's@__PREFIX__@${prefix}@g' < $< > $@
 
 # we create one sdf2table that uses source tree binaries and data 
 # this is needed for testing
 %.test: %.src Makefile
-	sed $(TESTREPLACE) < $< > $@ && \
+	sed "s@__BINDIR__@$(top_builddir)/src@g;\
+             s@__ACTIVATE__@0@g;\
+             s@__SGLR__@$(SGLR_PREFIX)@g;\
+             s@__CHECKERDIR__@$(top_builddir)/sdf-checker/src@g;\
+             s@__PT_SUPPORT__@$(PT_SUPPORT_PREFIX)@g;\
+             s@__DATADIR__@$(top_srcdir)/grammar@g;" < $< > $@ && \
 	chmod +x $@
 
 # and one sdf2table for installed binaries and data
 % : %.src Makefile
-	sed $(BINREPLACE) < $< > $@ && \
+	sed "s@__BINDIR__@$(bindir)@g;\
+             s@__ACTIVATE__@1@g;\
+             s@__PREFIX__@$(prefix)@g;\
+             s@__CHECKERDIR__@$(bindir)@g;\
+             s@__SGLR__@$(SGLR_PREFIX)@g;\
+             s@__PT_SUPPORT__@$(PT_SUPPORT_PREFIX)@g;\
+             s@__DATADIR__@$(pkgdatadir)@g;" < $< > $@ && \
 	chmod +x $@
 
 asfc: Sdf2-Normalization.eqs

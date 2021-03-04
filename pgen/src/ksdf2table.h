@@ -38,11 +38,8 @@ extern AFun afun_action;
 extern AFun afun_prod;
 extern AFun afun_goto;
 extern AFun afun_shift;
-extern AFun afun_left_prio;
-extern AFun afun_right_prio;
-extern AFun afun_assoc_prio;
-extern AFun afun_non_assoc_prio;
 extern AFun afun_gtr_prio;
+extern AFun afun_arg_gtr_prio;
 extern AFun afun_lit;
 
 extern ATerm eof_token;
@@ -70,7 +67,7 @@ extern int max_nr_lhs_members;
 extern int MAX_PROD;
 
 /*}}}  */
-ATerm generate_parse_table(int version_nr, PT_ParseTree g);
+ATerm generate_parse_table(int version_nr, SDF_Grammar g);
 void init_table_gen();
 void destroy_table_gen();
 AFun get_afun_char_class();

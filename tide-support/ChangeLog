@@ -1,4 +1,10 @@
 
+Mon Aug 15 15:08:29 CEST 2005 <jong@cwi.nl>
+ * configure.in:
+   - add libtool support
+
+Fri Nov 19 16:42:38 CET 2004 <jurgenv@cwi.nl>
+ * Bumped to 1.1
 
 Fri Nov 19 13:11:33 CET 2004 <jurgenv@cwi.nl>
  * Split tide/lib-c off into a separate package tide-support. The reason

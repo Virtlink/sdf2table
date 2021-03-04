@@ -1,35 +1,47 @@
-# $Id: Makefile.am,v 1.13 2004/01/30 15:12:07 kooiker Exp $
+# $Id: Makefile.am 19681 2006-07-25 22:38:59Z martinrw $
 
-lib_LIBRARIES		= libASFME.a
-include_HEADERS		= ASFME.h ASFME-utils.h ASFME_dict.h
-libASFME_a_SOURCES	= ASFME.c ASFME_dict.c ASFME-utils.c lex-cons.c \
-		          ASFME_bottom.c
+lib_LTLIBRARIES = libASFME.la
 
-INCLUDES =\
-	-I${ATERM}/include \
-	-I${ERROR_SUPPORT}/include \
-	-I${PT_SUPPORT}/include
+include_HEADERS = \
+	ASFME.h \
+	ASFME-utils.h \
+	ASFME_dict.h
 
-AM_CFLAGS = -DDISABLE_DYNAMIC_CHECKING
+libASFME_la_SOURCES = \
+	ASFME.c \
+	ASFME_dict.c \
+	ASFME-utils.c  \
+	lift.c \
+	lower.c
 
-ADT=/ufs/sen1/software/installed/apigen-bundle-1.5/linux/i386
+libASFME_la_CPPFLAGS = $(ATERM_CFLAGS) $(ERROR_SUPPORT_CFLAGS) $(PT_SUPPORT_CFLAGS)
+libASFME_la_CFLAGS   = -DDISABLE_DYNAMIC_CHECKING
+libASFME_la_LDFLAGS  = -avoid-version -no-undefined $(AM_LDFLAGS)
+libASFME_la_LIBADD   = $(PT_SUPPORT_LIBS) $(ERROR_SUPPORT_LIBS) $(ATERM_LIBS)
+
+LIBRARY=../../asf-library/library
 
 Asf.label.def:
 	(echo "definition";\
-         cat ../../asf-library/library/languages/asf/syntax/*.sdf ) > $@
+         cat \
+	     ${LIBRARY}/languages/asf/syntax/*.sdf \
+	     ${LIBRARY}/basic/Whitespace.sdf \
+	     ${LIBRARY}/languages/sdf2/syntax/Character.sdf) > $@
 
-api: subst-eqs
-	${ADT}/bin/sdf2-to-adt -i Asf.label.def -o ASFME.raw
-	${ADT}/bin/sdf2-to-c -b -o ASFME --prefix ASF_
-	./subst-eqs ASFME.raw > ASFME.adt
-	echo "typedef ATerm ASF_Symbol;" >> ASFME.pro
-	${ADT}/bin/adt-to-c --compat-term -i ASFME.adt --prologue ASFME.pro \
-		--prefix ASF_ -o ASFME
-
-subst-eqs: subst-eqs.c
-	${COMPILE} -o $@ $<  -I${ADT}/include -I${ATERM}/include \
-                             -L${ATERM}/lib -lATerm -L${ADT}/lib -lADT
+api: Asf.label.def
+	sdf2-to-c \
+		--input Asf.label.def \
+		--output ASFME \
+		--prefix ASF_
 
 api-clean:
-	${RM} ${CLEANFILES} *.o ASFME.[ch] ASFME_dict.[ch] ASFME.dict \
-	ASFME.adt ASFME.raw  subst-eqs ASFME_bottom.c
+	${RM} \
+		${CLEANFILES} \
+		*.o \
+		ASFME.[ch] \
+		ASFME_dict.[ch] \
+		ASFME.dict \
+		ASFME.adt 
+
+asfc:
+	asfc -i ASF-Normalization.eqs -o ASF-Normalization.c -v

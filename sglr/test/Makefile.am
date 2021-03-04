@@ -1,4 +1,4 @@
-# $Id: Makefile.am,v 1.10 2004/02/17 15:28:47 markvdb Exp $
+# $Id: Makefile.am 19685 2006-07-25 23:46:34Z martinrw $
 
 SUBDIRS    = erroneous tables terms
 
@@ -9,7 +9,6 @@ TESTS      = regress-terms
 CLEANFILES = regress-terms
 
 % : %.sh.src 
-	sed 's@__ATERM__@$(ATERM)@g;\
-	     s@__ERROR_SUPPORT__@$(ERROR_SUPPORT)@g;\
-	     s@__SRCDIR__@$(srcdir)@g' < $< > $@ && \
-	chmod +x $@
+	sed "s@__ATERM__@$(ATERM_PREFIX)@g;\
+	     s@__ERROR_SUPPORT__@$(ERROR_SUPPORT_PREFIX)@g;\
+	     s@__SRCDIR__@$(srcdir)@g" < $< > $@ && chmod +x $@

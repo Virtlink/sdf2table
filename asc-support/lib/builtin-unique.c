@@ -7,9 +7,9 @@ static PT_Tree next_id()
 {
   static unsigned long id = 0L;
   char str[32]; /* long enough for the largest unsigned long */
-  sprintf(str, "\"%ld\"", id++);
+  sprintf(str, "%ld", id++);
 
-  return (PT_Tree) CO_makeStrConDefault(str);
+  return (PT_Tree) CO_makeStrCon(str);
 }
 
 /*}}}  */

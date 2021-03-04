@@ -197,7 +197,7 @@ static void init_goto()
 {
   ATprotectArray(goto_states, MAX_STATES);
   ATprotectArray(goto_classes, MAX_STATES);
-  ATprotectArray((ATerm *)action_actions, MAX_STATES);
+  ATprotectArray((ATerm *)(void *)action_actions, MAX_STATES);
 }
 
 /*}}}  */
@@ -206,7 +206,7 @@ static void init_goto()
 
 static void free_goto()
 {
-  ATunprotectArray((ATerm *)action_actions);
+  ATunprotectArray((ATerm *)(void *)action_actions);
   memset(action_actions, 0, MAX_STATES*sizeof(ATerm));
   ATunprotectArray(goto_classes);
   memset(goto_classes, 0, MAX_STATES*sizeof(ATerm));
@@ -286,8 +286,8 @@ ATermList gotos(ItemSet vertex, ATermList prods, CC_Set *chars)
 
   gotoElems = ATempty;
 
-  IF_STATISTICS(nr_of_items += ITS_size(vertex));
-  IF_STATISTICS(if (ITS_size(vertex) > max_nr_items)
+  IF_PGEN_STATISTICS(nr_of_items += ITS_size(vertex));
+  IF_PGEN_STATISTICS(if (ITS_size(vertex) > max_nr_items)
 		{max_nr_items = ITS_size(vertex);});
 
   while(!ATisEmpty(prods)) {

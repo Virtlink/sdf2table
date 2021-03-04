@@ -1,4 +1,4 @@
-# $Id: Makefile.am,v 1.8 2004/01/30 12:27:56 jurgenv Exp $
+# $Id: Makefile.am 19677 2006-07-25 19:34:00Z martinrw $
 
 SUBDIRS=terms grammar in out 
 
@@ -28,18 +28,18 @@ CLEANFILES = $(TEST_SET:%=%.tested) $(TEST_SET:%=%.sh)
 #use this target to regenerate the regression tests:
 testset: grammar/tests.tbl \
          $(TEST_SET:%=%.in) \
-         $(TEST_SET:%=%.out)
+         $(TEST_SET:%=%.ref)
 
 testsetclean:
-	$(RM) grammar/tests.tbl in/*.in out/*.out
+	$(RM) grammar/tests.tbl in/*.in out/*.ref
 
 %.sh :
 	(\
 	   echo '#!/bin/sh' ;\
 	   echo 'set -e' ;\
 	   echo 'cat $(srcdir)/in/$*.in | \
-                 ${IMPLODE} $($(subst -,_,$*)_flags) -o $*.tested' ;\
-	   echo '${ATERM}/bin/atdiff $*.tested $(srcdir)/out/$*.out' ;\
+                 $(IMPLODE) $($(subst -,_,$*)_flags) -o $*.tested' ;\
+	   echo '$(ATERM_PREFIX)/bin/atdiff $*.tested $(srcdir)/out/$*.ref' ;\
 	) > $@ && chmod +x $@
 
 # To use these targets you need to have sglr and sdf2table in your path
@@ -51,5 +51,5 @@ testsetclean:
 %.tbl : %.def
 	sdf2table -i $< -o $@
 
-%.out :
-	cat in/$*.in | ${IMPLODE} $($(subst -,_,$*)_flags) -o out/$@
+%.ref :
+	cat in/$*.in | $(IMPLODE) $($(subst -,_,$*)_flags) -o out/$@

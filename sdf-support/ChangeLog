@@ -1,17 +1,136 @@
-$Id: ChangeLog,v 1.99.2.4 2004/12/17 08:26:20 uid508 Exp $
+$Id: ChangeLog 20920 2007-01-12 14:46:45Z jurgenv $
 
-Fri Dec 17 09:26:06 CET 2004 <kooiker@cwi.nl>
- * Bumped to 2.1.3 
+Fri Jan 12 15:45:37 CET 2007 <jurgenv@cwi.nl>
+ * src/SDFME.[ch]: regenerated with new syntax for "." operator.
+ * src/prop.c: removed dead code.
 
-Fri Jul  2 10:30:30 CEST 2004 <jurgenv@cwi.nl>
- * Bumped to 2.1.1
- * Updated version numbers of dependencies
+Tue Oct  3 10:40:26 CEST 2006 <economop@cwi.nl>
+ * Regenerated the api in lib given the changed nullable productions
+   calculations.
 
-Fri May  7 15:43:30 CEST 2004 <jurgenv@cwi.nl>
- * Bumped to 2.1
+Mon Sep 25 18:19:41 CEST 2006 <economop@cwi.nl>
+ * lib/SDFME-utils.{c,h}: Added functionality to extract the int value from an
+   SDF_NatCon.
 
-Wed Apr 28 15:42:13 CEST 2004 <markvdb@cwi.nl>
- * Fixed the renaming of parameterized modules, see bug report 289.
+Mon Sep 25 12:49:01 CEST 2006 <economop@cwi.nl>
+ * lib/prop.c: Fixed bug.
+
+Thu Sep 21 13:04:10 CEST 2006 <economop@cwi.nl>
+ * Forgot to add file ;-)
+
+Wed Sep 20 11:00:04 CEST 2006 <economop@cwi.nl>
+ * src/prop.c: added functionality to extract the property list from a grammar.
+
+Wed Sep 13 16:08:12 CEST 2006 <economop@cwi.nl>
+ * Regenerated API because there was a change in the sdf specification.
+
+Fri Sep  8 13:51:46 CEST 2006 <{economop,kooiker}@cwi.nl>
+ * lib/Makefile.am: 
+   - changed the library path to sdf-library path.
+ * Regenerated API.
+
+Thu Jul 27 12:06:51 CEST 2006 <martin.bravenboer@gmail.com>
+
+ * utils/Makefile.am: removed generation of sdf-support-config,
+   which is obsolete now we are using pkg-config.
+
+Fri Jul 21 02:01:11 CEST 2006 <martin.bravenboer@gmail.com>
+ * utils/sdf-renaming/src/Makefile.am: fix in linking order (Bug 489)
+	
+Tue May  9 16:50:47 CEST 2006 <{jurgenv,storm}@cwi.nl>
+ * utils/sdf-modules/sdf-imports.c: fixed a funny bug. Renamings and
+   module parameters did not support tuples! 
+
+Fri Mar 10 11:25:00 CET 2006 <kooiker@cwi.nl>
+ * **/Makefile.am:
+   - Mainainers use ATerm-dbg library
+
+Mon Jan 30 09:04:06 CET 2006 <kooiker@cwi.nl>
+ * utils/sdf-modules/src/sdf-modules.c:
+   - get_new_module_name handles searchpaths correct
+
+Thu Nov 17 10:29:25 CET 2005 <jurgenv@cwi.nl>
+ * */*.c: extended SDF with case insensitive literals
+
+Wed Jan 18 17:25:21 CET 2006 <{jurgenv,kooiker}@cwi.nl>
+ * package,configure.in: removed dependency on graph-support
+
+Thu Nov 10 17:07:38 CET 2005 <jurgenv@cwi.nl>
+ * utils/import-graph: Adapted implementation to new Graph API.
+
+Thu Sep 22 16:51:29 CEST 2005 <{kooiker,markvdb}@cwi.nl>
+ * utils/import-graph:
+   - removed, no longer needed
+
+Mon Sep 12 11:44:28 CEST 2005 <kooiker@cwi.nl>
+ * utils/sdf-modules/src:
+   - Removed plain-imports because these are handled by the module-manager
+
+Mon Aug 15 15:08:29 CEST 2005 <jong@cwi.nl>
+ * configure.in:
+   - add libtool support
+
+Fri Mar 25 09:41:13 CET 2005 <jurgenv@cwi.nl>
+ * tests/*.pt: regenerated test files for structured lexicals
+ * tests/sorts.c: removed illegal free(), added PT_initMEPTApi();
+ * Bumped version to 2.2
+
+Mon Feb 28 16:33:06 CET 2005 <{jurgenv,markvdb}@cwi.nl>
+ * Regenerated SDF support library after the syntax of priorities
+   was changed.
+
+Fri Dec 17 15:46:43 CET 2004 <jurgenv@cwi.nl>
+ * Regenerated sdf API with structured lexicals.
+ * Transformed SDFME-utils to deal with the changes. This means
+   a number of functions have been added that parse strings and
+   construct things like quoted literals, sort names, modulenames etc.
+ * Dealt with structured lexicals in the utils directory too.
+
+Fri Aug 27 14:52:49 CEST 2004 <jong@cwi.nl>
+ * refactor to use new PT_yield functions in MEPT API
+
+Mon Jul 19 11:34:53 CEST 2004 <jong@cwi.nl>
+ * sdf-support.pkg:
+   - remove dependency on toolbus
+   - add dependency on toolbus-java-adapter
+
+Tue Jul 13 14:45:59 CEST 2004 <jurgenv@cwi.nl>
+ * Removed dependency on ToolBus package
+ * Added dependency on new toolbus-java-adapter package
+
+Wed Jun 30 09:40:04 CEST 2004 <{jurgenv,kooiker}@cwi.nl>
+ * utils/import-graph/sdf:SdfImportGraph.java
+   - stopRunning bridge on rec-terminate 
+
+Fri Jun 18 14:05:52 CEST 2004 <kooiker@cwi.nl>
+ * Also depends on toolbus 
+
+Fri Jun 18 10:27:56 CEST 2004 <jurgenv@cwi.nl>
+ * Added dependency on graph-support in .pkg file
+
+Wed Jun 16 18:02:14 CEST 2004 <jurgenv@cwi.nl>
+ * Removed dependency on TOOLBUS in generation of ToolBus interface.
+   Developers are supposed to have toolbus and tifs2java in their PATH.
+   Otherwise to much tools would become dependent on toolbus, while in fact
+   they only need toolbuslib.
+
+Tue May 25 16:12:23 CEST 2004 <{jong,kooiker}@cwi.nl>
+ * use java Graph API to implement import-relations to graph
+
+Mon May 17 11:37:15 CEST 2004 <{markvdb,jurgenv}@cwi.nl>
+ * Regenerated due to extension of SDF grammar in order to
+   represent priority definitions.
+
+Tue Apr  6 16:02:42 CEST 2004 <{jong,kooiker}@cwi.nl>
+ * remove sm-module-path-inconsistent from sdf-modules.idef
+   as the C implementation never sends this value.
+
+Tue Mar 23 09:19:55 CET 2004 <{jong,kooiker}@cwi.nl>
+ * lib/sdf2pt.c: update wrt new MEPT api.
+
+Fri Mar 19 15:12:13 CET 2004 <{jong,jurgenv}@cwi.nl>
+ * lib/Makefile.am: add concatenation of sdf files to Sdf.label.def
+ * regenerated SDFME API and resolved resulting compiler issues
 
 Tue Feb 10 17:50:37 CET 2004 <jurgenv@cwi.nl>
  * sdf-modules and sdf-renaming use -TB_COLLECT_LOOP 1 to run the

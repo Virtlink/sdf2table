@@ -184,8 +184,8 @@ static ATermList extract_prods(IS_IntSet set)
   int i;
 
   for (i=MAX_PROD-1; i>=0; i--) {
-    while (i % 32 == 31 && set[i/32] == 0) {
-      i -= 32;
+    while (i % BITS_PER_LONG == (BITS_PER_LONG - 1) && set[i/BITS_PER_LONG] == 0) {
+      i -= BITS_PER_LONG;
       if (i == -1) {
 	return result;
       }
@@ -351,8 +351,8 @@ static void union_follow_sets()
     deps = depend_closure[prodid];
     done = ATfalse;
     for (i=MAX_PROD-1; !done && i>=MIN_PROD; i--) {
-      while (i % 32 == 31 && deps[i/32] == 0) {
-	i -= 32;
+      while (i % BITS_PER_LONG == (BITS_PER_LONG - 1) && deps[i/BITS_PER_LONG] == 0) {
+	i -= BITS_PER_LONG;
 	if (i == -1) {
 	  done = ATtrue;
 	  break;

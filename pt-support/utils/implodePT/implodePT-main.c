@@ -1,4 +1,4 @@
-/*  $Id: implodePT-main.c,v 1.8.4.1 2004/04/14 11:01:12 jurgenv Exp $  */
+/*  $Id: implodePT-main.c 13224 2004-04-16 12:20:43Z jurgenv $  */
 
 #include <stdio.h>
 #include <unistd.h>
@@ -139,7 +139,7 @@ int main(int argc, char **argv)
     inputTerm = ATreadFromNamedFile(input);
 
     if (inputTerm != NULL) {
-      tree = PT_makeParseTreeFromTerm(inputTerm);
+      tree = PT_ParseTreeFromTerm(inputTerm);
       implodedTree = PT_implodeParseTree(tree,
 					 interpret_cons ,
 					 remove_layout ,

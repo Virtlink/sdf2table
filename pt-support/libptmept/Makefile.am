@@ -1,23 +1,34 @@
-# $Id: Makefile.am,v 1.15 2004/01/30 15:13:29 kooiker Exp $
+# $Id: Makefile.am 19677 2006-07-25 19:34:00Z martinrw $
 
-lib_LIBRARIES		= libPTMEPT.a
-include_HEADERS		= PTMEPT.h PTMEPT-utils.h PTMEPT_dict.h 
+lib_LTLIBRARIES = libPTMEPT.la
+include_HEADERS = \
+	PTMEPT.h \
+	PTMEPT-utils.h \
+	PTMEPT_dict.h 
 
-libPTMEPT_a_SOURCES	= PTMEPT.c PTMEPT_dict.c PTMEPT_bottom.c ${UTILSRCS}
-UTILSRCS		= lift.c utils.c lower.c
+libPTMEPT_la_CPPFLAGS = -I${top_srcdir}/libmept $(ERROR_SUPPORT_CFLAGS) $(ATERM_CFLAGS) -DDISABLE_DYNAMIC_CHECKING
+libPTMEPT_la_LDFLAGS  = -avoid-version -no-undefined $(AM_LDFLAGS)
+libPTMEPT_la_LIBADD   = ../libmept/libmept.la $(ERROR_SUPPORT_LIBS) $(ATERM_LIBS)
+libPTMEPT_la_SOURCES = PTMEPT.c PTMEPT_dict.c $(UTILSRCS)
 
-EXTRA_DIST		= AsFix.def
-
-INCLUDES		= -I. \
-			  -I${top_srcdir}/libmept \
-			  -I${ERROR_SUPPORT}/include \
-                          -I${ATERM}/include  
-
-AM_CFLAGS = -DDISABLE_DYNAMIC_CHECKING
+UTILSRCS = lift.c lower.c
+EXTRA_DIST = AsFix.def
 
 # Developers only:
-api: AsFix.def
-	sdf2-to-c -i $< -P PTPT_ -o PTMEPT
+LIBRARY=../../asf-library/library
+
+AsFix.def:
+	(echo "definition"; \
+	echo ""; \
+	cat ${LIBRARY}/languages/asfix/syntax/*.sdf ; \
+	cat ${LIBRARY}/languages/aterm/syntax/*.sdf ; \
+	cat ${LIBRARY}/basic/StrCon.sdf ; \
+	cat ${LIBRARY}/basic/NatCon.sdf ; \
+	cat ${LIBRARY}/basic/IdentifierCon.sdf ; \
+	cat ${LIBRARY}/basic/Whitespace.sdf) > $@
+
+api: 
+	sdf2-to-c -i AsFix.def --prefix PTPT_ -o PTMEPT
 
 api-clean:
-	rm -f PTMEPT.[ch] PTMEPT_dict.* PTMEPT.adt PTMEPT_bottom.c
+	rm -f PTMEPT.[ch] PTMEPT_dict.* PTMEPT.adt

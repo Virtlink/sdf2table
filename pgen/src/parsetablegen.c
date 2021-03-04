@@ -36,7 +36,7 @@ ATbool normalizationMode = ATfalse;
 static char myname[] = "parsetablegen";
 static char myversion[] = "4.1";
 
-int version_nr = 4;
+int version_nr = 6;
 
 /*
     The argument vector: list of option letters, colons denote option
@@ -76,8 +76,7 @@ void rec_terminate(int cid, ATerm t) {
 static PT_Tree addNormalizeFunction(const char *str, PT_ParseTree parseTree)
 {
   SDF_ModuleName sdfModuleName = SDF_makeModuleName((char*) str);
-  PT_Tree ptModuleName = PT_makeTreeFromTerm(
-                           SDF_makeTermFromModuleName(sdfModuleName));
+  PT_Tree ptModuleName = PT_TreeFromTerm(SDF_ModuleNameToTerm(sdfModuleName));
   PT_Tree newTree = NULL;
 
   if (PT_isValidParseTree(parseTree)) {
@@ -104,7 +103,7 @@ static PT_Tree addNormalizeFunction(const char *str, PT_ParseTree parseTree)
 
 /*{{{  static PT_ParseTree normalize(char *topModule, PT_ParseTree parseTree) */
 
-static PT_ParseTree normalize(const char *topModule, PT_ParseTree parseTree)
+static PT_Tree normalize(const char *topModule, PT_ParseTree parseTree)
 {
   PT_Tree tree = addNormalizeFunction(topModule, parseTree);
 
@@ -119,21 +118,21 @@ static PT_ParseTree normalize(const char *topModule, PT_ParseTree parseTree)
 static ATerm normalize_and_generate_table(const char *name, PT_ParseTree sdf2term)
 {
   ATerm pt = NULL;
-  PT_ParseTree ksdf;
+  PT_Tree ksdf;
 
-  IF_STATISTICS(PT_Timer()); 
+  IF_PGEN_STATISTICS(PT_Timer()); 
 
   if (generationMode) {
-    ksdf = sdf2term;
+    ksdf = PT_getParseTreeTree(sdf2term);
   } else {
     ksdf = normalize(name, sdf2term); 
   }
 
-  IF_STATISTICS(fprintf(PT_log(), 
+  IF_PGEN_STATISTICS(fprintf(PT_log(), 
                 "Normalization to Kernel-Sdf took %.6fs\n", PT_Timer())); 
 
   if (normalizationMode) {
-    return PT_ParseTreeToTerm(ksdf);
+    return PT_ParseTreeToTerm(PT_makeValidParseTreeFromTree(ksdf));
   }
 
   init_table_gen();
@@ -146,11 +145,11 @@ static ATerm normalize_and_generate_table(const char *name, PT_ParseTree sdf2ter
   max_nr_items = 0;
 
   if (ksdf)  {
-    pt = generate_parse_table(version_nr, ksdf);
+    pt = generate_parse_table(version_nr, SDF_GrammarFromTerm((ATerm)ksdf));
   }
   destroy_table_gen();       
 
-  IF_STATISTICS(fprintf(PT_log(), 
+  IF_PGEN_STATISTICS(fprintf(PT_log(), 
                 "Parse table generation took %.6fs\n", PT_Timer())); 
  
   return pt;
@@ -164,19 +163,10 @@ ATerm generate_table(int cid, ATerm sdf, const char *name)
 {
   ATerm pt, packed;
   ATerm unpackSdf;
-/*
-  FILE *f;
-    
-  f = fopen("definition.baf", "wb");
-  assert(f);
-  ATwriteToBinaryFile(sdf, f);
-  fclose(f);
-*/
 
   unpackSdf = ATBunpack(sdf);
 
-  pt = normalize_and_generate_table(name, 
-         PT_makeParseTreeFromTerm(unpackSdf));
+  pt = normalize_and_generate_table(name, PT_ParseTreeFromTerm(unpackSdf));
 
   if (pt != NULL) {
     packed = ATBpack(pt);
@@ -328,10 +318,10 @@ int main(int argc, char *argv[])
 	  ATwarning("generating parsetable from %s\n", input[i]);
 	}
 
-	term = PT_makeParseTreeFromTerm(ATreadFromFile(iofile));
+	term = PT_ParseTreeFromTerm(ATreadFromFile(iofile));
 	assert(term);
 
-	IF_STATISTICS(
+	IF_PGEN_STATISTICS(
 		      if(!PT_log()) {
 		      ATwarning("Warning: implicitly opening logfile\n");
 		      PT_OpenLog(myname, "pgen-stats.txt");

@@ -1,5 +1,5 @@
 /*
- $Id: dump-gotos.c,v 1.9 2001/11/07 14:01:49 markvdb Exp $
+ $Id: dump-gotos.c 6010 2001-11-07 14:02:35Z markvdb $
  */
 
 #include "dump-skel.h"

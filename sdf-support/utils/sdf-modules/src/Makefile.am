@@ -1,30 +1,38 @@
-# $Id: Makefile.am,v 1.12 2003/06/03 07:46:49 jong Exp $
+# $Id: Makefile.am 19684 2006-07-25 23:23:25Z martinrw $
 
-include ${top_srcdir}/make_rules
+include $(top_srcdir)/Makefile.meta
 
-EXTRA_DIST = sdf-modules.idef
+EXTRA_DIST = sdf-modules.idef.src
+
+CLEANFILES += sdf-modules.idef
+
 pkgdata_DATA = sdf-modules.idef
 
 bin_PROGRAMS = sdf-modules
 
 sdf_modules_SOURCES = sdf-modules.c sdf-modules.tif.c \
 	module-table.c \
-	sdf-imports.c \
-	plain-imports.c
+	sdf-imports.c
 
-sdf_modules_LDADD =\
-		 -L$(top_builddir)/lib -lSDFME  \
-                 -L$(TOOLBUSLIB)/lib -lATB \
-                 -L$(ATERM)/lib -lATerm \
-                 $(SOCKLIBS)
+sdf_modules_LDADD = \
+	-L$(top_builddir)/lib -lSDFME  \
+	$(TOOLBUSLIB_LIBS) \
+	$(ERROR_SUPPORT_LIBS) \
+	$(PT_SUPPORT_LIBS) \
+	$(ATERM_LIBS) 
 
-noinst_HEADERS = sdf-modules.tif.h \
+noinst_HEADERS = \
+	sdf-modules.tif.h \
 	module-table.h \
-	sdf-imports.h \
-	plain-imports.h
+	sdf-imports.h
 
-INCLUDES = \
+AM_CPPFLAGS += \
 	-I$(top_srcdir)/lib  \
-	-I$(ATERM)/include  \
-	-I$(TOOLBUSLIB)/include \
-	-I$(SDF_SUPPORT)/include
+	$(ATERM_CFLAGS) \
+	$(TOOLBUSLIB_CFLAGS) \
+	$(PT_SUPPORT_CFLAGS) \
+	$(ERROR_SUPPORT_CFLAGS) \
+	$(SDF_SUPPORT_CFLAGS) 
+
+%.idef: %.idef.src Makefile
+	sed 's@__PREFIX__@${prefix}@g' < $< > $@

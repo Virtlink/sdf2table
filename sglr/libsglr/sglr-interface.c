@@ -1,4 +1,4 @@
-/*  $Id: sglr-interface.c,v 1.58.2.5 2004/12/08 19:19:15 uid509 Exp $  */
+/*  $Id: sglr-interface.c 20656 2006-11-13 13:32:22Z economop $  */
 
 #include <assert.h>
 #include <ctype.h>
@@ -52,7 +52,7 @@ void  SGinitParser(ATbool toolbus_mode)
   }
 
   SG_FILTER_ON();
-  SG_FILTER_ASSOCIATIVITY_ON();
+  SG_FILTER_REMOVECYCLES_OFF();
   SG_FILTER_DIRECTEAGERNESS_ON();
   SG_FILTER_EAGERNESS_ON();
   SG_FILTER_INJECTIONCOUNT_ON();
@@ -60,9 +60,6 @@ void  SGinitParser(ATbool toolbus_mode)
   SG_FILTER_REJECT_ON();
   
   SG_BINARY_ON();
-  SG_CYCLE_ON();
-
-  SG_InitParseTableErrorList();
 }
 
 void SGshowMode()
@@ -77,7 +74,6 @@ void SGshowMode()
   ATfprintf(stderr, "SHOWSTACK:   %s\n", SG_SHOWSTACK?"y":"n");
   ATfprintf(stderr, "FILTER:      %s\n", SG_FILTER?"y":"n");
   ATfprintf(stderr, "STARTSYMBOL: %s\n", SG_STARTSYMBOL?"y":"n");
-  ATfprintf(stderr, "CYCLE:       %s\n", SG_CYCLE?"y":"n");
 }
 
 /**  The ToolBus API functions  **/
@@ -93,7 +89,7 @@ ATerm SGopenLanguageFromTerm(language L, ATerm tbl, const char *path)
 
   IF_STATISTICS(ATfprintf(SG_log(), "Language: %t\n", L); SG_Timer());
 
-  pt = SG_BuildParseTable((ATermAppl) tbl, path, ATtrue);
+  pt = SG_BuildParseTable((ATermAppl) tbl, path);
 
   IF_STATISTICS(ATfprintf(SG_log(),
                           "Obtaining parse table for %t took %.6fs\n",
@@ -102,19 +98,7 @@ ATerm SGopenLanguageFromTerm(language L, ATerm tbl, const char *path)
     SG_SaveParseTable(L, pt);
   }
 
-  if (SG_TOOLBUS) {
-    if (pt) {
-      return SG_TermToToolbus(ATmake("language-opened(<term>)", L));
-    }
-    else {
-      return SG_TermToToolbus(ATmake("language-not-opened(<term>,<term>)", 
-				     L,
-				     ERR_SummaryToTerm(SG_makeParseTableErrorSummary(path))));
-    }
-  }
-  else {
-    return (ATerm) (pt ? ATempty : NULL);
-  }
+  return (ATerm) (pt ? ATempty : NULL);
 }
 
 ATerm SGopenLanguage(language L, const char *FN, const char *inFile)
@@ -130,9 +114,8 @@ ATerm SGopenLanguage(language L, const char *FN, const char *inFile)
     if (FN)
       ATwarning("opening parse table %s\n", SG_SAFE_STRING(FN))
   );
-  if (!(pt = SG_LookupParseTable(L, inFile))) {
-    pt = SG_AddParseTable(L, FN, inFile);
-  }
+
+  pt = SG_AddParseTable(L, FN, inFile);
 
   return (ATerm) (pt ? ATempty : NULL);
 }
@@ -150,39 +133,35 @@ ATerm SGopenLanguage(language L, const char *FN, const char *inFile)
  This is done by duplicating it.
  */
 
-ATerm SGparseString(language L, const char *G, const char *S, const char *path)
+ATerm SGparseString(const char *input, SGLR_ParseTable parseTable, const char *topSort, const char *path)
 {
   ATerm t;
-  parse_table *pt;
 
-  /* make really really sure that something is initialized */
   SG_InitPTGlobals();
 
-  if (!(pt = SG_LookupParseTable(L, path))) {
-    if (SG_IsParseTableErrorListEmpty()) {
-      SG_addParseTableErrorError(path, "No parse table available");
-    }
-    return ERR_SummaryToTerm(SG_makeParseTableErrorSummary(path));
-  }
   SG_Validate("SGparseString");
-  SG_theText   = strdup(S);
+  SG_theText = strdup(input);
   SG_textIndex = 0;
-  SG_textEnd   = strlen(SG_theText);
-  t = (ATerm) SG_Parse(path, pt, G?(*G?G:NULL):NULL, SG_GetChar, SG_textEnd);
+  SG_textEnd = strlen(SG_theText);
+
+  if (topSort != NULL && *topSort == '\0') {
+    topSort = NULL;
+  }
+
+  t = (ATerm) SG_Parse(path, (parse_table *)parseTable, topSort, SG_GetChar, SG_textEnd);
+
   free(SG_theText);
+
   return t;
 }
 
 
-ATerm SGparseStringAsAsFix(language L, const char *G, const char *S, const char *path)
+ATerm SGparseStringAsAsFix(const char *input, SGLR_ParseTable parseTable, 
+			   const char *topSort, const char *path)
 {
-  ATerm t;
-
   SG_ASFIX2ME_ON();
 
-  t = SGparseString(L, G, S, path);
-
-  return SG_TermToToolbus(t);
+  return SGparseString(input, parseTable, topSort, path);
 }
 
 /*
@@ -226,6 +205,35 @@ ATerm SGparseFile(const char *prgname,
 
   IF_VERBOSE(ATwarning("%s: parsing file %s (%d tokens)\n", prgname, FN, ntok));
   ret = SG_Parse(FN, pt, G?(*G?G:0):NULL, SG_GetChar, SG_textEnd);
+  SG_Free(SG_theText);
+  return (ATerm) ret;
+}
+
+ATerm SGparseStringWithLoadedTable(const char *prgname, 
+		  language L, 
+		  const char *input,
+		  const char *topSort, 
+		  const char *path)
+{
+  forest ret;
+  parse_table *pt;
+
+  SG_Validate("SGparseFile");
+  if ((pt = SG_LookupParseTable(L, path)) == NULL) {
+    IF_VERBOSE(ATwarning("no such parse table (%s)\n", 
+			 SG_SAFE_LANGUAGE(L)));
+    return (ATerm) ERR_makeErrorError("Parse table not found", ERR_makeSubjectListEmpty());
+  }
+
+  SG_theText = strdup(input);
+  SG_textIndex = 0;
+  SG_textEnd = strlen(SG_theText);
+
+  if (topSort != NULL && *topSort == '\0') {
+    topSort = NULL;
+  }
+  
+  ret = SG_Parse(path, pt, topSort, SG_GetChar, SG_textEnd);
   SG_Free(SG_theText);
   return (ATerm) ret;
 }
@@ -291,12 +299,12 @@ ATerm SGparseFileUsingTable(const char *prg,
   }
   
   SG_InitParseTableErrorList();
+
   if (!SGopenLanguage(L, ptblfil, infil)) {
     return SGtermToFile(prg,
-			ERR_SummaryToTerm(SG_makeParseTableErrorSummary(infil)),
+			ERR_ErrorToTerm(SG_makeParseTableErrorError()),
 			outfil);
   }
-
   return SGtermToFile(prg, SGparseFile(prg, L, sort, infil), outfil);
 }
 
@@ -311,19 +319,6 @@ ATbool SGisParseTree(ATerm t)
 
 ATbool SGisParseError(ATerm t)
 {
-/*
-  ERR_Summary summary = ERR_SummaryFromTerm(t);
-  if (ERR_isSummaryFeedback(summary)) {
-    ERR_FeedbackList feedbacks = ERR_getSummaryList(summary);
-    if (!ERR_isFeedbackListEmpty(feedbacks)) {
-      ERR_Feedback feedback = ERR_getFeedbackListHead(feedbacks);
-      if (ERR_isFeedbackError(feedback)) {
-        return ATtrue;
-      }
-    }
-  }
-  return ATfalse;
-*/
   return ATgetAFun(t) == SG_ParseError_AFun;
 }
 
@@ -347,10 +342,7 @@ void SG_UnGetChar(void)
   SG_textIndex--;
 }
 
-/*
- The ToolBus interface...
- */
-
+#if 1
 ATerm SG_TermToToolbus(ATerm t)
 {
   SG_InitPTGlobals();  /*  Make REALLY sure the PT globals are initialised  */
@@ -359,6 +351,7 @@ ATerm SG_TermToToolbus(ATerm t)
     ? (ATerm) ATmakeAppl1(SG_SndValue_AFun, t)
     : t;
 }
+#endif
 
 
 FILE  *SG_Log = NULL;
@@ -380,6 +373,11 @@ FILE  *SG_OpenLog(const char *prg, const char *fnam)
 FILE  *SG_log(void)
 {
   return SG_Log;
+}
+
+void SG_SetLog(FILE* stream)
+{
+  SG_Log = stream;
 }
 
 void SG_CloseLog(void)

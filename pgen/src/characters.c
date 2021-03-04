@@ -20,15 +20,16 @@
 /*}}}  */
 /*{{{  types */
 
-struct CC_Node
-{
-  struct CC_Node *next;
+union CC_Node {
+  CC_Class *cc;
+  CC_Class **next;
 };
 
 /*}}}  */
 /*{{{  variables */
 
-static struct CC_Node *free_nodes = NULL;
+static union CC_Node free_node = {NULL};
+
 static AFun afun_range	    = -1;
 static AFun afun_char_class = -1;
 static unsigned long last_mask = 0;
@@ -52,7 +53,7 @@ void CC_init()
   ATprotectAFun(afun_char_class);
 
   last_bits = CC_BITS-((CC_LONGS-1)*BITS_PER_LONG);
-  last_mask = (1<<last_bits) - 1;
+  last_mask = (1UL<<last_bits) - 1;
 
   max_char_classes = 512;
   char_classes = (CC_Class **)calloc(max_char_classes, sizeof(CC_Class *));
@@ -94,9 +95,9 @@ CC_Class *CC_alloc()
   int i;
   CC_Class *block;
   CC_Class *c;
-  struct CC_Node *node;
+  union CC_Node node;
 
-  if (free_nodes == NULL) {
+  if (free_node.cc == NULL) {
     block = (CC_Class *)calloc(CC_BLOCK_SIZE, sizeof(CC_Class));
     if (block == NULL) {
       ATerror("error allocating charclass block\n");
@@ -104,14 +105,14 @@ CC_Class *CC_alloc()
 
     for (i=CC_BLOCK_SIZE-1; i>=0; i--) {
       c = &block[i];
-      node = (struct CC_Node *)c;
-      node->next = free_nodes;
-      free_nodes = node;
+      node.cc = c;
+      *(node.next) = free_node.cc;
+      free_node.cc = node.cc;
     }
   }
 
-  c = (CC_Class *)free_nodes;
-  free_nodes = free_nodes->next;
+  c = free_node.cc;
+  free_node.cc = *(free_node.next);
 
   for (i=0; i<CC_LONGS; i++) {
     (*c)[i] = 0L;
@@ -168,9 +169,10 @@ void CC_free(CC_Class *cc)
 #ifdef DEBUG_ALLOC
   free(cc);
 #else
-  struct CC_Node *node = (struct CC_Node *)cc;
-  node->next = free_nodes;
-  free_nodes = node;
+  union CC_Node node;
+  node.cc = cc;
+  *(node.next) = free_node.cc;
+  free_node = node;
 #endif
 }
 
@@ -185,7 +187,7 @@ void CC_addChar(CC_Class *cc, int c)
  
   assert(c >= 0 && c < CC_BITS);
   index = c/BITS_PER_LONG;
-  mask  = 1 << (c % BITS_PER_LONG);
+  mask  = 1UL << (c % BITS_PER_LONG);
   
   (*cc)[index] |= mask;
 }
@@ -206,7 +208,7 @@ void CC_addRange(CC_Class *cc, int start, int end)
 
   for (c=start; c<=end; c++) {
     int index = c/BITS_PER_LONG;
-    int mask  = 1 << (c % BITS_PER_LONG);
+    unsigned long mask  = 1UL << (c % BITS_PER_LONG);
 
     (*cc)[index] |= mask;
   }
@@ -222,7 +224,7 @@ void CC_removeChar(CC_Class *cc, int c)
 
   assert(c >= 0 && c < CC_BITS);
   index = c/BITS_PER_LONG;
-  mask  = ~(1 << (c % BITS_PER_LONG));
+  mask  = ~(1UL << (c % BITS_PER_LONG));
   
   (*cc)[index] &= mask;
 }
@@ -284,8 +286,8 @@ ATerm CC_ClassToTerm(CC_Class *cc)
   assert(afun_range >= 0);
 
   for (i=CC_BITS-1; i>=0; i--) {
-    while (i % 32 == 31 && cc[i/32] == 0) {
-      i -= 32;
+    while (i % BITS_PER_LONG == (BITS_PER_LONG - 1) && cc[i/BITS_PER_LONG] == 0) {
+      i -= BITS_PER_LONG;
       if (i == -1) {
 	return (ATerm)range_set;
       }
@@ -448,7 +450,7 @@ ATbool CC_containsChar(CC_Class *cc, int c)
  
   assert(c >= 0 && c < CC_BITS);
   index = c/BITS_PER_LONG;
-  mask  = 1 << (c % BITS_PER_LONG);
+  mask  = 1UL << (c % BITS_PER_LONG);
   
   return ((*cc)[index] & mask) == 0 ? ATfalse : ATtrue;
 }

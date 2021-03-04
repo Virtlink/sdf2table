@@ -1,3 +1,3 @@
-# $Id: Makefile.am,v 1.1 2002/03/22 10:42:24 markvdb Exp $
+# $Id: Makefile.am 17830 2006-02-16 11:55:50Z jurgenv $
 
-SUBDIRS = spec src
+SUBDIRS = src

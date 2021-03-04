@@ -1,4 +1,4 @@
-/* $Id: sdf-renaming.c,v 1.10 2004/02/09 16:26:17 jurgenv Exp $ */
+/* $Id: sdf-renaming.c 15401 2005-01-26 10:31:57Z uid507 $ */
 
 #include <stdlib.h>
 #include <aterm2.h>
@@ -45,7 +45,7 @@ static void version(const char *msg)
 
 static SDF_ImportList getRelevantImports(const char *moduleName, SDF_ImportList imports)
 {
-  SDF_ModuleId id = SDF_makeModuleIdWord(SDF_makeCHARLISTString((char*) moduleName));
+  SDF_ModuleId id = SDF_makeModuleId(moduleName);
   SDF_ImportList relevantImports = SDF_makeImportListEmpty();
 
   while (!SDF_isImportListEmpty(imports)) {
@@ -59,6 +59,7 @@ static SDF_ImportList getRelevantImports(const char *moduleName, SDF_ImportList 
 
     if (SDF_isEqualModuleId(id, importId)) {
       relevantImports = SDF_concatImportList(relevantImports,
+					     SDF_makeLayoutSpace(),
 					     SDF_makeImportListSingle(import));
     }
 

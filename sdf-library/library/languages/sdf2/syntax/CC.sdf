@@ -1,0 +1,11 @@
+%%% $Id: CC.sdf 17765 2006-02-13 12:54:52Z jurgenv $
+                  
+module languages/sdf2/syntax/CC
+
+imports languages/sdf2/syntax/Character-Class 
+        languages/sdf2/syntax/Kernel
+
+exports
+  context-free syntax
+    CharClass -> Symbol {cons("char-class")}
+     

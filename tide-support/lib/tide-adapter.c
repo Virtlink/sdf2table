@@ -434,7 +434,7 @@ int TA_createProcess(int proc_cid, char *name)
       }
       processes[pid].state = STATE_STOPPED;
       processes[pid].cpe = TA_makeLocationUnknown();
-      ATprotect((ATerm *)&processes[pid].cpe);
+      TA_protectLocation(&processes[pid].cpe);
       for (port=0; port<MAX_PORT_TYPES; port++) {
         processes[pid].enabled_rules[port] = NULL;
       }
@@ -478,7 +478,7 @@ int TA_createRule(int pid, TA_Port port, TA_Expr cond, TA_Expr act, ATerm tag,
       rule->action    = act;
       rule->tag       = tag;
 
-      ATprotect((ATerm *)&rule->port);
+      ATprotectTerm(&rule->port);
       ATprotect((ATerm *)&rule->condition);
       ATprotect((ATerm *)&rule->action);
       ATprotect((ATerm *)&rule->tag);

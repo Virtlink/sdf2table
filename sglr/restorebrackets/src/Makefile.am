@@ -1,25 +1,28 @@
-# $Id: Makefile.am,v 1.5 2004/01/13 07:49:06 jurgenv Exp $
+# $Id: Makefile.am 19685 2006-07-25 23:46:34Z martinrw $
 
-include ${top_srcdir}/make_rules
+include $(top_srcdir)/Makefile.meta
 
-EXTRA_DIST		= restorebrackets.idef
+EXTRA_DIST   = restorebrackets.idef.src
+CLEANFILES   += restorebrackets.idef
+pkgdata_DATA = restorebrackets.idef
+bin_PROGRAMS = restorebrackets 
 
-INCLUDES		= -I$(top_srcdir)/libsglr \
-			-I$(PT_SUPPORT)/include \
-			-I$(ERROR_SUPPORT)/include \
-			-I$(TOOLBUSLIB)/include \
-			-I$(SGLR)/include \
-			-I$(ATERM)/include
-
-pkgdata_DATA		= restorebrackets.idef
-
-bin_PROGRAMS		= restorebrackets 
+AM_CPPFLAGS += \
+  -I$(top_srcdir)/libsglr \
+  $(PT_SUPPORT_CFLAGS) \
+  $(ERROR_SUPPORT_CFLAGS) \
+  $(TOOLBUSLIB_CFLAGS) \
+  $(SGLR_CFLAGS) \
+  $(ATERM_CFLAGS) 
 
 restorebrackets_SOURCES	= restorebrackets.tif.c restorebrackets.tif.h restorebrackets-main.c
-restorebrackets_LDADD	= -L$(top_builddir)/libsglr -lsglr \
-			-L$(SGLR)/lib -lsglr \
-			-L$(PT_SUPPORT)/lib -lmept \
-			-L$(ERROR_SUPPORT)/lib -lErrorAPI \
-			-L$(TOOLBUSLIB)/lib -lATB \
-			-L$(ATERM)/lib -lATerm \
-			$(SOCKLIBS)
+
+restorebrackets_LDADD = \
+  -L$(top_builddir)/libsglr -lsglr \
+  $(PT_SUPPORT_LIBS) \
+  $(ERROR_SUPPORT_LIBS) \
+  $(TOOLBUSLIB_LIBS) \
+  $(ATERM_LIBS)
+
+%.idef: %.idef.src Makefile
+	sed 's@__PREFIX__@$(prefix)@g' < $< > $@

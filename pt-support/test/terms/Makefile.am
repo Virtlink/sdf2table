@@ -4,21 +4,19 @@
 
 EXTRA_DIST=genTermsDict.sh.src $(wildcard *.pt)
 
-noinst_LIBRARIES=libtestTerms.a
-noinst_SCRIPTS=genTermsDict.sh
+check_LIBRARIES = libtestTerms.a
+check_SCRIPTS = genTermsDict.sh
 
-noinst_HEADERS=terms_dict.h
-libtestTerms_a_SOURCES=terms_dict.c
+nodist_libtestTerms_a_SOURCES = terms_dict.c terms_dict.h
+AM_CPPFLAGS=$(ATERM_CFLAGS)
 
-INCLUDES=-I$(ATERM)/include
+terms_dict.c terms_dict.h : terms.dict
+	$(ATERM_PREFIX)/bin/dicttoc -dict $< 
 
-terms_dict.c: terms.dict
-	$(ATERM)/bin/dicttoc -dict $< 
-
-terms.dict: genTermsDict.sh ${srcdir}/*.pt
-	./genTermsDict.sh ${srcdir}/*.pt > $@
+terms.dict: genTermsDict.sh $(srcdir)/*.pt
+	./genTermsDict.sh $(srcdir)/*.pt > $@
 
 %.sh: %.sh.src Makefile
-	sed 's@__ATERM__@$(ATERM)@g' < $< > $@ && chmod +x $@	
+	sed 's@__ATERM__@$(ATERM_PREFIX)@g' < $< > $@ && chmod +x $@	
 
-CLEANFILES=*.[ch] *.dict *.sh
+CLEANFILES=terms_dict.c terms_dict.h terms.dict genTermsDict.sh

@@ -1,17 +1,16 @@
-# $Id: Makefile.am,v 1.3 2004/01/13 07:14:50 jurgenv Exp $
+# $Id: Makefile.am 19677 2006-07-25 19:34:00Z martinrw $
 
-SUBDIRS=test
+include $(top_srcdir)/Makefile.meta
 
-bin_PROGRAMS		= implodePT 
+SUBDIRS = test
+
+bin_PROGRAMS = implodePT 
 
 INCLUDES = \
-	-I${top_srcdir}/libmept \
-	-I${ERROR_SUPPORT}/include \
-	-I${ATERM}/include 
+	-I$(top_srcdir)/libmept \
+	$(ERROR_SUPPORT_CFLAGS)
 
-
-implodePT_SOURCES	= implodePT-main.c
+implodePT_SOURCES = implodePT-main.c
 implodePT_LDADD	=\
-	-L${top_builddir}/libmept -lmept \
-	-L${ERROR_SUPPORT}/lib -lErrorAPI \
-	-L${ATERM}/lib -lATerm
+	-L$(top_builddir)/libmept -lmept \
+	$(ERROR_SUPPORT_LIBS)

@@ -1,5 +1,5 @@
 /*
- $Id: dump-skel.c,v 1.17.4.2 2004/07/15 14:39:10 uid509 Exp $
+ $Id: dump-skel.c 14158 2004-07-19 08:32:06Z uid509 $
  */
 
 #include <stdlib.h>

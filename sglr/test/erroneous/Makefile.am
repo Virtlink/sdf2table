@@ -1,4 +1,4 @@
-# $Id: Makefile.am,v 1.6 2002/09/16 14:51:59 markvdb Exp $
+# $Id: Makefile.am 17172 2005-12-21 08:09:32Z kooiker $
 
-EXTRA_DIST = bi.asfix2.org bi.cycle empty.amb empty.asfix2.org \
+EXTRA_DIST = empty.amb empty.asfix2.org \
 	     test.asfix2.org test.inj

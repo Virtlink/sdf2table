@@ -9,9 +9,7 @@ noinst_HEADERS = \
 
 INCLUDES = \
         -I${top_srcdir}/libmept \
-        -I${ERROR_SUPPORT}/include \
-        -I${ATERM}/include
-
+        ${ERROR_SUPPORT_CFLAGS}
 
 filterPT_SOURCES = \
 	main.c \
@@ -20,6 +18,4 @@ filterPT_SOURCES = \
 
 filterPT_LDADD =\
         -L${top_builddir}/libmept -lmept \
-        -L${ERROR_SUPPORT}/lib -lErrorAPI \
-        -L${ATERM}/lib -lATerm
-
+        ${ERROR_SUPPORT_LIBS}

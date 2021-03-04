@@ -1,15 +1,17 @@
-# $Id: Makefile.am,v 1.8 2003/02/11 13:07:29 markvdb Exp $
+# $Id: Makefile.am 19696 2006-07-26 02:13:32Z martinrw $
 
-SUBDIRS    = grammars tables
+SUBDIRS    = grammars tables terms erroneous
 
-EXTRA_DIST = lang-types regress-lang.sh.src 
+EXTRA_DIST = lang-types regress-lang.sh.src regress-terms.sh.src
 
-TESTS      = regress-lang
+TESTS      = regress-lang regress-terms
 
-CLEANFILES = $(TESTS)
+CLEANFILES = $(TESTS) 
 
 % : %.sh.src Makefile
-	sed 's@__TOP_BUILDDIR__@$(top_builddir)@g;\
+	sed "s@__TOP_BUILDDIR__@$(top_builddir)@g;\
              s@__TOP_SRCDIR__@$(top_srcdir)@g;\
-             s@__ATERM__@$(ATERM)@g' < $< > $@ && \
+             s@__SGLR__@$(SGLR_PREFIX)@g;\
+             s@__ERROR_SUPPORT__@$(ERROR_SUPPORT_PREFIX)@g;\
+             s@__ATERM__@$(ATERM_PREFIX)@g" < $< > $@ && \
 	chmod +x $@

@@ -1,32 +1,41 @@
-$Id: ChangeLog,v 1.20.2.10 2004/12/17 08:19:11 uid508 Exp $
+$Id: ChangeLog 20713 2006-12-12 12:20:47Z jurgenv $
 
-Fri Dec 17 09:18:58 CET 2004 <kooiker@cwi.nl>
- * Bumped to 0.7.1 
+Tue Dec 12 13:19:17 CET 2006 <jurgenv@cwi.nl>
+ * src/atb-tool.c: wrapped call to select in ATBhandleAny with a while
+   loop. As long as the select was interupted by a non-blocked signal
+   we try again. This error popped up while profiling the library, since
+   under those circumstances there are more frequent interrupts...
 
-Mon Nov  1 16:07:02 CET 2004 <jurgenv@cwi.nl>
- * Added tbunpack tool, calls ATBunpack on an input term. Can be
-   used for commandline debugging purposes.
+Tue Jul 25 09:16:05 CEST 2006 <{kooiker,jurgenv}@cwi.nl,martin.bravenboer@gmail.com>
+ * **: adapted package to use the standard meta-build-env.
 
-Mon Oct 11 15:02:57 CEST 2004 <jurgenv@cwi.nl>
- * Fixed a bug in the adapter code. When multiple connections are
-   present, the events that were queued were sometimes send on the
-   wrong socket. Similar events for different sockets are now queued 
-   separately.
- * Bumped to 0.7
+Wed Jul 19 10:33:50 CEST 2006 <{jurgenv,storms}@cwi.nl>
+ * aterm/*: renamed to src/*
+ * configure.ac: cleanup of checks for header files, and removed
+   dependency on -lm math library
+ * src/atb-tool.[ch]: removed dead includes
+ * toolbuslib.pc.in: declares dependencies on system socket libraries 
 
-Thu Sep 16 12:00:38 CEST 2004 <jurgenv@cwi.nl>
- * Bumped to 0.6.1
+Fri Mar 10 11:51:51 CET 2006 <kooiker@cwi.nl>
+ * **/Makefile.am:
+   - Maintainers use ATerm-dbg library
 
-Tue Sep 14 16:09:08 CEST 2004 <{jong,storm,jurgenv}@cwi.nl>
- * Try-out of a new configure m4 macro: GLT_INIT_PACKAGE. Both the
-   name and the version of a package are extracted from an autobundle
-   package definition at ./reconf time.
+Wed Mar  8 17:13:27 CET 2006 <jurgenv@cwi.nl>
+ * aterm: a tool listens for QUIT and TERM signals and disconnects
+   from the ToolBus first before exiting.
 
-Thu Mar 11 18:40:42 CET 2004 <jurgenv@cwi.nl>
- * -ltb library from the toolbuslib package is deprecated and was only used 
+Mon Aug 15 15:08:29 CEST 2005 <jong@cwi.nl>
+ * configure.in:
+   - add libtool support
+
+Fri Nov 19 16:39:49 CET 2004 <jurgenv@cwi.nl>
+ * Bumped to 0.8
+
+Thu Mar 11 18:42:34 CET 2004 <jurgenv@cwi.nl>
+* -ltb library from the toolbuslib package is deprecated and was only used 
    inside of the toolbus package. So I moved it into the toolbus package.
 
-Thu Mar  4 13:11:16 CET 2004 <{paulk,jurgenv}@cwi.nl>
+Thu Mar  4 13:15:02 CET 2004 <{paulk,jurgenv}@cwi.nl>
  * Fixed a nice bug in toolbuslib: uninitialized field of a struct
    for symbols.
 
