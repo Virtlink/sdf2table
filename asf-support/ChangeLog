@@ -1,0 +1,154 @@
+# $Id: ChangeLog,v 1.42.2.5 2004/12/17 08:23:03 uid508 Exp $
+
+Fri Dec 17 09:22:20 CET 2004 <kooiker@cwi.nl>
+ * Bumped to 1.4.2 
+
+Wed Dec  1 13:30:19 CET 2004 <jurgenv@cwi.nl>
+ * Bumped to 1.4.1
+
+Tue Sep 28 15:47:04 CEST 2004 <{jong,jurgenv}@cwi.nl>
+ * Added an extra parameter to ASF_unionASFCondEquationList for the layout 
+   that should be used in between every equation.
+
+Tue May 25 13:38:07 CEST 2004 <jurgenv@cwi.nl>
+ * Bumped to 1.4
+ * Conversion of lexical constructor function keeps annotations better.
+
+Fri May  7 11:20:39 CEST 2004 <jurgenv@cwi.nl>
+ * 1.2 was released before, so bumped to 1.3
+
+Tue Feb 10 15:27:49 CET 2004 <m336@cwi.nl>
+ * upgrade auto* to: autoconf 2.59, automake 1.7.9, libtool 1.5.2
+
+2003/01/13 (jurgenv@cwi.nl)
+ * added dependency on error-support
+ 
+2003/11/09 (jurgenv@cwi.nl)
+ * An ASF file is now an ASF-Module which consists of a list of ASF-Sections.
+   An ASF-Section is either an equations sections or a tests sections for now.
+
+2003/11/06 (jurgenv@cwi.nl)
+ * Added "!:=" the condition operator that fails if a match succeeds and
+   succeeds when a match fails
+
+2003/11/05 (jurgenv@cwi.nl)
+ * Added "==" (equality) and ":=" (match) to replace the "=" condition syntax.
+
+2003/10/16 (jurgenv@cwi.nl)
+ * Added syntax for conditional tests
+
+2003/10/15 (jurgenv@cwi.nl)
+ * Added syntax for tests to ASF
+ * Regenerated asf-support library
+ * Added concatTestEquationTestList function
+
+2003/10/08 (markvdb@cwi.nl)
+ * Bumped into version 1.2.
+
+2003/10/02 (markvdb@cwi.nl)
+ * Added the prefix ASF to all sorts.
+ * Generated without the -r option.
+
+2003/08/01 (jurgenv@cwi.nl)
+ * Set version to  1.1.1
+
+2003/07/02 (jurgenv@cwi.nl)
+ * Release 1.1
+
+2003/06/26 (jurgenv@cwi.nl)
+ * Added package definition file
+ * Bumped to 1.1beta
+
+2003/01/22 (vinju@loria.fr)
+ * Release 1.0
+ * LGPL license
+
+2002/11/05 (vinju@loria.fr)
+ * Moved libME to lib
+
+2002/11/04 (vinju@loria.fr)
+ * Regenerated library with new sdf-apigen features
+ * Removed dependency on pt-support where possible
+
+2002/10/07 (vinju@loria.fr)
+ * Regenerated library to obtain improved start constructors
+
+2002/10/03 (jurgenv@cwi.nl)
+ * Bumped to 1.0beta
+ * Added ASF_makeCondEquationListFromParseTrees
+ * Made all non start sorts in Asf.label.def hidden
+ * Regenerated ASFME to get new start constructors
+
+2002/07/24 (jurgenv@cwi.nl)
+ * Release 0.8
+
+2002/07/01 (vandenbr@loria.fr)
+ * Bumped version to 0.8beta.
+ * Lexical constructor attribute added to lexical constructor
+   production.
+ * Ambiguity constructor attribute added to ambiguity production.
+
+2002/02/07 (jurgenv@cwi.nl)
+ * Released 0.7
+
+2001/12/19 (jurgenv@cwi.nl)
+ * Bumped version to 0.7beta
+
+2001/11/29 (jurgenv@cwi.nl)
+ * Adapted library to cope with new production attributes (no 
+   automatic quoting anymore).
+
+2001/11/13 (jong@cwi.nl)
+ * released version 0.6
+
+2001/11/05 ({jurgenv,markvdb}@cwi.nl)
+ * Removed module identifiers from productions:
+   - regenerated the library.
+   - subeqs adapted.
+
+2001/10/30 (jurgenv@cwi.nl)
+ * Added ASF_isTreeTraversalFunction to the library.
+
+2001/10/10 (jurgenv@cwi.nl)
+ * Bumped to version 0.6beta
+
+2001/10/01 (jurgenv@cwi.nl)
+ * Regenerated library for changes in parse tree format. (See apigen and
+   pt-support ChangeLogs)
+ * Added lex-cons file that contains functionality for manipulating lexical 
+   constructor functions.
+
+2001/08/08 (jurgenv@cwi.nl)
+ * Added new library function: ASF_getConditionListLength
+
+2001/07/17 (jong@cwi.nl)
+ * version 0.4 released, bumped to 0.5
+
+2001/07/16 (jong@cwi.nl)
+ * documented change to version 0.4
+
+2001/07/06 (markvdb@cwi.nl)
+ * Removed AsFix1 depending functionality.
+
+2001/07/03 (markvdb@cwi.nl)
+ * Added a union function for CondEquationLists based on indexed sets.
+
+2001/06/21 (jurgenv@cwi.nl)
+ * added a function that checks if a tree is a lexical constructor function:
+   ASF_isTreeLexicalConstructorFunction. Do not use the generated function
+   ASF_isTreeLexicalConstructor, because it will always return true when
+   DISABLE_DYNAMIC_CHECKING is defined.
+
+2001/04/23 (markvdb@cwi.nl)
+ * Released version 0.2, and bumped into 0.3. 
+ * Bumped into version 0.2 in order to make distribution.      
+
+2001/04/23 (markvdb@cwi.nl)
+ * Added ASF support based on AsFix2ME.
+
+2001/02/08 (jong@cwi.nl)
+ * inserted several brainstorm-results for asf-apigen-library into lib/
+ * added subst-eqs.c (aka "asf-hack-prod" ;-)
+
+2001/02/07 (jurgenv@cwi.nl)
+ * initial version of asf-support

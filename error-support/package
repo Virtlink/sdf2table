@@ -1,0 +1,17 @@
+package 
+identification
+   name=error-support
+   version=1.0.1
+   location=http://www.cwi.nl/projects/MetaEnv/meta-errors
+   info=http://www.cwi.nl/projects/MetaEnv/meta-errors
+   description='A generic data-structure for describing errors, warnings, etc.'
+
+
+   keywords=meta-environment, error-handling
+
+configuration interface
+
+requires
+  aterm 2.3.0.1
+
+toolbuslib 0.7.1

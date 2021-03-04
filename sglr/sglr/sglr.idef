@@ -1,0 +1,52 @@
+/* $Id: sglr.idef,v 1.25.2.3 2004/07/15 13:52:49 uid509 Exp $ */
+
+tool sglr is {
+  command = "sglr"
+}
+
+process SGLR is
+let
+  SGLR        : sglr,
+  ModuleId    : term,
+  Nonterminal : str,
+  Text        : str,
+  ErrorId     : str,
+  ToolId      : str,
+  Path        : str,
+  Id          : term,
+  Table       : term,
+  Tree        : term,
+  Error       : list,
+  NrOfAmbs    : int,
+  FeedBack    : term,
+  CountingFiltersOn : term
+in
+  (
+    rec-msg(Id?, parse-string-given-table(ModuleId?, Table?, Nonterminal?, Text?, Path?, CountingFiltersOn?)) .
+    execute(sglr, SGLR?) .
+    snd-eval(SGLR, open-language(ModuleId, Table, Path)) .
+    (
+      rec-value(SGLR, language-opened(ModuleId)) .
+      snd-eval(SGLR, parse-string(ModuleId, Nonterminal, Text, Path, CountingFiltersOn)) .
+      (
+        rec-value(SGLR, parsetree(Tree?, NrOfAmbs?)) .
+        snd-msg(parse-result-asfix2me(Id, parsetree(Tree, NrOfAmbs), no-errors))
+      +
+        rec-value(SGLR, summary(ToolId?, ErrorId?, Error?)) .
+        snd-msg(parse-result-asfix2me(Id, 
+                                      error-tree, 
+                                      summary(ToolId, ErrorId, Error)))
+      +
+        rec-value(SGLR, ambiguous-tree(Tree?, FeedBack?)) .
+        snd-msg(parse-result-asfix2me(Id, Tree, FeedBack))
+      )
+    +
+      rec-value(SGLR, language-not-opened(ModuleId, FeedBack?)) .
+      snd-msg(parse-result-asfix2me(Id, error-tree, FeedBack))
+    ) .
+    snd-terminate(SGLR, "done")
+  )
+  * delta
+endlet
+
+toolbus(SGLR)

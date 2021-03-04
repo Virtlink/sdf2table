@@ -1,0 +1,44 @@
+module basic/Strings
+
+%% This module defines strings with continuations and escaped newlines, 
+%% tabs and backslashes
+
+
+imports basic/StrCon
+imports basic/Integers
+imports	basic/Bytes
+
+hiddens 
+  sorts Escaped Normal
+
+  context-free start-symbols 
+    String
+  
+exports
+  sorts String
+
+  context-free syntax
+    StrCon             -> String {constructor}
+    String "||" String -> String {left}
+    "(" String ")"     -> String {bracket}
+   
+    String "<"  String  -> Boolean
+    String "<=" String  -> Boolean
+    String ">"  String  -> Boolean
+    String ">=" String  -> Boolean
+
+  context-free syntax
+    remove-continuations(String) -> String
+
+    length(String)         -> Integer
+
+hiddens
+  imports
+    basic/Whitespace
+
+  variables
+    "Chars" [0-9]* -> CHAR*
+
+  variables
+    "Str-con" [0-9\']* -> StrCon
+    "Str" [0-9\']*     -> String

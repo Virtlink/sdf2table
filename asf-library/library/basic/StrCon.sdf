@@ -1,0 +1,15 @@
+module basic/StrCon
+
+exports
+
+sorts StrCon Normal Escaped
+
+
+lexical syntax
+    ~[\0-\31\"\\\n] -> Normal {cons("default")}
+
+    "\\n" | "\\t" |  "\\\"" | "\\\\" -> Escaped {cons("special-character")}
+    "\\" [0-7][0-7][0-7]             -> Escaped {cons("octal")}
+
+    "\"" (Normal | Escaped)* ("\\\n" (Normal | Escaped)*)* "\"" 
+       -> StrCon {cons("default")}

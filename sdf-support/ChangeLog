@@ -1,0 +1,338 @@
+$Id: ChangeLog,v 1.99.2.4 2004/12/17 08:26:20 uid508 Exp $
+
+Fri Dec 17 09:26:06 CET 2004 <kooiker@cwi.nl>
+ * Bumped to 2.1.3 
+
+Fri Jul  2 10:30:30 CEST 2004 <jurgenv@cwi.nl>
+ * Bumped to 2.1.1
+ * Updated version numbers of dependencies
+
+Fri May  7 15:43:30 CEST 2004 <jurgenv@cwi.nl>
+ * Bumped to 2.1
+
+Wed Apr 28 15:42:13 CEST 2004 <markvdb@cwi.nl>
+ * Fixed the renaming of parameterized modules, see bug report 289.
+
+Tue Feb 10 17:50:37 CET 2004 <jurgenv@cwi.nl>
+ * sdf-modules and sdf-renaming use -TB_COLLECT_LOOP 1 to run the
+   garbage collector after every ToolBus event.
+
+Tue Feb 10 15:27:49 CET 2004 <m336@cwi.nl>
+ * upgrade auto* to: autoconf 2.59, automake 1.7.9, libtool 1.5.2
+
+Mon Feb  9 17:44:10 CET 2004 <jurgenv@cwi.nl>
+ * Using const char* in all ToolBus communication
+
+Mon Feb  2 16:43:59 CET 2004 <{jong,kooiker}@cwi.nl>
+ * fix Makefile.am to get "distcheck" working
+
+2003/01/13 (jurgenv@cwi.nl)
+ * Added dependency on error-support
+
+2003/12/11 (markvdb@cwi.nl)
+  * Introduced the {lexical, context-free} start-symbols in the Sdf2 grammar. 
+
+2003/10/09 (markvdb@cwi.nl)
+ * By accident the strategy symbol was removed, added again.
+
+2003/10/08 (markvdb@cwi.nl)
+ * Bumped into version 2.0
+ * Adapted package dependency.
+
+2003/10/07 (markvdb@cwi.nl)
+ * Added "tuple" (<A,B>) besides A#B, but the latter is mapped to
+   pt-tuple instead of pt-pair.
+
+2003/10/02 (markvdb@cwi.nl)
+ * Removed the set and perm symbol, in the library of course.
+   Regenerated the Sdf.label.def and the rest.
+
+2003/10/01 (markvdb@cwi.nl)
+ * Regenerated from a dump from Sdf2 in the library with constructor
+   and labels.
+
+2003/09/26 ({jurgenv,jong}@cwi.nl)
+ * Refactored implementation of get-new-modulename in sdf-modules tool and
+   fixed a compiler warning in it.
+ 
+2003/09/25 (markvdb@cwi.nl)
+ * Made robust against the absence of correct modules.
+
+2003/09/23 (jurgenv@cwi.nl)
+ * Added label support.
+
+2003/08/01 (jurgenv@cwi.nl)
+ * SDFProductionToPtProduction does not abort anymore after encountering
+   a production it can not convert. A message is printed and NULL is 
+   returned instead.
+
+2003/08/01 (jurgenv@cwi.nl)
+ * Set version to 1.1.2
+ * Added new functionality to derive the direct dependencies of
+   modules.
+
+2003/08/01 (jurgenv@cwi.nl)
+ * Set version to 1.1.1
+
+2003/07/22 ({markvdb,jurgenv}@cwi.nl)
+ * Changed is-valid-modulename-in-path to is-valid-modulename
+ * Made getTransitiveImports robust against incomplete specifications
+
+2003/07/18 (jurgenv@cwi.nl)
+ * Removed an unnecessary ATBunpack
+
+2003/07/02 (jurgenv@cwi.nl)
+ * Release 0.2
+
+2003/07/01 (jurgenv@cwi.nl)
+ * Removed debug statement "Initializing module cache with %d modules"
+
+2003/06/27 (markvdb@cwi.nl)
+ * Fixed a bug in the path calculation: path <some-path>/spec and
+   c/SomeName yielded the path <some-path>/spe!
+
+2003/06/26 (jurgenv@cwi.nl)
+ * Added package definition file
+
+2003/06/25 (jurgenv@cwi.nl)
+ * Added computation of new module names based on a search path to
+   the sdf-modules tool. This is used to support compound module names,
+   the user can select a path to a module name and the system computes
+   which part is the path to the module name and which part should be
+   the compound module name.
+
+2003/06/18 ({jong,markvdb}@cwi.nl)
+ * Added explicit ATBpack to parsetrees.
+
+2003/06/17 (markvdb@cwi.nl)
+ * Again fixed a non-termination bug in the transitive closuer calculation
+   of imports.
+
+2003/06/12 ({markvdb,iversen}@cwi.nl)
+ * Fixed a non-termination bug in the transitive closure calculation of
+   imports.
+ * Fixed a bug in the dependingModule calculation, a module was depending
+   on itself.
+
+2003/06/03 (markvdb@cs.vu.nl)
+ * Added import removal functionality.
+ * Prepared for renaming.
+
+2003/06/03 ({markvdb,jong}@cwi.nl)
+ * Fixed a bug in the renaming of renamings.
+
+2003/06/03 (markvdb@cwi.nl)
+ * First refactoring operation (add-import) enabled. 
+
+2003/06/02 ({jong,jurgenv}@cwi.nl)
+ * Added SDF_concatRenamingList
+ * Changed order of includes in utils/src/sdf-modules
+ * Added dealing with user defined renamings to getTransitiveImports
+ * Fixed numerous bugs in the implementation of getTransitiveImports:
+     - forgot to remove position info once again
+     - compound symbols not dealt with correctly
+     - renaming in parameters went wrong when there were no parameters
+
+2003/05/30 (jurgenv@cwi.nl)
+ * Introduced src directories for sdf-modules and sdf-renaming
+ * Fixed bug: transitive imports could not deal with circular imports
+   (this also improved the efficiency quite alot)
+ * Optimized transitive imports to do as less work as possible using the
+   result cache.
+ * Implemented transitive closure based on pure ATerm representation of the
+   import relation 
+ * getDependingModules based on new transitive closure, not on complete 
+   modules anymore
+
+2003/05/28 ({jong,jurgenv,markvdb}@cwi.nl)
+ * utils/sdf-modules/sdf-modules.c: ATBpack added to make_sdf_definition
+ * Added an ATBpack in renaming of equations.
+ * Rewrote a large part of the transitive import code and broke it! It
+   doesn't work at the moment but the code looks nicer.
+ * Calculation of import graph removed.
+
+2003/05/27 (markvdb@cwi.nl)
+ * Some ATBpack and unpacks added.   
+
+2003/05/26 (jurgenv@cwi.nl)
+ * Added a generic tool that applies a number of SDF renamings to a parse tree
+   and returns a list of parse trees accordingly. This code is based on
+   the old asf-operations and elan-operations tool and designed to replace
+   it.
+ * Added get-all-imported-modules to the sdf-modules tool that does not
+   return a list of imported module names, but the modules themselves
+  
+2003/05/21 ({markvdb,jurgenv}@cwi.nl)
+ * Fixed a large number of bugs in sdf-modules.
+
+2003/05/19 (jurgenv@cwi.nl)
+ * Renamed the sdf-tool to sdf-modules.
+ * Moved SDF2 functionality from the old module-db in the meta package to
+   the new sdf-modules tool.
+
+2003/05/17 (jurgenv@cwi.nl)
+ * Added dependency on toolbuslib
+ * Added (still empty) sdf toolbus tool that will serve as a 
+   ToolBus interface to the support library
+  
+2003/04/29 (markvdb@cwi.nl)
+ * Fixed a bug in the renaming due to annotations.
+
+Tue Mar  4 10:18:52 CET 2003 <{markvdb,jong}@cwi.nl>
+ * some refactorings, weeding out of (hopefully) dead code
+ * add support to extract variable productions
+
+2003/02/11 ({jong,markvdb}@cwi.nl)
+ * Added \r and restructured the AlphaNumericEscapeChar.
+ * Regenerated.
+
+Sat Feb  8 08:46:04 CET 2003 <jong@cwi.nl>
+ * add SDF_removeSymbolAnnotations:
+   FIXME: duplicate escape() function from asf-library until we have
+   a general "utils" package to solve this.
+
+2003/02/02 ({jong,markvdb}@cwi.nl)
+ * Bumped into version 1.1beta.
+ * Started working on pt2sdf functionality.
+ * Add testcase for pt2sdf
+
+2003/01/22 (markvdb@cwi.nl)
+ * Release 1.0
+ * LGPL license
+
+2003/01/10 (markvdb@cwi.nl)
+ * Added a function to rename of renamings.
+
+2002/11/05 (vinju@loria.fr)
+ * libME renamed to lib
+ * Split of SDF2PT.a library such that SDFME.a becomes independent of
+   pt-support
+
+2002/11/04 (vinju@loria.fr)
+ * Regenerated library with new sdf-apigen features
+ * Removed dependency on pt-support where possible
+
+2002/10/10 (jurgenv@cwi.nl)
+ * Added functionality to add an import to a module
+
+2002/10/08 (jurgenv@cwi.nl)
+ * Added functionality to compute a list of renamings from a list
+   of formal parameters and a list of actual parameters of an SDF2 module
+   import: SDF_makeRenamingsFromModuleNames(...) and
+   SDF_makeRenamingsFromParameters(...)
+
+2002/10/07 (jurgenv@cwi.nl)
+ * Regenerated library to get improved start constructors
+
+2002/10/04 (jurgenv@cwi.nl)
+ * Include MEPT-utils.h in grammars.c because a function has been moved
+
+2002/10/03 (jurgenv@cwi.nl)
+ * Changed Sdf.label.def to hide all non start sorts
+ * Regenerated SDFME library to get new start constructors
+ * Bumped to 1.0beta
+
+2002/07/24 (jurgenv@cwi.nl)
+ * Release 0.9
+
+2002/05/24 (vandenbr@loria.fr)
+ * Introduced strategy symbols.
+ * Bumped into version 0.9beta.
+
+2002/04/19 (jurgenv@cwi.nl)
+ * Removed TagId from SDF definition
+ * Release 0.8
+
+2002/03/04 (vandenbr@loria.fr)
+ * Introduced parameterized sorts.
+ * Bumped into version 0.8beta
+
+2002/02/07 (jurgenv@cwi.nl)
+ * Release 0.7
+
+2001/12/19 (jurgenv@cwi.nl)
+ * Bumped to version 0.7beta
+
+2001/11/29 (jurgenv@cwi.nl)
+ * Regenerated due to changes in AsFix (no automatic quoting anymore)
+
+2001/11/13 (jong@cwi.nl)
+ * released version 0.6
+
+2001/11/09 (markvdb@cwi.nl)
+ * added SDF_getModuleName support
+
+2001/11/05 ({jurgenv,markvdb}@cwi.nl)
+ * Removed module identifiers from productions: 
+   - regenerated the library.
+   - regenerated the test input terms.
+
+2001/09/27 (jurgenv@cwi.nl)
+ * Made some important changes in the Sdf grammar:
+     - added:   ATerm                      -> Attribute {cons("term")}
+     - changed: Associativity              -> Attribute {cons("atr")} to
+                Associativity              -> Attribute {cons("assoc")} 
+     - removed: "cons" "(" term:ATerm ")"  -> Attribute {cons("cons")}
+                "constructor"              -> Attribute {cons("constructor")}
+                "memo"                     -> Attribute {cons("memo")}
+                "traverse"                 -> Attribute {cons("traverse")
+     - refactored the ATerm grammar a bit.
+ * NOTE: These changes affect any tool using SDF or AsFix[2,me].
+ * Adapted sdf2pt library functionality to cope with new attribute format. 
+   See ChangeLog of pt-support for details.
+
+2001/08/28 (jong@cwi.nl)
+ * Added #include directives to satisfy gcc-3.0.1
+
+2001/08/21 (markvdb@cwi.nl)
+ * Bugfix: yielding of Sdf Alt returned PT Pair!
+
+2001/08/03 (jurgenv@cwi.nl)
+ * Bugfix: quotes around cons attributes should be removed.
+
+2001/07/17 (jong@cwi.nl)
+ * version 0.4 released, bumped to 0.5
+
+2001/07/16 (jong@cwi.nl)
+ * documented change to version 0.4
+
+2001/07/06 (jurgenv@cwi.nl, markvdb@cwi.nl)
+ * Removed AsFix1 depending functionality.
+ * Fixed some problems in sdf2pt.c and added sdf2pt.c
+ * added a function to construct a modulename given a string.
+
+2001/07/03 (markvdb@cwi.nl)
+ * Added functionality to deal with renaming and parameters.
+
+2001/06/28 (markvdb@cwi.nl)
+ * Added functionality to extract the imports from a module.
+ * Added function to replace the module name in a module.
+
+2001/06/27 ({jong,jurgenv}@cwi.nl)
+ * Bumped into version 0.3.1
+ * added --with-pt-support option, making a dependency explicit.
+ * improved building process for distcheck target
+
+2001/06/21 (jurgenv@cwi.nl)
+ * added SDF_getModuleProductions which retrieves all productions from
+  a module
+
+2001/05/23 (markvdb@cwi.nl)
+ * Released version 0.2, and bumped into 0.3.
+ * Bumped into version 0.2 in order to make distribution.
+
+2001/04/23 (markvdb@cwi.nl)
+ * First version SDF support library based on AsFix2ME.
+
+2001/02/27 (jurgenv@cwi.nl)
+ * added test parsetrees to distribution
+
+2001/02/20 (markvdb@cwi.nl)
+ * labels added to ATerm and ATermList.
+ * Code adapted because of <str> introduction.
+
+2001/02/20 (jong@cwi.nl)
+ * Added Sdf.label.def to lib/
+
+2001/02/07 (jurgenv@cwi.nl)
+ * initial version of sdf-support

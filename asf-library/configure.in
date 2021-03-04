@@ -1,0 +1,44 @@
+dnl $Id: configure.in,v 1.30.2.7 2004/12/09 12:18:21 uid508 Exp $
+
+AC_INIT
+AC_CONFIG_SRCDIR([configure.in])
+GLT_INIT_PACKAGE
+AC_PREREQ(2.59)
+
+AC_PROG_MAKE_SET([])
+
+AC_CONFIG_FILES([Makefile
+   utils/Makefile
+   library/Makefile
+   library/basic/Makefile
+   library/containers/Makefile
+   library/utilities/Makefile
+   library/languages/Makefile
+   library/languages/cpp/Makefile
+   library/languages/cpp/syntax/Makefile
+   library/languages/asfix/Makefile
+   library/languages/asfix/syntax/Makefile
+   library/languages/asf/Makefile
+   library/languages/asf/syntax/Makefile
+   library/languages/aterm/Makefile
+   library/languages/aterm/syntax/Makefile
+   library/languages/sdf2/Makefile
+   library/languages/sdf2/syntax/Makefile
+   library/languages/sdf2/normalization/Makefile
+   library/languages/sdf2/projection/Makefile
+   library/languages/sdf2/renaming/Makefile
+   library/languages/pico/Makefile
+   library/languages/pico/syntax/Makefile
+   library/languages/pico/debugger/Makefile
+   library/languages/pico/interpreter/Makefile
+   library/languages/pico/compiler/Makefile
+   library/languages/pico/typechecker/Makefile
+   library/languages/pico/pretty/Makefile
+   library/languages/box/Makefile
+   library/languages/box/syntax/Makefile
+   library/languages/box/utilities/Makefile
+   library/languages/casl/Makefile
+   library/languages/casl/syntax/Makefile
+   library/languages/casl/tocasfix/Makefile
+])
+AC_OUTPUT

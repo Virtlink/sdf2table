@@ -1,0 +1,192 @@
+definition
+module basic/Booleans
+
+imports basic/BoolCon
+exports
+  sorts Boolean
+
+  context-free syntax
+    BoolCon                     -> Boolean {cons("constant")}
+    lhs:Boolean "|" rhs:Boolean -> Boolean {left, cons("or")}
+    lhs:Boolean "&" rhs:Boolean -> Boolean {left, cons("and")}
+    "not" "(" Boolean ")" 	-> Boolean {cons("not")}
+    "(" Boolean ")"       	-> Boolean {bracket, cons("bracket")}
+
+  context-free priorities
+    Boolean "&" Boolean -> Boolean >
+    Boolean "|" Boolean -> Boolean
+
+hiddens
+  context-free start-symbols Boolean
+
+  imports
+    basic/Comments
+  variables
+    "Bool"[0-9]* 	-> Boolean
+    "Bool-con"[0-9]* 	-> BoolCon
+
+module basic/StrCon
+
+exports
+
+sorts StrCon Normal Escaped
+
+
+lexical syntax
+    ~[\0-\31\"\\\n] -> Normal {cons("default")}
+
+    "\\n" | "\\t" |  "\\\"" | "\\\\" -> Escaped {cons("special-character")}
+    "\\" [0-7][0-7][0-7]             -> Escaped {cons("octal")}
+
+    "\"" (Normal | Escaped)* ("\\\n" (Normal | Escaped)*)* "\"" 
+       -> StrCon {cons("default")}
+module basic/BoolCon
+
+exports
+
+sorts BoolCon
+context-free syntax
+
+    "true"  -> BoolCon {cons("true")}
+    "false" -> BoolCon {cons("false")}
+
+hiddens
+context-free start-symbols
+  BoolCon
+module basic/NatCon
+
+exports
+
+sorts NatCon
+
+lexical syntax
+  
+ [0-9]+ -> NatCon {cons("default")}
+
+lexical restrictions
+
+ NatCon -/- [0-9]
+
+module basic/BytesCon
+
+%% This module defines a lexical sort Bytes without defining any
+%% particular syntax for it. The Bytes sort is used to store any
+%% characters using lexical constructor functions.
+
+exports 
+  sorts Bytes Byte
+
+%% It is essential to hide this the following syntax,
+%% since ~[] is ambiguous with all languages
+
+hiddens 
+  lexical syntax
+    ~[]   -> Byte  {cons("byte")}
+    Byte* -> Bytes {cons("bytes")}
+
+context-free start-symbols
+  Bytes
+module basic/Errors
+
+imports basic/Locations
+imports basic/StrCon
+
+hiddens
+  context-free start-symbols
+    Summary Error
+
+exports
+
+sorts Subject
+context-free syntax
+  "subject" "(" description:StrCon ")" -> Subject {cons("subject")}
+
+  "localized" "(" description:StrCon "," Location ")"
+    -> Subject {cons("localized")}
+
+
+sorts Error
+context-free syntax
+  "info" "(" description:StrCon "," "[" {Subject ","}* "]" ")"
+    -> Error {cons("info")}
+
+  "warning" "(" description:StrCon "," "[" {Subject ","}* "]" ")"
+    -> Error {cons("warning")}
+
+  "error" "(" description:StrCon "," "[" {Subject ","}* "]" ")"
+    -> Error {cons("error")}
+
+  "fatal" "(" description:StrCon "," "[" {Subject ","}* "]" ")"
+    -> Error {cons("fatal")}
+
+
+sorts Summary
+context-free syntax
+  "summary" "(" producer:StrCon "," id:StrCon "," 
+   "[" {Error ","}* "]" ")"  -> Summary {cons("summary")}
+
+module basic/Locations
+
+imports basic/Areas
+imports basic/StrCon
+
+exports
+
+sorts Location
+context-free syntax
+
+  "file" "(" filename:StrCon ")" -> Location {cons("file")}
+
+  "area-in-file" "(" filename:StrCon "," Area ")"
+    -> Location {cons("area-in-file")}
+module basic/Areas
+
+imports basic/NatCon
+
+exports
+
+sorts Area
+context-free syntax
+
+  "area" "("
+    begin-line:NatCon "," 
+    begin-column:NatCon ","
+    end-line:NatCon ","
+    end-column:NatCon ","
+    offset:NatCon ","
+    length:NatCon ")"
+  -> Area {cons("area")}
+module basic/ReadWriteCon
+
+imports basic/BytesCon
+imports basic/Errors
+
+exports 
+
+sorts Read Write
+
+context-free syntax
+
+  "read" "(" value:Bytes ")"    -> Read  {cons("success")}
+  "read-error" "(" Summary ")"  -> Read  {cons("failure")}
+
+  "written"                     -> Write {cons("success")}
+  "write-error" "(" Summary ")" -> Write {cons("failure")}
+module basic/ParsetreeCon[X]
+
+imports basic/BytesCon
+imports basic/NatCon
+imports basic/Errors
+
+exports 
+
+context-free syntax
+
+  "parse-tree" "(" left-layout:Bytes  "," 
+                   tree:X             "," 
+                   right-layout:Bytes ","
+                   amb-cnt:NatCon
+               ")"                   -> Parsetree[[X]] {cons("success")}
+
+  "parse-error" "(" Summary ")"      -> Parsetree[[X]] {cons("failure")}
+ 

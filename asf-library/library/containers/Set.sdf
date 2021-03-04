@@ -1,0 +1,41 @@
+module containers/Set[X]
+
+imports basic/Whitespace
+imports basic/Booleans
+
+exports
+  context-free syntax
+
+    "{" { X ","}* "}" -> Set[[X]]
+
+    union(Set[[X]], Set[[X]])	-> Set[[X]]
+    Set[[X]] "\\/" Set[[X]]  -> Set[[X]] {left}
+
+    X "in" Set[[X]] -> Boolean
+    elem(X, Set[[X]])      -> Boolean
+
+    intersection(Set[[X]], Set[[X]])	-> Set[[X]]
+    Set[[X]] "/\\" Set[[X]] -> Set[[X]] {left}
+
+    Set[[X]] "\\" Set[[X]] -> Set[[X]] {non-assoc}
+    difference(Set[[X]], Set[[X]]) -> Set[[X]]
+
+    "(" Set[[X]] ")" -> Set[[X]] {bracket}
+
+    equal(Set[[X]],Set[[X]]) -> Boolean
+
+  context-free priorities
+    Set[[X]] "\\" Set[[X]] -> Set[[X]] >
+    Set[[X]] "\\/" Set[[X]] -> Set[[X]] >
+    Set[[X]] "/\\" Set[[X]] -> Set[[X]]
+
+hiddens
+  context-free start-symbols Set[[X]]
+
+  variables
+    "X"[0-9]*  -> X
+    "X*"[0-9]* -> {X ","}*
+
+    "Set"[0-9]* -> Set[[X]]
+
+

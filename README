@@ -1,0 +1,9 @@
+The SDF2 Bundle is an easy to install collection of packages related
+to the SDF2 syntax definition formalism. The packages are developed at
+the CWI. The main packages of the sdf2-bundle are:
+
+  pgen - parser generator for SDF2
+  sglr - parser
+
+More info:
+  http://www.syntax-definition.org

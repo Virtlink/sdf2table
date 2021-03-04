@@ -1,0 +1,19 @@
+# $Id: Makefile.am,v 1.3.4.1 2004/04/14 11:07:07 jurgenv Exp $
+
+SUBDIRS=terms
+
+TESTS=mept-test
+
+noinst_PROGRAMS=mept-test
+
+mept_test_SOURCES=mept-test.c
+mept_test_LDADD=\
+	-L$(top_builddir)/libmept -lmept\
+	-L$(top_builddir)/test/terms -ltestTerms\
+	-L$(ATERM)/lib -lATerm
+
+INCLUDES =\
+	-I${top_srcdir}/libmept\
+	-I${top_srcdir}/test/terms\
+	-I${ERROR_SUPPORT}/include \
+	-I${ATERM}/include

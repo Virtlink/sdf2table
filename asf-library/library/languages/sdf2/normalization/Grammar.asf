@@ -1,0 +1,16 @@
+%%%%  $Id: Grammar.asf,v 1.2 2003/11/10 18:08:53 jurgenv Exp $
+
+equations
+
+%% \noindent
+%% The empty grammar $\emptygrammar$ is a unit for composition and
+%% composition is associative.
+
+    [left-unit]   (/) _G        = _G
+    [right-unit]  _G (/)        = _G
+    [assoc]       _G1 (_G2 _G3) = (_G1 _G2) _G3
+
+%% Subgrammars can be swapped as specified by the function $\Diamond$.
+
+    [grm-sort1]   _G1 _G2     = _G1' _G2'     when <_G1', _G2'> := _G1 <> _G2
+    [grm-sort2]   _G1 _G2 _G3 = _G1 _G2' _G3' when <_G2', _G3'> := _G2 <> _G3

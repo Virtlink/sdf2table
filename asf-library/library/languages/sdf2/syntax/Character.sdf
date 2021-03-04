@@ -1,0 +1,21 @@
+%%% $Id: Character.sdf,v 1.6 2003/10/01 19:55:25 markvdb Exp $
+                     
+module languages/sdf2/syntax/Character
+
+imports basic/Comments
+
+exports
+  sorts Character NumChar ShortChar
+  lexical syntax
+    [\\] [0-9]+                     -> NumChar   {cons("digits")}
+    [a-zA-Z0-9]                     -> ShortChar {cons("regular")}
+    [\\] ~[\0-\31A-Za-mo-qsu-z0-9]  -> ShortChar {cons("escaped")}
+  context-free syntax
+    NumChar   -> Character {cons("numeric")}
+    ShortChar -> Character {cons("short")}
+    "\\TOP"   -> Character {cons("top")}
+    "\\EOF"   -> Character {cons("eof")}
+    "\\BOT"   -> Character {cons("bot")}
+    "\\LABEL_START" -> Character {cons("label_start")}
+
+   

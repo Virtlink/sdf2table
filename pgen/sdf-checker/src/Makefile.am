@@ -1,0 +1,33 @@
+# $Id: Makefile.am,v 1.7.4.3 2004/11/19 13:22:51 uid507 Exp $
+
+include ${top_srcdir}/make_rules
+
+INCLUDES = \
+	-I$(ASC_SUPPORT)/include \
+	-I$(PT_SUPPORT)/include \
+	-I$(SDF_SUPPORT)/include \
+	-I$(ASF_SUPPORT)/include \
+	-I$(ERROR_SUPPORT)/include \
+	-I$(TOOLBUSLIB)/include \
+	-I$(ATERM)/include \
+	-DASF_WITH_ANNOS
+
+bin_PROGRAMS = sdfchecker
+
+pkgdata_DATA = sdfchecker.idef
+
+EXTRA_DIST = sdfchecker.idef 
+
+noinst_HEADERS = sdfchecker.tif.h
+sdfchecker_SOURCES = sdfchecker.c Sdf-Checker.c sdfchecker.tif.c
+sdfchecker_LDADD = \
+	-L$(ASC_SUPPORT)/lib -lasc-support-me \
+	-L$(SGLR)/lib -lsglr \
+	-L$(TIDE_SUPPORT)/lib -ltide-adapter \
+	-L$(SDF_SUPPORT)/lib -lSDFME \
+	-L$(ASF_SUPPORT)/lib -lASFME \
+	-L$(PT_SUPPORT)/lib -lmept -lPTMEPT \
+	-L$(ERROR_SUPPORT)/lib -lErrorAPI \
+	-L$(TOOLBUSLIB)/lib -lATB \
+	-L$(ATERM)/lib -lATerm \
+	$(SOCKLIBS)

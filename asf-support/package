@@ -1,0 +1,21 @@
+package 
+identification
+   name=asf-support
+   version=1.4.2
+   location=http://www.cwi.nl/projects/MetaEnv/asf-support
+   info=http://www.cwi.nl/projects/MetaEnv/asf-support
+   description='This package contains the largely generated library for
+                handling parsetrees over ASF syntax. The syntax of terms in
+                ASF is user-defined, so this library only contains the fixed
+                parts of the ASF syntax.'
+
+   keywords=meta-environment, asf, parsetree, library
+
+configuration interface
+
+requires
+  aterm 2.3.0.1
+
+error-support 1.0.1
+
+pt-support 1.4

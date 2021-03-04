@@ -1,0 +1,9 @@
+%%%% $Id: Sorts.asf,v 1.2 2003/12/11 16:39:38 markvdb Exp $
+
+equations
+
+  [0] sorts                  = (/)
+  [0] sorts 'a1   <> sorts 'a2 = <sorts 'a1 'a2, (/)>
+  [0] syntax p*  <> sorts 'a = <sorts 'a, syntax p*>
+
+%%

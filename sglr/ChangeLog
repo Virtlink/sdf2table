@@ -1,0 +1,606 @@
+$Id: ChangeLog,v 1.134.2.9 2004/12/17 08:24:52 uid508 Exp $
+
+Fri Dec 17 09:24:16 CET 2004 <kooiker@cwi.nl>
+ * Bumped to 3.14 
+
+Wed Dec  8 20:18:03 CET 2004 <markvdb@cwi.nl>
+ * Fixed a serious bug wrt obtaining a parse table for a grammar
+   without start symbols for restoring brackets.
+
+Tue Nov 30 09:20:16 CET 2004 <jurgenv@cwi.nl>
+ * Fixed a bug. The global ptErrorList was not always initialized and never
+   protected from the garbage collector.
+
+Thu Sep 16 11:58:59 CEST 2004 <jurgenv@cwi.nl>
+ * Bumped to 3.13
+
+Thu Jul 15 15:49:40 CEST 2004 <markvdb@cwi.nl>
+ * Introduced the Error-api for the situation the parse table
+   could not be processed because:
+   - wrong version
+   - not a valid parse table
+   - parse table does not contain a start state.
+ * Added a test for the latter case.
+
+Fri Jul  2 10:20:58 CEST 2004 <jurgenv@cwi.nl>
+ * Bumped to 3.12
+
+Tue Apr 27 17:26:14 CEST 2004 <markvdb@cwi.nl>
+ * Restore brackets improved with respect to the interaction
+   between left/right/non-associativity and priorities.
+
+Fri Apr 16 15:35:45 CEST 2004 <jurgenv@cwi.nl>
+ * SGLR idef allows parsing without the counting filters
+
+Wed Mar 10 09:47:15 CET 2004 <{jong,kooiker}@cwi.nl>
+ * Use new Error API
+
+2004/02/17 (markvdb@cwi.nl)
+ * Fixed the regression tests.
+
+Tue Feb 10 15:27:49 CET 2004 <m336@cwi.nl>
+ * upgrade auto* to: autoconf 2.59, automake 1.7.9, libtool 1.5.2
+
+2004/02/09 (jurgenv@cwi.nl)
+ * Regenerated sglr.tif.c with new const char * arguments and transitively
+   closed all compiler warnings. No real problems detected!
+
+Mon Feb  2 16:43:59 CET 2004 <{jong,kooiker}@cwi.nl>
+ * fix Makefile.am to get "distcheck" working
+
+2004/01/20 (markvdb@cwi.nl)
+ * First version of clickable error messages.
+
+2004/01/14 (markvdb@cwi.nl)
+ * Cleanup of interface and first steps towards using error api.
+
+2004/01/12 (jurgenv@cwi.nl)
+ * Added dependency on error-support
+ * Bumped version to 3.11
+ 
+2004/01/06 (markvdb@cwi.nl)
+ * Simplified the TB interface of SGLR. A parse request contains
+   directly the parse table.
+
+2003/11/21 (jurgenv@cwi.nl)
+ * Brought up-to-date with pt-support, libconversion and libasfix2 
+   are now part of libmept.
+ * Refactored sglr-interface and sglr-main such that ATBpack is not used
+   in sglr-interface anymore. Note that in sglr-interface there seems
+   to be to much knowledge about communication with the ToolBus. libsglr
+   should not know anything about the context in which it is applied!
+
+2003/10/08 (markvdb@cwi.nl)
+ * Reverse the list of ambiguities, fixed bug #55.
+
+2003/10/01 (markvdb@cwi.nl)
+ * Removed the '-n' flag and everything related to this.
+   The detection of eagerness attributes remains as it was.
+   If two trees have the attributes at the top they are
+   directly compared, otherwise it is checked whether they
+   only differ in one branch, if so, this branch is inspected.
+
+2003/08/08 (markvdb@cwi.nl)
+ * Removed some dead code.
+
+2003/08/07 ({jurgenv,markvdb}@cwi.nl)
+ * Fixed a bug wrt to filtering of rejects, somehow the position
+   information was not updated and thus in case a rejected tree
+   was in an ambiguity cluster the position information got 
+   out of sync during filtering.
+ * Bumped in to version 3.10.2.
+ * Regenerated one of the Casl tests.
+ * The assert on rejected productions is only activated when
+   SG_FILTER && SG_FILTER_REJECT are active.
+
+2003/08/01 (markvdb@cwi.nl)
+ * Fine-tuned the way user-defined injections are treated.
+
+2003/08/01 (jurgenv@cwi.nl)
+ * Set version to 3.10.1
+
+2003/07/30 (markvdb@cs.vu.nl)
+ * Fixed the injection bug reported by Albert Hofkamp.
+   Added the corresponding regression test.
+
+2003/07/24 ({markvdb, jurgenv}@cwi.nl)
+ * Improved the bug fix of 2003/07/23. Finally understood the
+   problem, which is not caused by the combination of ambiguities
+   and cycles, but by the fact that the optimalization introduced
+   to inspect ambiguity clusters only once. This optimalization
+   causes the position information to be out of sync, which eventually
+   leads to not finding ambiguity clusters down the road.
+
+2003/07/23 (markvdb@cs.vu.nl)
+ * Fixed a serious bug wrt the combination of ambiguities and
+   cycles.
+
+2003/07/02 (jurgenv@cwi.nl)
+ * Release 3.10
+
+2003/06/26 (jurgenv@cwi.nl)
+ * Added package definition file
+
+Thu Jun 19 13:32:10 CEST 2003 <jong@cwi.nl>
+ * Added explicit ATBunpack and ATBpack to restore-term-brackets
+
+2003/06/18 ({jong,markvdb}@cwi.nl)
+ * Added explicit ATBpack to parsetrees.
+
+2003/05/19 ({jong,markvdb}@cwi.nl)
+ * Added explicit ATBpack and ATBunpack.
+
+2003/0307 (markvdb@cwi.nl)
+ * The sglr.idef contained an error when returning a cycle, T? instead T.
+
+2003/01/29 (markvdb@cs.vu.nl)
+ * Bumped into version 3.10beta.
+ * The counting of prefers/avoids in nested ambiguity
+   clusters fine-tuned.
+
+2003/01/24 ({jong,jurgenv}@cwi.nl)
+ * Removed obsolete ToolBus requirements
+
+2003/01/22 (jurgenv@cwi.nl)
+ * Release 3.9
+ * LGPL license
+
+2002/11/22 (vandenbr@loria.fr)
+ * Removed the check that a preferred/avoided subtree occurring in both
+   trees are not counted as preferred/avoided when counting nested
+   preferred/avoided subtrees.
+
+2002/10/29 (vinju@loria.fr)
+ * Removed implicit generation of ToolBus interfaces. *.tif.[ch] are
+   now in the repository and in the distributions
+
+2002/10/16 ({vandenbr,vinju}@loria.fr)
+ * Fixed two bugs in restore-brackets tool.
+
+2002/09/18 (vandenbr@loria.fr)
+ * The -c option (switch cycle detection off) does no longer imply
+   switching of filtering as well.
+
+2002/09/16 (vandenbr@loria.fr)
+ * Treatment of eagerness and injections improved, jumping
+   over injections stops as soon as an (un)eager node is 
+   found. This bug was discovered by Robbert de Haan.
+   
+2002/08/07 (markvdb@cwi.nl)
+ * Rolled back the special treatment of keywords.
+ * Ambiguous parse-tree are now returned as ordinary AsFix2ME trees
+   to ToolBus.
+
+2002/08/05 (jong@cwi.nl)
+ * Improved check for stacks which are in 'keyword-lookup' mode.
+
+2002/08/01 (vandenbr@loria.fr)
+ * Improved the (efficient) treatment of keywords.
+
+2002/07/31 (jong@cwi.nl)
+ * Refactored shift-tuple data structure.
+
+2002/07/31 (vandenbr@loria.fr)
+ * Bumped to version 3.9beta.
+ * Started working on an improved treatment of keywords.
+
+2002/07/24 (jurgenv@cwi.nl)
+ * Release 3.8
+
+2002/06/25 (vandenbr@loria.fr)
+ * Fine tuned the eagerness filter.
+ * Bumped to version 3.8beta.
+ * Added a test to check the implementation of the fine-tuned 
+   eagerness filter.
+ * Flag 'n' added to switch the check for this fine-tuned
+   eagerness filter off.
+ * Moved restore brackets functionality from asf to sglr.
+
+2002/04/19 (jurgenv@cwi.nl)
+ * Release 3.7
+
+2002/02/28 (vandenbr@loria.fr)
+ * If there are more than SG_TOO_MANY_AMBS (10000) ambiguities
+   SGLR generates an error messages and stops.
+
+2002/02/13 (vandenbr@loria.fr)
+ * Bumped to version 3.7beta
+ * Removed the get-top-symbols functionality.
+
+2002/02/07 (jurgenv@cwi.nl)
+ * Release 3.6
+
+2001/12/21 (jurgenv@cwi.nl)
+ * Improved ambiguity reporting of sglr's -v switch a bit.
+   Still not optimal ;-(
+
+2001/12/17 (vandenbr@loria.fr)
+ * SGLR ignored the non-assoc attribute when processing the
+   parse table.
+ * Added basic functionality to enable restoring of brackets.
+ * Bumped to version 3.6beta.
+
+2001/11/25 (mdejonge@cwi.nl)
+ * package now uses toolbuslib package
+ * extended functionality of program-check.m4 macros
+
+2001/11/13 (jong@cwi.nl)
+ * Cleaned up ChangeLog
+ * Released version 3.5
+
+2001/11/07 (markvdb@cwi.nl)
+ * Version number introduced in the parse table format.
+
+2001/11/01 ({jurgenv,markvdb}@cwi.nl)
+2001/10/31 ({jurgenv,markvdb}@cwi.nl)
+ * Fixed a bug with respect to storing filtered ambiguity clusters.
+   
+2001/10/30 (mdejonge@cwi.nl)
+ * Makefile.am: added program-check.m4 to EXTRA_DIST variable
+ * Makefile.am: removed ACLOCAL_AMFLAGS
+
+2001/10/30 (markvdb@cwi.nl)
+ * BitMap introduced to mark that for a specific position a
+   ambiguity cluster was created.
+ * Performance back to normal.
+
+2001/10/29 (jurgenv@cwi.nl, markvdb@cwi.nl)
+ * Replaced SG_MARK and UNMARK by an ATermIndexedSet implementation.
+ * Marking only ambiguity clusters when detecting cycles.
+ * Completely refactored the code for ambiguity clusters (markvdb).
+ * The changes of the last days fix a major bug in sglr; sharing of ambiguity
+   clusters caused ambiguities to occur in terms were there are no ambiguities
+   due to lexical or context-free restrictions.
+ * NOTE: SGLR is now quite a bit slower! 
+         A smarter implementation of the current bugfix is needed.
+ * NOTE: SGLR can yield different parse trees than previous versions 
+         because there are less ambiguities. This effect can be expected
+         for grammars that are highly ambiguous (e.g Casl, Island Grammars).
+ * The regression tests for Casl have been updated.
+
+2001/10/25-26 (jurgenv@cwi.nl,markvdb@cwi.nl)
+ * Added position information to the ambiguity cluster table in order
+   to make ambiguity clusters unique.
+ * Links and paths are extended with a length field.
+ * During cycle detection and filtering the position information
+   is updated.
+
+2001/10/11 (mdejonge@cwi.nl)
+ * Changed order of EXTRA_DIST files
+
+2001/09/27 (jurgenv@cwi.nl)
+ * Due to some changes in the pt-support package, sglr now emits different
+   parsetrees in both AsFix2 and AsFix2me. The changes are about the
+   attributes of a production. See the ChangeLog of pt-support for details.
+ * NOTE: the new parse tree format is not backward compatible.
+ 
+2001/09/21 (jurgenv@cwi.nl)
+ * Added -u switch to dump-productions (unparses the productions).
+
+2001/08/31 (markvdb@cwi.nl)
+ * Version 3.5beta.
+ * Improved (I hope you are never sure in life) the prefer/avoid
+   count filter. Only unique occurences are taken into account.
+   This means that a subtree with a preferred/avoided production
+   which occurs also in the other tree is not counted.
+
+2001/08/28 (jong@cwi.nl)
+ * unused static function outcommented to satisfy gcc-3.0.1
+
+2001/08/20 (markvdb@cwi.nl)
+ * Added an option (-A) to treat an ambiguity as an error.
+ * Removed option (-P) for adding position information.
+
+2001/08/09 (markvdb@cwi.nl, jurgenv@cwi.nl)
+ * MultiSet calculation removed, replaced by a simpler
+   Avoid/Prefer counting mechanism.
+ * Renamed MultiSetCounting to PreferCounting.
+ * Reshuffled some code.
+ * Wrote alternative InjectionCounting code, not yet activated.
+ * Improved the DirectEagerPrefer code (looks through injections).
+ * Improved the FilterReject code, rejects are inspected before
+   the actual filtering kicks in.
+ * Added a new test case.
+ * Adapted a number of grammars in order to be prepared for
+   a new injection count strategy.
+ * Fixed some bugs in the regression test grammars.
+ 
+
+2001/08/01 (jurgenv@cwi.nl)
+ * Bugfix; topsymbols were always reports as [undefined].
+
+2001/07/25 (jurgenv@cwi.nl)
+ * Moved all tree2dot functionality to pt-support package.
+ * Removed sdf1tosdf2 tool (did almost nothing).
+ * Removed unused client & server frontends for sglr
+
+2001/07/25 ({jong,markvdb,olivierp}@cwi.nl)
+ * Added Prefix term to test suite
+ * Moved Sdf2.sdf to test/terms dir.
+
+2001/07/24 (jurgenv@cwi.nl)
+ * ambtracker functionality and tool moved to pt-support package
+
+2001/07/20 ({jong,markvdb,olivierp}@cwi.nl)
+ * Adapted for new parsetable format (marginally more compact)
+ * Regenerated parsetables accordingly
+ 
+2001/07/17 (jong@cwi.nl)
+ * version 3.3 released, bumped to 3.3.1
+
+2001/07/13 (markvdb@cwi.nl)
+  * Bug fix: if all ambiguous nodes disappear, then return
+    NULL.
+
+2001/07/12 (markvdb@cwi.nl)
+  * Bug fix: a single node is never ambiguous, so "amb" removed!
+
+2001/07/11 (jong@cwi.nl)
+ * patched Makefile.am's to comply with new location of -lATB.
+
+2001/07/11 (markvdb@cwi.nl)
+  * Bug fix in dealing with filtering over injections. Sometimes it
+    stopped in a non-application node.
+
+2001/07/09 (markvdb@cwi.nl)
+  * Fixed a bug in yielding the parse tree, it is possible, that
+    due to filtering the parse tree becomes empty and thus a
+    parse bug is discovered.
+
+2001/07/06 (jurgenv@cwi.nl, markvdb@cwi.nl)
+  * Removed AsFix1 stuff and AsFix2ME is now the default output
+    of SGLR.
+
+2001/07/04 (markvdb@cwi.nl)
+  * Propagation of NULL trees was not correctly handled.
+
+2001/06/27 (markvdb@cwi.nl)
+  * Repaired a bug detected by Peter Mosses with respect to priorities,
+    implemented what is described in Section 4.5.1 (Priority Conflicts) in
+    Eelco's PhD thesis.
+
+2001/06/13 (markvdb@cwi.nl)
+  * Removed PosInfo related code.
+  * Removed BOEHM related "if-def"s.
+  * Fixed a protection bug of the reject/prefer/avoid attributes.
+
+2001/06/12 (markvdb@cwi.nl)
+  * Changed size of state and label into int (was short).
+
+2001/05/23 (markvdb@cwi.nl)
+  * Released version 3.2.2, and bumped into 3.2.3.
+
+2001/05/21 ({jurgenv,markvdb,jong}@cwi.nl)
+  * Fixed bug in prefer/avoid filtering. Trees with equal avoids and prefers
+    can not be disambiguated.
+ 
+2001/05/11 (markvdb@cwi.nl)
+  * Added Set, Perm, Numbered iterator, and Function.
+
+2001/05/04 (markvdb@cwi.nl)
+  * Added pair symbol.
+
+2001/05/03 (jong@cwi.nl)
+ * version 3.2.2
+ * cleaned up all Makefile.ams that caused "make install" to rebuild
+   (=recompile) due to wrong -I include paths.
+ * removed JS legacy ("crippled platform" remark erased)
+
+2001/04/23 (mdejonge@cwi.nl)
+  * Increased version number to 3.2.1
+
+2001/04/23 (mdejonge@cwi.nl)
+  * Fixed library search-paths in ./dump, ./client, and ./ambtracker
+
+2001/03/27 (jurgenv@cwi.nl)
+  * added six options to libsglr. Each option toggles the use of
+    a specific disambigation filter.
+
+2001/03/22 (markvdb@cwi.nl)
+  * Fixed a serious bug in filtering of assocativity. 
+    Revealed by the following grammar (by Peter D. Mosses):
+
+    module AN-Full
+
+    imports Layout
+
+    exports
+      sorts Action Yielder DataOp
+
+    context-free syntax
+      Action Yielder          -> Action
+
+      "give" Yielder          -> Action
+      "give" DataOp           -> Action
+      "skip"                 -> Action
+      Action "then" Action    -> Action {left}
+
+      "it"                    -> DataOp
+
+      Action                  -> Yielder
+      DataOp                  -> Yielder
+      Yielder "then" Yielder  -> Yielder {left}       
+
+2001/03/15 (markvdb@cwi.nl)
+  * Fixed a bug concerning the filtering of trees containing "rejects"
+    - New filter introduced which compares two trees and selects
+      the one without any rejects (if any).
+  
+2001/02/27 (jurgenv@cwi.nl)
+  * Fixed location of parsetree libraries 
+
+2001/02/22 (markvdb@cwi.nl)
+  * Introduced the "-m" option to generate AsFix2ME.
+  * SGLR is no longer dependent on the "old" asfix library.
+  * New version (3.20 of SGLR.
+
+2000/12/14 (markvdb@cwi.nl)
+  * Re-implemented the "no parse tree contruction" option, however
+    in a slightly different way. No nodes are constructed, and in
+    FindPaths the list of sons is neither constructed.
+
+2000/12/14 (markvdb@cwi.nl, olivierp@cwi.nl, jong@cwi.nl)
+  * Simplified actiontable implementation
+  * Counting avoids and prefers filter improved.
+  * New version (3.1) of SGLR.
+
+2000/11/17 (markvdb@cwi.nl)
+  * Several (serious) memory leaks fixed.
+
+2000/11/08 (jurgenv@cwi.nl)
+    * ambtrakker renamed to ambtracker
+
+2000/11/04 (mdejonge@cwi.nl)
+    * Bug fix: of by one error in SG_ReadFile (sglr-interface,c)
+      which caused sglr to dump core when reading from standard input  is
+      fixed.
+
+2000/10/18 (jurgenv@cwi.nl, markvdb@cwi.nl)
+  - Major revision of SGLR!
+    * Filtering is moved from shifting/reducing phase to a postprocessing
+      phase.
+    * All filtering code completely refactored.
+    * Efficiency of cycle detection is improved.
+    * Efficiency of filtering improved.
+    * Position information yielded by AmbTracker has been corrected.
+    * Remove a lot of dead and obscure code.
+    * New filter added: associativity filter.
+  - Bumped into version 3.0!       
+
+2000/10/02 (markvdb@cwi.nl)
+  * A major oversight in filtering fixed:
+    - Nested ambiguity clusters were ignored during filtering.
+      This caused the "eager" list behaviour of Ernst-Jan Verhoeven!
+    - The fix involved also an runtime check on cycles.
+      Perfomance penalty has still to be figured out.
+  * Bumped version to 2.40
+
+2000/9/27 (markvdb@cwi.nl)
+  * Fixed a bug in the lookahead when operating in ToolBus mode.
+  * In case of ToolBus mode or stand-alone mode the same buffer
+    is being used. Some code has become obsolete and is removed.
+
+2000/9/18 (mdejonge@cwi.nl)
+  * All file references in sglr-stats.txt are now quoted
+
+2000/8/25 (jong@cwi.nl)
+  * In verbose mode, animated counter is only displayed if stderr is a tty.
+
+2000/8/09 (jurgenv@cwi.nl)
+  * Fixed a major bug that caused sglr to dump core while reading parsetables
+    in some infrequently occurring cases.
+  * Added prettyprinting of ambiguous productions
+  * Bumped version to 2.39
+  
+2000/8/01 (jurgenv@cwi.nl)
+  * Fixed a major bug that caused sglr to throw away ambiguities
+  * Bumped version to 2.38
+
+2000/7/28 (jong@cwi.nl)
+  * In verbose mode, sglr prints which token-# it is parsing/shifting.
+
+2000/7/12 (markvdb@cwi.nl)
+   * "char *L" replaced by "language L" where "language" is a typedef ATerm.
+     L is used as key in the parsetable database.
+
+2000/7/12 (mdejonge@cwi.nl)
+   * Bug fix in libsglr/sglr-interface.c. SGparseStringAsAsFix2 used ATBpack
+     to pack the complete parse term which caused pattern matching in
+     sglr/sglr.idef to fail.
+
+2000/7/11 (mdejonge@cwi.nl)
+   * Bug fixed in regress-test/grammars/Makefile.am which caused make dist
+     to fail
+
+2000/6/28 (js@cwi.nl)
+   * Cycles are reported with expanded productions rather than production
+     numbers
+
+2000/6/28 (js@cwi.nl)
+   * Bumped version to 2.36
+   * Refactored forest yielding/ambiguity tracking code: ambiguity
+     tracking is now cleanly separated
+   * Added `ambtrakker', a command-line tool that conveniently lists
+     ambiguities found in AsFix2; by adding a ToolBus interface to
+     this tool, a modular disambiguator (sort of) could be provided
+     in a Meta-Environmant that uses AsFix2 for exchange format
+   * Added version reporting to tree2dot
+
+2000/6/27 (js@cwi.nl)
+   *  Bumped version to 2.35
+   *  Implemented ambiguity collection code: when asked to return AsFix1,
+      a parse error is now generated that includes a list of pairs
+      in which for each ambiguity, its position in the input
+      term as well as the relevant productions are included.  An example
+      (prettyprinted for your convenience):
+
+         module Amber
+         exports
+           sorts A B
+           lexical syntax
+            [a]+ -> A
+            [a]+ -> B
+
+      js:p5@dek[275]> print -n "a" | sglr -p Amber.tbl -t1
+      parse-error([character(256),line(1),col(1),char(2)],
+                  ambiguities(1,[ambiguity(position(0),
+                                 productions(prod([cf(opt(layout)),
+                                                   cf(sort("A")),
+                                                   cf(opt(layout))],
+                                                  sort("<START>"),no-attrs),
+                                             prod([cf(opt(layout)),
+                                                   cf(sort("B")),
+                                                   cf(opt(layout))],
+                                                  sort("<START>"),no-attrs)))]))
+      sglr: error in -, line 1, col 1: cannot represent 1 ambiguity
+
+2000/6/23 (js@cwi.nl)
+   *  Fixed a tiny bug in sglr's handling of follow restrictions
+      of levels deeper than 1
+   *  Added the Follower language, and both an offending and a
+      non-offending input term w.r.t. the follow-restrictions
+   *  Bumped version to 2.34
+
+2000/5/15 (js@cwi.nl)
+   * Extended the SGLR API documentation to cover greater detail
+   * Fixed a case of usage of uninitialized AFun (that broke the daily build)
+   * Implemented a routine that returns the available start symbols,
+     available through both ToolBus as well as the public API
+   * Bumped the version number (now at 2.32)
+
+2000/5/13 (js@cwi.nl)
+   * Documented (pod) the SGLR API
+   * Cleaned up function naming to strictly use thepublic vs. private
+     convention; accordingly, several cleanups/reshuffles in bits
+     containing public routines especially
+
+2000/5/04 (mdejonge@cwi.nl)
+   * sglr -l now also displays number of reductions per token
+
+2000/4/05 (mdejonge@cwi.nl)
+   * Removed doc/a2toa1.pod because it now lives in the separate asfix
+     distribution
+   * manual pages are no longer stored in section 7 but in section 1
+
+2000/4/05 (mdejonge@cwi.nl)
+   * Version is now 2.29
+   * The asfix2 to asfix1 conversion stuff has been removed because it is
+     now part of the asfix distribution.
+
+2000/3/31 (mdejonge@cwi.nl)
+   * The toolbus is no longer required during the build process of sglr
+
+2000/3/28 (mdejonge @cwi.nl)
+   * No longer distribute DEVELOPERS-INFO
+
+2000/3/2 (mdejong@cwi.nl)
+   * sglr build/configuration now using automake
+
+1999/8/30
+   * New metric: number of rejects encountered.
+
+1999/8/15 (EV)
+   * Extra metrics: calls to SG_Amb, allocated ATerm memory, page faults,
+     ambiguities, number of lines, characters per second
+   * Characters per second is the main metric we want to improve
+

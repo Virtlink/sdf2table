@@ -1,0 +1,12 @@
+$Id: README,v 1.1.1.1 2003/12/04 18:52:03 jurgenv Exp $
+
+
+This package will contain generated data-structures from basic/Errors and 
+some convenience functions.
+
+The data-structures are to be used as:
+   - a general error description mechanism in the Meta-Environment
+   - a reusable error description mechanism for ASF+SDF specifications
+
+
+See: http://www.cwi.nl/projects/MetaEnv on installation instructions.

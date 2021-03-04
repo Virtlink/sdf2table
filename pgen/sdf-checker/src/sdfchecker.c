@@ -1,0 +1,179 @@
+#ifndef WIN32
+        /* These files can not be included in Windows NT*/
+        #include <atb-tool.h>
+        #include "sdfchecker.tif.h"
+#endif
+
+#include <stdio.h>
+#include <stdlib.h>     /* used for exit(0) */
+#include <assert.h>
+#include <ctype.h>
+#include <unistd.h>
+
+#include <asc-support2-me.h>
+#include <MEPT-utils.h>
+#include <SDFME-utils.h>
+#include <Error-utils.h>
+
+
+static char *name;
+
+ATbool run_verbose;
+
+static char myname[] = "sdfchecker";
+static char myversion[] = "1.0";
+
+/*
+ *     The argument vector: list of option letters, colons denote option
+ *         arguments.  See Usage function, immediately below, for option
+ *             explanation.
+ *              */
+
+static char myarguments[] = "hi:m:vV";
+
+void init_patterns();
+void c_rehash(int newsize);
+
+extern void register_Sdf_Checker();
+extern void resolve_Sdf_Checker();
+extern void init_Sdf_Checker();
+
+
+static PT_Tree addSdfCheckerFunction(const char *str, PT_ParseTree parseTree)
+{
+  PT_Tree newTree = NULL;
+
+  if (PT_isValidParseTree(parseTree)) {
+    PT_Tree ptSyntax = PT_getParseTreeTree(parseTree);
+
+    if (!strcmp(str, "-")) {
+      newTree = PT_applyFunctionToTree("check-sdf", "Summary", 1, ptSyntax);
+    }
+    else {
+      SDF_ModuleId strCon = SDF_makeModuleId((char *)str);
+      newTree = PT_applyFunctionToTree("check-sdf", "Summary", 2, ptSyntax, strCon);
+    }
+  }
+  else {
+    ATerror("addSdfCheckerFunction: not a proper parse tree: %t\n",
+            (ATerm) parseTree);
+  }
+
+  return newTree;
+}
+
+static ATerm checkSdf(const char *moduleName, ATerm term)
+{
+  PT_ParseTree parseTree;
+  PT_Tree ptApplied;
+  ATerm reduct;
+  PT_ParseTree asfix;
+
+  setKeepAnnotations(ATtrue);
+  parseTree = PT_makeParseTreeFromTerm(term);
+  ptApplied = addSdfCheckerFunction(moduleName, parseTree);
+  reduct    = innermost(ptApplied);
+  asfix     = toasfix(reduct);
+
+  return PT_makeTermFromParseTree(asfix);
+}
+
+static void displayMessages(ATerm term)
+{
+  PERR_Start pStart;
+  PERR_Summary pSummary;
+  ERR_Summary summary;
+
+  pStart = PERR_StartFromTerm(term);
+  pSummary = PERR_getStartTopSummary(pStart);
+  summary = PERR_lowerSummary(pSummary);
+  ERR_displaySummary(summary);
+}
+
+ATerm check_sdf(int cid, ATerm term)
+{
+  ATerm  output = checkSdf("-", ATBunpack(term));
+
+  return ATmake("snd-value(feedback(<term>))", output);
+}
+
+void rec_terminate(int cid, ATerm arg)
+{
+  exit(0);
+}
+
+static void usage(void)
+{
+  ATwarning(
+    "Usage: %s -h -i file -m modulename -vV . . .\n"
+    "Options:\n"
+    "\t-h              display help information (usage)\n"
+    "\t-i filename     input from file (default stdin)\n"
+    "\t-m modulename   name of module from which the definition is to be checked (default Main)\n"
+    "\t-v              verbose mode\n"
+    "\t-V              reveal program version (i.e. %s)\n",
+    myname, myversion);
+}
+
+static void version(void)
+{
+  ATwarning("%s v%s\n", myname, myversion);
+}
+
+int main(int argc, char *argv[])
+{
+  ATerm syntax = NULL, msgs = NULL;
+  char *input = "-";
+  char *moduleName = "-";
+  int cid;
+  int c, toolbus_mode = 0;
+  ATerm bottomOfStack;
+  name = argv[0];
+
+/*  Check whether we're a ToolBus process  */
+  for(c=1; !toolbus_mode && c<argc; c++) {
+    toolbus_mode = !strcmp(argv[c], "-TB_TOOL_NAME");
+  }
+
+  ATinit(argc, argv, &bottomOfStack);
+  SDF_initSDFMEApi();
+  initErrorApi();
+
+  ASC_initRunTime(INITIAL_TABLE_SIZE);
+
+  register_Sdf_Checker();
+  resolve_Sdf_Checker();
+  init_Sdf_Checker();
+
+  if (toolbus_mode) {
+    #ifndef WIN32 /* Code with Toolbus calls, non Windows */
+      ATBinit(argc, argv, &bottomOfStack);  /* Initialize the Aterm library */
+      cid = ATBconnect(NULL, NULL, -1, sdfchecker_handler);
+      ATBeventloop();
+    #else
+      ATwarning("sdfchecker: Toolbus cannot be used in Windows.\n");
+    #endif
+  }
+  else {
+    while ((c = getopt(argc, argv, myarguments)) != -1) {
+      switch (c) {
+        case 'v':  run_verbose = ATtrue;                   break;
+        case 'i':  input=optarg;                           break;
+        case 'm':  moduleName=optarg;                      break;
+        case 'V':  version(); exit(0);                     break;
+  
+        case 'h':
+        default:   usage(); exit(0);                       break;
+      }
+    }
+    argc -= optind;
+    argv += optind;
+
+    syntax = ATreadFromNamedFile(input);
+
+    msgs = checkSdf(moduleName, syntax);
+
+    displayMessages(msgs);
+  }
+  return 0;
+}

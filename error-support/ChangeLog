@@ -1,0 +1,96 @@
+$Id: ChangeLog,v 1.15.2.11 2004/12/17 08:21:11 kooiker Exp $
+
+Fri Dec 17 09:20:52 CET 2004 <kooiker@cwi.nl>
+ * Bumped to 1.0.1 
+
+Wed Oct 13 15:08:53 CEST 2004 <jurgenv@cwi.nl,kooiker@cwi.nl>
+ * Added locationapi.jar to the CLASSPATH that is printed by
+   error-support-config
+
+Thu Sep 16 11:54:33 CEST 2004 <jurgenv@cwi.nl>
+ * Bumped to 1.0
+ * error-support commandline tool now pretty prints a summary to stderr.
+
+Mon Aug  9 14:43:54 CEST 2004 <jurgenv@cwi.nl>
+* Extended error-diff to be able to handle locations that do not have an
+  area.
+
+Tue May 18 10:21:52 CEST 2004 <jurgenv@cwi.nl>
+ * Bumped to 0.1.1
+ * Fixed Makefile.am's INCLUDE orders
+ * Removed -Werror
+
+Mon May  3 18:58:48 CEST 2004 <jurgenv@cwi.nl>
+ * added liftSummary
+ * fixed a bug: lowering reversed the set of errors
+
+Mon Apr 19 11:28:55 CEST 2004 <jurgenv@cwi.nl>
+ * Made get-feedback-first-location robust against unavailability of
+   a first location. It sends no-feedback-first-location in that case.
+
+Thu Apr  1 16:47:19 CEST 2004 <jurgenv@cwi.nl>
+ * Reset version to 0.1 (0.1 was never released and the other
+   packages depend on 0.1).
+
+Thu Mar 11 14:40:46 CET 2004 <{jong,kooiker}@cwi.nl>
+ * Bumped into version 0.2
+ * Regenerated api's 
+
+Thu Mar 11 10:45:01 CET 2004 <{jong,kooiker}@cwi.nl>
+ * Finished transition to new error api names
+
+Tue Mar  9 16:57:31 CET 2004 <{jong,kooiker}@cwi.nl>
+ * Re-implemented error-api due to changes in
+   basic/{Areas,Locations,Errors}.sdf
+
+2004/02/17 (markvdb@cwi.nl)
+ * Added error-diff functionality.
+
+Mon Feb 16 16:37:02 CET 2004 <{jong,jurgenv}@cwi.nl>
+ * utils/error-support.{c,idef}:
+   - add get-summary-first-feedback, get-feedback-first-location,
+     get-location-filename
+
+Tue Feb 10 15:27:49 CET 2004 <m336@cwi.nl>
+ * upgrade auto* to: autoconf 2.59, automake 1.7.9, libtool 1.5.2
+
+2004/02/03 (markvdb@cwi.nl)
+ * Added display functionality.
+
+Mon Feb  2 16:40:44 CET 2004 <{jong,kooiker}@cwi.nl>
+ * Fix Makefile.am's to get distcheck working
+
+2004/01/29 (markvdb@cwi.nl)
+ * Added a ToolBus component for manipulating errors.
+
+2004/01/27 (markvdb@cwi.nl)
+ * Added the mapping from parsed errors to abstract errors.
+
+2003/12/18 (jurgenv@cwi.nl)
+ * Renamed package to error-support
+
+2003/12/16 ({jong,jurgenv}@cwi.nl)
+ * Renamed library to libErrorAPI
+ * Completed lifting of abstract errors to parsed errors.
+ * Added commandline tool for lifting errors (mainly for testing purposes)
+ * Added generated jar file with the Java version of the abstract error API
+
+2003/12/15 (jurgenv@cwi.nl)
+ * Regenerated both APIs using new apigen. 
+ * Added lexical definitions of String and NatCon manually to prevent 
+   bottom-sort generation in the parsed API (See lib/Lexicals.sdf)
+ * started on utility functions for lifting abstract errors to parsed errors
+   and vice versa.
+
+2003/12/04 (jurgenv@cwi.nl)
+ * Initial version 0.1 of meta-errors package. This package will contain
+   generated data-structures from basic/Errors and some convenience functions.
+   The data-structures are to be used as:
+     - a general error description mechanism in the Meta-Environment
+     - a reusable error description mechanism for ASF+SDF specifications
+ * Started with generated of imploded api and parse-tree api versions of
+   meta-error in lib subdirectory
+ * Generation of libraries is completely manual: missing bottom-sorts
+   NatCon and String are not generated in the parsed api (manual editing
+   of ParsedErrors.h solved this problem temporarily).
+

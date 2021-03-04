@@ -1,0 +1,12 @@
+%%%% $Id: Start-Symbols.asf,v 1.1 2003/12/11 16:39:42 markvdb Exp $
+
+equations
+
+%% \noindent
+%% Renaming start symbols.
+
+  [0] (start-symbols 'a) 'r = start-symbols ('a)*'r
+  [0] (lexical start-symbols 'a) 'r = lexical start-symbols ('a)*'r
+  [0] (context-free start-symbols 'a) 'r = context-free start-symbols ('a)*'r
+
+%%%

@@ -1,0 +1,99 @@
+$Id: ChangeLog,v 1.20.2.10 2004/12/17 08:19:11 uid508 Exp $
+
+Fri Dec 17 09:18:58 CET 2004 <kooiker@cwi.nl>
+ * Bumped to 0.7.1 
+
+Mon Nov  1 16:07:02 CET 2004 <jurgenv@cwi.nl>
+ * Added tbunpack tool, calls ATBunpack on an input term. Can be
+   used for commandline debugging purposes.
+
+Mon Oct 11 15:02:57 CEST 2004 <jurgenv@cwi.nl>
+ * Fixed a bug in the adapter code. When multiple connections are
+   present, the events that were queued were sometimes send on the
+   wrong socket. Similar events for different sockets are now queued 
+   separately.
+ * Bumped to 0.7
+
+Thu Sep 16 12:00:38 CEST 2004 <jurgenv@cwi.nl>
+ * Bumped to 0.6.1
+
+Tue Sep 14 16:09:08 CEST 2004 <{jong,storm,jurgenv}@cwi.nl>
+ * Try-out of a new configure m4 macro: GLT_INIT_PACKAGE. Both the
+   name and the version of a package are extracted from an autobundle
+   package definition at ./reconf time.
+
+Thu Mar 11 18:40:42 CET 2004 <jurgenv@cwi.nl>
+ * -ltb library from the toolbuslib package is deprecated and was only used 
+   inside of the toolbus package. So I moved it into the toolbus package.
+
+Thu Mar  4 13:11:16 CET 2004 <{paulk,jurgenv}@cwi.nl>
+ * Fixed a nice bug in toolbuslib: uninitialized field of a struct
+   for symbols.
+
+Tue Feb 10 17:09:13 CET 2004 <{jurgenv,jong}@cwi.nl>
+ * added new ATBinit commandline option: -TB_COLLECT_LOOP <N>
+   - if N == 0, then ATBeventloop does not do an AT_collect();
+   - if N > 0, then ATBeventloop does an AT_collect after every Nth event. 
+
+Tue Feb 10 15:20:55 CET 2004 <m336@cwi.nl>
+ * upgrade auto* to: autoconf 2.59, automake 1.7.9, libtool 1.5.2
+
+Mon Feb  2 14:27:13 CET 2004 <jong@cwi.nl>
+ * configure.in: version bump 0.6
+ * Makefile.am: add generated package file to CLEANFILES
+
+2003/08/01 (jurgenv@cwi.nl)
+ * Set to version 0.5.1
+
+2003/07/31
+ * Release 0.5
+
+Wed Jul 30 11:52:46 CEST 2003 <jong@cwi.nl>
+ * toolbuslib/aterm/Makefile.am
+   -DTERM_SIZE_WARNING_THRESHOLD=512 removed
+
+Tue Jul  1 13:20:05 CEST 2003 <jong@cwi.nl>
+ * aterm/atb-tool.c:
+   - clear buffer before sending out a term to prevent a previous term
+     from 'leaking'
+
+2003/06/26 (jurgenv@cwi.nl)
+ * Added package definition file
+
+2003/05/28 ({jong,jurgenv}@cwi.nl)
+ * Added TERM_SIZE_WARNING_THRESHOLD: when terms bigger than this threshold
+   are sent to the ToolBus, a warning is printed. If threshold is set to 0,
+   the warning code is disabled.
+
+2003/05/19 ({jong,markvdb}@cwi.nl)
+ * Added explicit ATBpack and ATBunpack.
+ * Bumped to 0.5beta
+
+2003/01/22 (jurgenv@cwi.nl)
+ * Release 0.4
+ * LGPL license
+
+2002/10/10 (jurgenv@cwi.nl)
+ * Added functionality to print only pending snd-msgs when ctrl+\ is pressed.
+
+2002/10/01 (vandenbr@loria.fr)
+ * Bumped into 0.4beta.
+ * Increased the number of sockets that can be open.
+
+2002/07/24 (jurgenv@cwi.nl)
+ * Released 0.3
+ * Some debugging utilities were added to the source code
+
+2002/04/19 (jurgenv@cwi.nl)
+ * Released 0.2
+
+2002/03/05 (jong@cwi.nl)
+ * Increased magical LENSPEC from 8 bytes to 12 bytes
+ * Improved atb-tool support wrt to use of LENSPEC define
+ * Bumped to 0.2beta
+
+2001/11/25 (mdejonge@cwi.nl)
+ * Released version 0.1
+ * Added toolbuslib-config utility
+ * Created toolbuslib package from the subdirs aterm and libtb of the toolbus
+   source tree

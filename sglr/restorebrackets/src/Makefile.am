@@ -1,0 +1,25 @@
+# $Id: Makefile.am,v 1.5 2004/01/13 07:49:06 jurgenv Exp $
+
+include ${top_srcdir}/make_rules
+
+EXTRA_DIST		= restorebrackets.idef
+
+INCLUDES		= -I$(top_srcdir)/libsglr \
+			-I$(PT_SUPPORT)/include \
+			-I$(ERROR_SUPPORT)/include \
+			-I$(TOOLBUSLIB)/include \
+			-I$(SGLR)/include \
+			-I$(ATERM)/include
+
+pkgdata_DATA		= restorebrackets.idef
+
+bin_PROGRAMS		= restorebrackets 
+
+restorebrackets_SOURCES	= restorebrackets.tif.c restorebrackets.tif.h restorebrackets-main.c
+restorebrackets_LDADD	= -L$(top_builddir)/libsglr -lsglr \
+			-L$(SGLR)/lib -lsglr \
+			-L$(PT_SUPPORT)/lib -lmept \
+			-L$(ERROR_SUPPORT)/lib -lErrorAPI \
+			-L$(TOOLBUSLIB)/lib -lATB \
+			-L$(ATERM)/lib -lATerm \
+			$(SOCKLIBS)
