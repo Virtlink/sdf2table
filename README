@@ -7,7 +7,17 @@ To compile:
     - `curl`
     - `pkg-config`
     - `graphviz`
-2.  Compile and install ATerm in the default locations (from [Meta Environment][1])
+
+2.  Compile and install ATerm in the default locations
+
+    ```
+    cd aterm-2.5/
+    ./configure
+    make
+    make install
+    cd ../
+    ```
+
 3.  Ensure `libATerm.so` is on the dynamic library path
 
     ```
@@ -15,7 +25,7 @@ To compile:
     # /usr/local/lib/libATerm.so
     echo $LD_LIBRARY_PATH
     # <empty>
-    export $LD_LIBRARY_PATH=/usr/local/lib
+    export LD_LIBRARY_PATH=/usr/local/lib
     echo $LD_LIBRARY_PATH
     /usr/local/bin/baffle --help
     ```
@@ -23,9 +33,7 @@ To compile:
 4.  Configure this project using the following command:
 
     ```
-    ./configure --with-cflags=-fgnu89-inline
+    ./configure --with-cflags="-fgnu89-inline -std=c89"
+    make
+    make install
     ```
-
-5.  N/A
-
-[1]: http://www.meta-environment.org/
