@@ -55,23 +55,27 @@ CLEANFILES = \
 	sdf2table.1 \
 	sdf2table.test 
 
-# we create one sdf2table that uses source tree binaries and data 
-# this is needed for testing
-%.test: %.src Makefile
-	sed 's@__BINDIR__@$(top_builddir)/src@g;\
+TESTREPLACE = 's@__BINDIR__@$(top_builddir)/src@g;\
              s@__ACTIVATE__@0@g;\
              s@__SGLR__@$(SGLR)@g;\
              s@__PT_SUPPORT__@$(PT_SUPPORT)@g;\
-             s@__DATADIR__@$(top_srcdir)/grammar@g;' < $< > $@ && \
+             s@__DATADIR__@$(top_srcdir)/grammar@g;'
+
+BINREPLACE = 's@__BINDIR__@$(bindir)@g;\
+             s@__ACTIVATE__@1@g;\
+             s@__SGLR__@$(SGLR)@g;\
+             s@__PT_SUPPORT__@$(PT_SUPPORT)@g;\
+             s@__DATADIR__@$(pkgdatadir)@g;'
+
+# we create one sdf2table that uses source tree binaries and data 
+# this is needed for testing
+%.test: %.src Makefile
+	sed $(TESTREPLACE) < $< > $@ && \
 	chmod +x $@
 
 # and one sdf2table for installed binaries and data
 % : %.src Makefile
-	sed 's@__BINDIR__@$(bindir)@g;\
-             s@__ACTIVATE__@1@g;\
-             s@__SGLR__@$(SGLR)@g;\
-             s@__PT_SUPPORT__@$(PT_SUPPORT)@g;\
-             s@__DATADIR__@$(pkgdatadir)@g;' < $< > $@ && \
+	sed $(BINREPLACE) < $< > $@ && \
 	chmod +x $@
 
 asfc: Sdf2-Normalization.eqs
