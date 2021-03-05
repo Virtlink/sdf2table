@@ -1,4 +1,6 @@
-# $Id: Makefile.am 19681 2006-07-25 22:38:59Z martinrw $
+# $Id: Makefile.am 23710 2007-09-26 11:12:55Z kooiker $
+
+include $(top_srcdir)/Makefile.meta
 
 lib_LTLIBRARIES = libASFME.la
 
@@ -19,7 +21,7 @@ libASFME_la_CFLAGS   = -DDISABLE_DYNAMIC_CHECKING
 libASFME_la_LDFLAGS  = -avoid-version -no-undefined $(AM_LDFLAGS)
 libASFME_la_LIBADD   = $(PT_SUPPORT_LIBS) $(ERROR_SUPPORT_LIBS) $(ATERM_LIBS)
 
-LIBRARY=../../asf-library/library
+LIBRARY=../../sdf-library/library
 
 Asf.label.def:
 	(echo "definition";\

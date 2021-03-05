@@ -1,4 +1,4 @@
-dnl $Id: configure.ac 19513 2006-07-25 14:09:19Z jurgenv $
+dnl $Id: configure.ac 21925 2007-03-14 14:10:44Z economop $
 
 AC_INIT
 META_SETUP

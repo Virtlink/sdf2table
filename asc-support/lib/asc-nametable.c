@@ -1,4 +1,4 @@
-/* $Id: asc-nametable.c 20488 2006-10-13 08:46:34Z jurgenv $ */
+/* $Id: asc-nametable.c 24315 2007-12-02 19:04:03Z jurgenv $ */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -133,6 +133,13 @@ void register_prod(ATerm prod, funcptr func, Symbol sym)
 }
 
 /*}}}  */
+
+void unregister_all() {
+  free(prod_table);
+  prod_table = NULL;
+  free(sym_table);
+  sym_table = NULL;
+}
 
 /*{{{  funcptr lookup_func_given_sym(Symbol sym) */
 

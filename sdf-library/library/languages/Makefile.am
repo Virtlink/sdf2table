@@ -5,12 +5,18 @@ SUBDIRS = \
 	asfix \
 	aterm \
 	box \
+	bnf \
 	casl \
 	cpp \
 	ansi-c \
+        ebnf \
 	graph \
+	fortran \
 	fdl \
+        logo \
 	pico \
 	sdf2  \
 	generic-cpp \
-	java
+	java \
+        xml \
+        yacc

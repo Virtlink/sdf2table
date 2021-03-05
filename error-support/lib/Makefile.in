@@ -23,7 +23,6 @@
 #
 
 
-
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
 VPATH = @srcdir@
@@ -48,7 +47,6 @@ build_triplet = @build@
 host_triplet = @host@
 DIST_COMMON = $(include_HEADERS) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(top_srcdir)/Makefile.meta
-@MAINTAINER_MODE_TRUE@am__append_1 = .eqs .adt .idef .tifs
 subdir = ./lib
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/meta-build.m4 \
@@ -63,8 +61,7 @@ am__vpath_adj = case $$p in \
     *) f=$$p;; \
   esac;
 am__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
-am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(pkgdatadir)" \
-	"$(DESTDIR)$(includedir)"
+am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(includedir)"
 libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
 am__DEPENDENCIES_1 =
@@ -73,7 +70,8 @@ am_libErrorAPI_la_OBJECTS = libErrorAPI_la-Error.lo \
 	libErrorAPI_la-Error_dict.lo libErrorAPI_la-ParsedError.lo \
 	libErrorAPI_la-ParsedError_dict.lo libErrorAPI_la-init.lo \
 	libErrorAPI_la-display.lo libErrorAPI_la-lift.lo \
-	libErrorAPI_la-lower.lo libErrorAPI_la-manager.lo
+	libErrorAPI_la-lower.lo libErrorAPI_la-manager.lo \
+	libErrorAPI_la-Error-utils.lo
 libErrorAPI_la_OBJECTS = $(am_libErrorAPI_la_OBJECTS)
 libLocationAPI_la_DEPENDENCIES = $(am__DEPENDENCIES_1)
 am_libLocationAPI_la_OBJECTS = libLocationAPI_la-Location.lo \
@@ -94,8 +92,6 @@ LINK = $(LIBTOOL) --tag=CC --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
 SOURCES = $(libErrorAPI_la_SOURCES) $(libLocationAPI_la_SOURCES)
 DIST_SOURCES = $(libErrorAPI_la_SOURCES) $(libLocationAPI_la_SOURCES)
-pkgdataDATA_INSTALL = $(INSTALL_DATA)
-DATA = $(pkgdata_DATA)
 includeHEADERS_INSTALL = $(INSTALL_HEADER)
 HEADERS = $(include_HEADERS)
 ETAGS = etags
@@ -132,6 +128,7 @@ DEPDIR = @DEPDIR@
 DISABLE_FALSE = @DISABLE_FALSE@
 DISABLE_TRUE = @DISABLE_TRUE@
 DLLTOOL = @DLLTOOL@
+DSYMUTIL = @DSYMUTIL@
 ECHO = @ECHO@
 ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
@@ -157,6 +154,7 @@ MAINT = @MAINT@
 MAINTAINER_MODE_FALSE = @MAINTAINER_MODE_FALSE@
 MAINTAINER_MODE_TRUE = @MAINTAINER_MODE_TRUE@
 MAKEINFO = @MAKEINFO@
+NMEDIT = @NMEDIT@
 OBJDUMP = @OBJDUMP@
 OBJEXT = @OBJEXT@
 PACKAGE = @PACKAGE@
@@ -168,6 +166,7 @@ PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 PKG_CONFIG = @PKG_CONFIG@
 RANLIB = @RANLIB@
+SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
@@ -230,9 +229,21 @@ target_alias = @target_alias@
 # Put very common AM_CPPFLAGS, LDADD here, also here 
 # because of pkgconfig:
 AM_CPPFLAGS = 
+
+# Note: this makes all binaries relocatable as long as the ../lib directory
+# moves with it. The extra /foo in front is to work around a check in libtool
+# which demands that all rpaths are absolute. Note that this 'solution'
+# will only work on platforms that have support for $ORIGIN substitution.
+AM_LDFLAGS = 
+#-rpath '/foo:\$$ORIGIN/../lib'
+AM_LIBTOOLFLAGS = 
 LDADD = 
-SUFFIXES = $(am__append_1)
-CLEANFILES = 
+
+# ToolBus rules
+SUFFIXES = .idef .isrc
+CLEANFILES = $(wildcard *.idef) $(foreach i,$(basename $(wildcard \
+	*.idef)),$i.c $i.h)
+EXTRA_DIST = $(wildcard *.c) $(wildcard *.h)
 pkgconfigdir = $(libdir)/pkgconfig
 docdatadir = $(datadir)/doc/$(PACKAGE)
 
@@ -240,8 +251,15 @@ docdatadir = $(datadir)/doc/$(PACKAGE)
 # toolbus -gentifs, tifstoc, tifstojava, apigen and asfc are available
 # on the path. If not, we will use touch to update the timestamp of
 # the needed file if it exists, and fail if it does not exist.
+# Alas, the 'which' command is not portable, so we have to hack it here:
 @MAINTAINER_MODE_TRUE@check_available = \
-@MAINTAINER_MODE_TRUE@  @if which $1; then \
+@MAINTAINER_MODE_TRUE@  @found="";  \
+@MAINTAINER_MODE_TRUE@  for p in `echo ${PATH} | tr ':' ' '`; do \
+@MAINTAINER_MODE_TRUE@    if [ -f $$p/$1 ]; then \
+@MAINTAINER_MODE_TRUE@      found=$$p; \
+@MAINTAINER_MODE_TRUE@    fi; \
+@MAINTAINER_MODE_TRUE@  done; \
+@MAINTAINER_MODE_TRUE@  if [ -f $${found}/$1 ]; then \
 @MAINTAINER_MODE_TRUE@    echo "$2"; $2; \
 @MAINTAINER_MODE_TRUE@  else \
 @MAINTAINER_MODE_TRUE@    echo "missing $1 to generate $@";  \
@@ -250,14 +268,12 @@ docdatadir = $(datadir)/doc/$(PACKAGE)
 @MAINTAINER_MODE_TRUE@    else \
 @MAINTAINER_MODE_TRUE@      echo "missing $@!";  \
 @MAINTAINER_MODE_TRUE@      false; \
-@MAINTAINER_MODE_TRUE@    fi; \
+@MAINTAINER_MODE_TRUE@    fi;  \
 @MAINTAINER_MODE_TRUE@  fi
 
 @MAINTAINER_MODE_TRUE@stemvar = $($(shell echo "$*" | tr '-' '_')$1)
 
-# $Id: Makefile.am 19283 2006-07-25 08:19:08Z jurgenv $
-pkgdata_DATA = errorapi.jar locationapi.jar
-EXTRA_DIST = errorapi.jar locationapi.jar
+# $Id: Makefile.am 25775 2008-06-09 14:32:47Z jurgenv $
 lib_LTLIBRARIES = libErrorAPI.la libLocationAPI.la
 include_HEADERS = \
 	Location.h \
@@ -283,7 +299,8 @@ libErrorAPI_la_SOURCES = \
 	display.c \
 	lift.c \
 	lower.c \
-	manager.c
+	manager.c \
+	Error-utils.c
 
 libLocationAPI_la_CPPFLAGS = $(ATERM_CFLAGS)
 libLocationAPI_la_LDFLAGS = -avoid-version -no-undefined $(AM_LDFLAGS)
@@ -312,7 +329,7 @@ libLocationAPI_la_SOURCES = \
 all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .eqs .adt .idef .tifs .c .lo .o .obj
+.SUFFIXES: .idef .isrc .c .h .lo .o .obj
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/Makefile.meta $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -380,6 +397,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libErrorAPI_la-Error-utils.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libErrorAPI_la-Error.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libErrorAPI_la-Error_dict.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libErrorAPI_la-ParsedError.Plo@am__quote@
@@ -478,6 +496,13 @@ libErrorAPI_la-manager.lo: manager.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libErrorAPI_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libErrorAPI_la-manager.lo `test -f 'manager.c' || echo '$(srcdir)/'`manager.c
 
+libErrorAPI_la-Error-utils.lo: Error-utils.c
+@am__fastdepCC_TRUE@	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libErrorAPI_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libErrorAPI_la-Error-utils.lo -MD -MP -MF "$(DEPDIR)/libErrorAPI_la-Error-utils.Tpo" -c -o libErrorAPI_la-Error-utils.lo `test -f 'Error-utils.c' || echo '$(srcdir)/'`Error-utils.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/libErrorAPI_la-Error-utils.Tpo" "$(DEPDIR)/libErrorAPI_la-Error-utils.Plo"; else rm -f "$(DEPDIR)/libErrorAPI_la-Error-utils.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='Error-utils.c' object='libErrorAPI_la-Error-utils.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libErrorAPI_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libErrorAPI_la-Error-utils.lo `test -f 'Error-utils.c' || echo '$(srcdir)/'`Error-utils.c
+
 libLocationAPI_la-Location.lo: Location.c
 @am__fastdepCC_TRUE@	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libLocationAPI_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libLocationAPI_la-Location.lo -MD -MP -MF "$(DEPDIR)/libLocationAPI_la-Location.Tpo" -c -o libLocationAPI_la-Location.lo `test -f 'Location.c' || echo '$(srcdir)/'`Location.c; \
 @am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/libLocationAPI_la-Location.Tpo" "$(DEPDIR)/libLocationAPI_la-Location.Plo"; else rm -f "$(DEPDIR)/libLocationAPI_la-Location.Tpo"; exit 1; fi
@@ -515,23 +540,6 @@ clean-libtool:
 distclean-libtool:
 	-rm -f libtool
 uninstall-info-am:
-install-pkgdataDATA: $(pkgdata_DATA)
-	@$(NORMAL_INSTALL)
-	test -z "$(pkgdatadir)" || $(mkdir_p) "$(DESTDIR)$(pkgdatadir)"
-	@list='$(pkgdata_DATA)'; for p in $$list; do \
-	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
-	  f=$(am__strip_dir) \
-	  echo " $(pkgdataDATA_INSTALL) '$$d$$p' '$(DESTDIR)$(pkgdatadir)/$$f'"; \
-	  $(pkgdataDATA_INSTALL) "$$d$$p" "$(DESTDIR)$(pkgdatadir)/$$f"; \
-	done
-
-uninstall-pkgdataDATA:
-	@$(NORMAL_UNINSTALL)
-	@list='$(pkgdata_DATA)'; for p in $$list; do \
-	  f=$(am__strip_dir) \
-	  echo " rm -f '$(DESTDIR)$(pkgdatadir)/$$f'"; \
-	  rm -f "$(DESTDIR)$(pkgdatadir)/$$f"; \
-	done
 install-includeHEADERS: $(include_HEADERS)
 	@$(NORMAL_INSTALL)
 	test -z "$(includedir)" || $(mkdir_p) "$(DESTDIR)$(includedir)"
@@ -628,9 +636,9 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile $(LTLIBRARIES) $(DATA) $(HEADERS)
+all-am: Makefile $(LTLIBRARIES) $(HEADERS)
 installdirs:
-	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(pkgdatadir)" "$(DESTDIR)$(includedir)"; do \
+	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(includedir)"; do \
 	  test -z "$$dir" || $(mkdir_p) "$$dir"; \
 	done
 install: install-am
@@ -679,7 +687,7 @@ info: info-am
 
 info-am:
 
-install-data-am: install-includeHEADERS install-pkgdataDATA
+install-data-am: install-includeHEADERS
 
 install-exec-am: install-libLTLIBRARIES
 
@@ -708,7 +716,7 @@ ps: ps-am
 ps-am:
 
 uninstall-am: uninstall-includeHEADERS uninstall-info-am \
-	uninstall-libLTLIBRARIES uninstall-pkgdataDATA
+	uninstall-libLTLIBRARIES
 
 .PHONY: CTAGS GTAGS all all-am check check-am clean clean-generic \
 	clean-libLTLIBRARIES clean-libtool ctags distclean \
@@ -717,13 +725,41 @@ uninstall-am: uninstall-includeHEADERS uninstall-info-am \
 	install install-am install-data install-data-am install-exec \
 	install-exec-am install-includeHEADERS install-info \
 	install-info-am install-libLTLIBRARIES install-man \
-	install-pkgdataDATA install-strip installcheck installcheck-am \
-	installdirs maintainer-clean maintainer-clean-generic \
-	mostlyclean mostlyclean-compile mostlyclean-generic \
-	mostlyclean-libtool pdf pdf-am ps ps-am tags uninstall \
-	uninstall-am uninstall-includeHEADERS uninstall-info-am \
-	uninstall-libLTLIBRARIES uninstall-pkgdataDATA
+	install-strip installcheck installcheck-am installdirs \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
+	pdf pdf-am ps ps-am tags uninstall uninstall-am \
+	uninstall-includeHEADERS uninstall-info-am \
+	uninstall-libLTLIBRARIES
 
+.isrc.idef:
+	sed 's@__PREFIX__@${prefix}@g' < $< > $@
+
+@MAINTAINER_MODE_TRUE@.idef.c:
+@MAINTAINER_MODE_TRUE@	$(call check_available,toolbus,toolbus-gentifs -output $*.tifs -S$<)
+@MAINTAINER_MODE_TRUE@	$(call check_available,tifstoc,tifstoc -tool $* $*.tifs $(call stemvar,_TIF_OPTIONS))
+
+@MAINTAINER_MODE_TRUE@.idef.h:
+@MAINTAINER_MODE_TRUE@	$(call check_available,toolbus,toolbus-gentifs -output $*.tifs -S$<)
+@MAINTAINER_MODE_TRUE@	$(call check_available,tifstoc,tifstoc -tool $* $*.tifs $(call stemvar,_TIF_OPTIONS))
+
+@MAINTAINER_MODE_FALSE@.idef.c: 
+@MAINTAINER_MODE_FALSE@	if [ -e $*.h ]; then touch $*.h; else cp ${srcdir}/$*.h ./$*.h; fi
+@MAINTAINER_MODE_FALSE@	if [ -e $*.c ]; then touch $*.c; else cp ${srcdir}/$*.c ./$*.c; fi
+
+@MAINTAINER_MODE_FALSE@.idef.h: 
+@MAINTAINER_MODE_FALSE@	if [ -e $*.h ]; then touch $*.h; else cp ${srcdir}/$*.h ./$*.h; fi
+@MAINTAINER_MODE_FALSE@	if [ -e $*.c ]; then touch $*.c; else cp ${srcdir}/$*.c ./$*.c; fi
+
+#Hide distclean errors, see 'info automake, 13.4 Checking the distribution'
+#distcleancheck_listfiles = \
+#	find -type f -exec sh -c 'test -f $(srcdir)/{} || echo {}' ';'
+
+#ApiGen
+
+#SUFFIXES += .adt
+#
+#EXTRA_DIST += $(wildcard *.adt) $(foreach i,$(basename $(wildcard *.adt)),$i.c $i.h $i_dict.c $i_dict.h)
 
 @MAINTAINER_MODE_TRUE@api: error-api location-api
 
@@ -740,15 +776,6 @@ uninstall-am: uninstall-includeHEADERS uninstall-info-am \
 @MAINTAINER_MODE_TRUE@	sdf2-to-c --imploded --input $< --prefix ERR_ --output Error
 @MAINTAINER_MODE_TRUE@	indent Error.h
 
-@MAINTAINER_MODE_TRUE@java-error-api: MetaErrors.def Makefile
-@MAINTAINER_MODE_TRUE@	sdf2-to-java \
-@MAINTAINER_MODE_TRUE@		--imploded \
-@MAINTAINER_MODE_TRUE@		--input $< \
-@MAINTAINER_MODE_TRUE@		--name errorapi \
-@MAINTAINER_MODE_TRUE@		--output . \
-@MAINTAINER_MODE_TRUE@		--version ${VERSION}
-@MAINTAINER_MODE_TRUE@	mv errorapi-${VERSION}.jar errorapi.jar
-
 @MAINTAINER_MODE_TRUE@Location.def: Makefile
 @MAINTAINER_MODE_TRUE@	@(echo "definition"; cat ${ABS_LOCATION_MODULES}) > $@
 
@@ -761,15 +788,6 @@ uninstall-am: uninstall-includeHEADERS uninstall-info-am \
 @MAINTAINER_MODE_TRUE@imploded-location-api: Location.def Makefile
 @MAINTAINER_MODE_TRUE@	sdf2-to-c --imploded --input $< --prefix LOC_ --output Location
 @MAINTAINER_MODE_TRUE@	indent Location.h
-
-@MAINTAINER_MODE_TRUE@java-location-api: Location.def Makefile
-@MAINTAINER_MODE_TRUE@	sdf2-to-java \
-@MAINTAINER_MODE_TRUE@		--imploded \
-@MAINTAINER_MODE_TRUE@		--input $< \
-@MAINTAINER_MODE_TRUE@		--name locationapi \
-@MAINTAINER_MODE_TRUE@		--output . \
-@MAINTAINER_MODE_TRUE@		--version ${VERSION}
-@MAINTAINER_MODE_TRUE@	mv locationapi-${VERSION}.jar locationapi.jar
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

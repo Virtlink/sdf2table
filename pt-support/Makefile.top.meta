@@ -1,13 +1,13 @@
 
 include $(top_srcdir)/Makefile.meta
 
-EXTRA_DIST = $(wildcard *.m4) \
+EXTRA_DIST += $(wildcard *.m4) \
              reconf \
 	     Doxyfile.meta \
              Makefile.meta \
              Makefile.top.meta
 
-CLEANFILES+= ${PACKAGE}-uninstalled.pc
+CLEANFILES+= ${PACKAGE}-uninstalled.pc META-INF/MANIFEST.MF .project
 
 pkgconfig_DATA = ${PACKAGE}.pc
 

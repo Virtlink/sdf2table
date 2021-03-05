@@ -1,4 +1,33 @@
-$Id: ChangeLog 20960 2007-01-19 11:52:47Z kooiker $
+$Id: ChangeLog 25776 2008-06-09 14:33:41Z jurgenv $
+
+Mon Jun  9 16:32:56 CEST 2008 <jurgenv@cwi.nl>
+ * error-support.pc.in: Bumped version to 1.5.1
+
+Mon Jun  9 13:17:49 CEST 2008 <jurgenv@cwi.nl>
+ * error-support.pc.in: Bumped version to 1.5
+
+Thu May 22 02:29:61 CEST 2008 <basten@cwi.nl>
+ * lib/Error-utils.*: added function to count the number of errors, warnings,
+   etc. in error reports.
+ * utils/display-error.c: program now exits with exit code 1 if error report
+   contains (fatal) errors.
+
+Wed Apr 16 11:33:50 CEST 2008 <jurgenv@cwi.nl>
+ * lib/*.c: regenerated API to fix type punned aliasing issues.
+
+Mon Aug 20 15:04:28 CEST 2007 <kooiker@cwi.nl>
+ * util/display-error.c: commandline utility that displays errors in a user
+   readable way
+
+Tue Mar 20 16:22:51 CET 2007 <kooiker@cwi.nl>
+ * lib/lower.c: lowerError checks if an error is valid. If not it tries to
+ create an error from the origin information, otherwise it creates an error
+ with the error to be lowered as subject.
+
+Thu Mar  8 19:03:58 CET 2007 <{economop,kooiker,jurgenv}@cwi.nl>
+ * **: regenerated all API's in this package with a new version of 
+   ApiGen that generates more efficient code for the is-alternative 
+   predicates.
 
 Fri Jan 19 12:52:19 CET 2007 <kooiker@cwi.nl>
  * utils/error-support.idef: add function to set id of summary

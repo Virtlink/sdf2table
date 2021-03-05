@@ -1,4 +1,4 @@
-/* $Id: asc-support.c 21097 2007-01-26 09:35:12Z jurgenv $ */
+/* $Id: asc-support.c 22866 2007-05-30 08:31:47Z jurgenv $ */
 
 /*{{{  standard includes */
 
@@ -149,10 +149,10 @@ ATerm innermost(PT_Tree tree)
   if (!keep_layout && PT_isTreeLayout(tree)) {
     result = NULL;
   }
-  else if (PT_isTreeLit(tree)) {
+  else if (!keep_layout && PT_isTreeLit(tree)) {
     result = NULL;
   }
-  else if (PT_isTreeCilit(tree)) {
+  else if (!keep_layout && PT_isTreeCilit(tree)) {
     result = NULL;
   }
   else if (PT_isTreeAppl(tree)) {

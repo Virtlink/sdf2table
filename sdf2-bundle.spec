@@ -1,6 +1,6 @@
 Summary: SDF2 syntax definition formalism
 Name: sdf2-bundle
-Version: 2.4
+Version: 2.6
 Release: 1
 License: LGPL
 Group: Development/Languages

@@ -1,8 +1,7 @@
-# $Id: Makefile.am 19809 2006-07-27 11:13:06Z jurgenv $
+# $Id: Makefile.am 21926 2007-03-14 14:19:00Z economop $
 
 include $(top_srcdir)/Makefile.top.meta
 
-SUBDIRS = doc libsglr sglr dump restorebrackets test
+SUBDIRS = doc src restorebrackets test
 
 ACLOCAL_AMFLAGS = -I .
-

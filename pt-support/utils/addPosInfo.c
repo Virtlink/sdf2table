@@ -1,4 +1,4 @@
-/* $Id: addPosInfo.c 13294 2004-04-19 09:29:48Z jong $ */
+/* $Id: addPosInfo.c 24310 2007-12-01 15:38:25Z jurgenv $ */
 
 /*{{{  includes */
 
@@ -10,7 +10,7 @@
 #include <MEPT-utils.h>
 #include <Error-utils.h>
 
-#include "position-annotator.tif.h"
+#include "position-annotator.h"
 
 /*}}}  */
 
@@ -75,13 +75,13 @@ ATerm promote_posinfo_to_origin(int cid, ATerm t)
 ATerm get_origin(int cid, ATerm t)
 {
   PT_Tree tree = PT_TreeFromTerm(ATBunpack(t));
-  LOC_Location origin = PT_getTreeOrigin(tree);
+  ERR_Location origin = PT_getTreeOrigin(tree);
 
   if (origin == NULL) {
     return ATmake("snd-value(no-origin)");
   }
   else {
-    return ATmake("snd-value(origin(<term>))", LOC_LocationToTerm(origin));
+    return ATmake("snd-value(origin(<term>))", ERR_LocationToTerm(origin));
   }
 }
 
@@ -164,7 +164,7 @@ int main(int argc, char *argv[])
     int cid;
     ATBinit(argc, argv, &bottomOfStack);
     PT_initMEPTApi();
-    LOC_initLocationApi();
+    ERR_initErrorApi();
 
     cid = ATBconnect(NULL, NULL, -1, position_annotator_handler);
     ATBeventloop();
@@ -174,7 +174,7 @@ int main(int argc, char *argv[])
   {
     ATinit(argc, argv, &bottomOfStack);
     PT_initMEPTApi();
-    LOC_initLocationApi();
+    ERR_initErrorApi();
 
     if (argc == 1) {
       /* no arguments */

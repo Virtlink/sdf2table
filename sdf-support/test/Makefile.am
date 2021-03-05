@@ -1,7 +1,7 @@
 #
 # vim:ts=8
 #
-# $Id: Makefile.am 19684 2006-07-25 23:23:25Z martinrw $
+# $Id: Makefile.am 22232 2007-03-27 17:20:39Z jurgenv $
 #
 
 include $(top_srcdir)/Makefile.meta
@@ -9,7 +9,7 @@ include $(top_srcdir)/Makefile.meta
 TESTS = $(check_PROGRAMS)
 check_PROGRAMS = pt2sdf grammars sorts 
 
-EXTRA_DIST = Booleans.pt Layout.pt BoolTerm.pt
+EXTRA_DIST += Booleans.pt Layout.pt BoolTerm.pt
 
 AM_CPPFLAGS += \
 	-I$(top_srcdir)/lib \

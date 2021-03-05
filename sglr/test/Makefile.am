@@ -1,14 +1,18 @@
-# $Id: Makefile.am 19685 2006-07-25 23:46:34Z martinrw $
+# $Id: Makefile.am 21926 2007-03-14 14:19:00Z economop $
 
 SUBDIRS    = erroneous tables terms
 
-EXTRA_DIST = lang-types regress-terms.sh.src
+EXTRA_DIST = lang-types regressionTests.sh.src
 
-TESTS      = regress-terms
+TESTS      = regressionTests
 
-CLEANFILES = regress-terms
+CLEANFILES = regressionTests
 
-% : %.sh.src 
+% : %.sh.src Makefile 
 	sed "s@__ATERM__@$(ATERM_PREFIX)@g;\
+	     s@__PT_SUPPORT__@$(PT_SUPPORT_PREFIX)@g;\
 	     s@__ERROR_SUPPORT__@$(ERROR_SUPPORT_PREFIX)@g;\
-	     s@__SRCDIR__@$(srcdir)@g" < $< > $@ && chmod +x $@
+	     s@__SGLR_BINARY__@$(top_builddir)/src/sglr@g;\
+	     s@__SGLR__@$(top_builddir)@g;\
+	     s@__SRCDIR__@$(srcdir)@g" < $< > $@ && \
+	chmod +x $@

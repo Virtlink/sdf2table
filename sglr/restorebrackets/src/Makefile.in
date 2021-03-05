@@ -14,7 +14,7 @@
 
 @SET_MAKE@
 
-# $Id: Makefile.am 19685 2006-07-25 23:46:34Z martinrw $
+# $Id: Makefile.am 22366 2007-04-05 15:48:04Z jurgenv $
 
 #
 # \file 
@@ -49,7 +49,6 @@ build_triplet = @build@
 host_triplet = @host@
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(top_srcdir)/Makefile.meta
-@MAINTAINER_MODE_TRUE@am__append_1 = .eqs .adt .idef .tifs
 bin_PROGRAMS = restorebrackets$(EXEEXT)
 subdir = ./restorebrackets/src
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -62,13 +61,14 @@ CONFIG_CLEAN_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(pkgdatadir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
-am_restorebrackets_OBJECTS = restorebrackets.tif.$(OBJEXT) \
+am_restorebrackets_OBJECTS = restorebrackets.$(OBJEXT) \
 	restorebrackets-main.$(OBJEXT)
 restorebrackets_OBJECTS = $(am_restorebrackets_OBJECTS)
 am__DEPENDENCIES_1 =
 restorebrackets_DEPENDENCIES = $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 DEFAULT_INCLUDES = -I. -I$(srcdir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -112,6 +112,12 @@ AWK = @AWK@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
+CONFIG_SUPPORT_CFLAGS = @CONFIG_SUPPORT_CFLAGS@
+CONFIG_SUPPORT_INSTALLED_JARS = @CONFIG_SUPPORT_INSTALLED_JARS@
+CONFIG_SUPPORT_JARS = @CONFIG_SUPPORT_JARS@
+CONFIG_SUPPORT_LIBS = @CONFIG_SUPPORT_LIBS@
+CONFIG_SUPPORT_PREFIX = @CONFIG_SUPPORT_PREFIX@
+CONFIG_SUPPORT_TOOLBUSFLAGS = @CONFIG_SUPPORT_TOOLBUSFLAGS@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CXX = @CXX@
@@ -119,11 +125,18 @@ CXXCPP = @CXXCPP@
 CXXDEPMODE = @CXXDEPMODE@
 CXXFLAGS = @CXXFLAGS@
 CYGPATH_W = @CYGPATH_W@
+C_LIBRARY_CFLAGS = @C_LIBRARY_CFLAGS@
+C_LIBRARY_INSTALLED_JARS = @C_LIBRARY_INSTALLED_JARS@
+C_LIBRARY_JARS = @C_LIBRARY_JARS@
+C_LIBRARY_LIBS = @C_LIBRARY_LIBS@
+C_LIBRARY_PREFIX = @C_LIBRARY_PREFIX@
+C_LIBRARY_TOOLBUSFLAGS = @C_LIBRARY_TOOLBUSFLAGS@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
 DISABLE_FALSE = @DISABLE_FALSE@
 DISABLE_TRUE = @DISABLE_TRUE@
 DLLTOOL = @DLLTOOL@
+DSYMUTIL = @DSYMUTIL@
 ECHO = @ECHO@
 ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
@@ -155,6 +168,7 @@ MAINT = @MAINT@
 MAINTAINER_MODE_FALSE = @MAINTAINER_MODE_FALSE@
 MAINTAINER_MODE_TRUE = @MAINTAINER_MODE_TRUE@
 MAKEINFO = @MAKEINFO@
+NMEDIT = @NMEDIT@
 OBJDUMP = @OBJDUMP@
 OBJEXT = @OBJEXT@
 PACKAGE = @PACKAGE@
@@ -165,6 +179,12 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 PKG_CONFIG = @PKG_CONFIG@
+PTABLE_SUPPORT_CFLAGS = @PTABLE_SUPPORT_CFLAGS@
+PTABLE_SUPPORT_INSTALLED_JARS = @PTABLE_SUPPORT_INSTALLED_JARS@
+PTABLE_SUPPORT_JARS = @PTABLE_SUPPORT_JARS@
+PTABLE_SUPPORT_LIBS = @PTABLE_SUPPORT_LIBS@
+PTABLE_SUPPORT_PREFIX = @PTABLE_SUPPORT_PREFIX@
+PTABLE_SUPPORT_TOOLBUSFLAGS = @PTABLE_SUPPORT_TOOLBUSFLAGS@
 PT_SUPPORT_CFLAGS = @PT_SUPPORT_CFLAGS@
 PT_SUPPORT_INSTALLED_JARS = @PT_SUPPORT_INSTALLED_JARS@
 PT_SUPPORT_JARS = @PT_SUPPORT_JARS@
@@ -172,6 +192,7 @@ PT_SUPPORT_LIBS = @PT_SUPPORT_LIBS@
 PT_SUPPORT_PREFIX = @PT_SUPPORT_PREFIX@
 PT_SUPPORT_TOOLBUSFLAGS = @PT_SUPPORT_TOOLBUSFLAGS@
 RANLIB = @RANLIB@
+SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
@@ -233,12 +254,27 @@ target_alias = @target_alias@
 
 # Put very common AM_CPPFLAGS, LDADD here, also here 
 # because of pkgconfig:
-AM_CPPFLAGS = -I$(top_srcdir)/libsglr $(PT_SUPPORT_CFLAGS) \
-	$(ERROR_SUPPORT_CFLAGS) $(TOOLBUSLIB_CFLAGS) $(SGLR_CFLAGS) \
-	$(ATERM_CFLAGS)
+AM_CPPFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/src/utils \
+	-I$(top_srcdir)/src/parseForest -I$(top_srcdir)/src/parseTable \
+	-I$(top_srcdir)/src/parser $(PT_SUPPORT_CFLAGS) \
+	$(ERROR_SUPPORT_CFLAGS) $(CONFIG_SUPPORT_CFLAGS) \
+	$(C_LIBRARY_CFLAGS) $(TOOLBUSLIB_CFLAGS) \
+	$(PTABLE_SUPPORT_CFLAGS) $(ATERM_CFLAGS)
+
+# Note: this makes all binaries relocatable as long as the ../lib directory
+# moves with it. The extra /foo in front is to work around a check in libtool
+# which demands that all rpaths are absolute. Note that this 'solution'
+# will only work on platforms that have support for $ORIGIN substitution.
+AM_LDFLAGS = 
+#-rpath '/foo:\$$ORIGIN/../lib'
+AM_LIBTOOLFLAGS = 
 LDADD = 
-SUFFIXES = $(am__append_1)
-CLEANFILES = restorebrackets.idef
+
+# ToolBus rules
+SUFFIXES = .idef .isrc
+CLEANFILES = $(wildcard *.idef) $(foreach i,$(basename $(wildcard \
+	*.idef)),$i.c $i.h)
+EXTRA_DIST = $(wildcard *.c) $(wildcard *.h)
 pkgconfigdir = $(libdir)/pkgconfig
 docdatadir = $(datadir)/doc/$(PACKAGE)
 
@@ -246,8 +282,15 @@ docdatadir = $(datadir)/doc/$(PACKAGE)
 # toolbus -gentifs, tifstoc, tifstojava, apigen and asfc are available
 # on the path. If not, we will use touch to update the timestamp of
 # the needed file if it exists, and fail if it does not exist.
+# Alas, the 'which' command is not portable, so we have to hack it here:
 @MAINTAINER_MODE_TRUE@check_available = \
-@MAINTAINER_MODE_TRUE@  @if which $1; then \
+@MAINTAINER_MODE_TRUE@  @found="";  \
+@MAINTAINER_MODE_TRUE@  for p in `echo ${PATH} | tr ':' ' '`; do \
+@MAINTAINER_MODE_TRUE@    if [ -f $$p/$1 ]; then \
+@MAINTAINER_MODE_TRUE@      found=$$p; \
+@MAINTAINER_MODE_TRUE@    fi; \
+@MAINTAINER_MODE_TRUE@  done; \
+@MAINTAINER_MODE_TRUE@  if [ -f $${found}/$1 ]; then \
 @MAINTAINER_MODE_TRUE@    echo "$2"; $2; \
 @MAINTAINER_MODE_TRUE@  else \
 @MAINTAINER_MODE_TRUE@    echo "missing $1 to generate $@";  \
@@ -256,24 +299,25 @@ docdatadir = $(datadir)/doc/$(PACKAGE)
 @MAINTAINER_MODE_TRUE@    else \
 @MAINTAINER_MODE_TRUE@      echo "missing $@!";  \
 @MAINTAINER_MODE_TRUE@      false; \
-@MAINTAINER_MODE_TRUE@    fi; \
+@MAINTAINER_MODE_TRUE@    fi;  \
 @MAINTAINER_MODE_TRUE@  fi
 
 @MAINTAINER_MODE_TRUE@stemvar = $($(shell echo "$*" | tr '-' '_')$1)
-EXTRA_DIST = restorebrackets.idef.src
 pkgdata_DATA = restorebrackets.idef
-restorebrackets_SOURCES = restorebrackets.tif.c restorebrackets.tif.h restorebrackets-main.c
-restorebrackets_LDADD = \
-  -L$(top_builddir)/libsglr -lsglr \
-  $(PT_SUPPORT_LIBS) \
-  $(ERROR_SUPPORT_LIBS) \
-  $(TOOLBUSLIB_LIBS) \
-  $(ATERM_LIBS)
+restorebrackets_SOURCES = restorebrackets.isrc restorebrackets-main.c
+restorebrackets_LDADD = -L$(top_builddir)/src -lsglr \
+			$(PT_SUPPORT_LIBS) \
+			$(PTABLE_SUPPORT_LIBS) \
+			$(CONFIG_SUPPORT_LIBS) \
+			$(C_LIBRARY_LIBS) \
+			$(ERROR_SUPPORT_LIBS) \
+			$(TOOLBUSLIB_LIBS) \
+			$(ATERM_LIBS)
 
 all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .eqs .adt .idef .tifs .c .lo .o .obj
+.SUFFIXES: .idef .isrc .c .h .lo .o .obj
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/Makefile.meta $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -342,7 +386,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/restorebrackets-main.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/restorebrackets.tif.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/restorebrackets.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
@@ -564,9 +608,34 @@ uninstall-am: uninstall-binPROGRAMS uninstall-info-am \
 	uninstall-am uninstall-binPROGRAMS uninstall-info-am \
 	uninstall-pkgdataDATA
 
+.isrc.idef:
+	sed 's@__PREFIX__@${prefix}@g' < $< > $@
 
-%.idef: %.idef.src Makefile
-	sed 's@__PREFIX__@$(prefix)@g' < $< > $@
+@MAINTAINER_MODE_TRUE@.idef.c:
+@MAINTAINER_MODE_TRUE@	$(call check_available,toolbus,toolbus-gentifs -output $*.tifs -S$<)
+@MAINTAINER_MODE_TRUE@	$(call check_available,tifstoc,tifstoc -tool $* $*.tifs $(call stemvar,_TIF_OPTIONS))
+
+@MAINTAINER_MODE_TRUE@.idef.h:
+@MAINTAINER_MODE_TRUE@	$(call check_available,toolbus,toolbus-gentifs -output $*.tifs -S$<)
+@MAINTAINER_MODE_TRUE@	$(call check_available,tifstoc,tifstoc -tool $* $*.tifs $(call stemvar,_TIF_OPTIONS))
+
+@MAINTAINER_MODE_FALSE@.idef.c: 
+@MAINTAINER_MODE_FALSE@	if [ -e $*.h ]; then touch $*.h; else cp ${srcdir}/$*.h ./$*.h; fi
+@MAINTAINER_MODE_FALSE@	if [ -e $*.c ]; then touch $*.c; else cp ${srcdir}/$*.c ./$*.c; fi
+
+@MAINTAINER_MODE_FALSE@.idef.h: 
+@MAINTAINER_MODE_FALSE@	if [ -e $*.h ]; then touch $*.h; else cp ${srcdir}/$*.h ./$*.h; fi
+@MAINTAINER_MODE_FALSE@	if [ -e $*.c ]; then touch $*.c; else cp ${srcdir}/$*.c ./$*.c; fi
+
+#Hide distclean errors, see 'info automake, 13.4 Checking the distribution'
+#distcleancheck_listfiles = \
+#	find -type f -exec sh -c 'test -f $(srcdir)/{} || echo {}' ';'
+
+#ApiGen
+
+#SUFFIXES += .adt
+#
+#EXTRA_DIST += $(wildcard *.adt) $(foreach i,$(basename $(wildcard *.adt)),$i.c $i.h $i_dict.c $i_dict.h)
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

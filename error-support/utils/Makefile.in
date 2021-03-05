@@ -23,8 +23,6 @@
 #
 
 
-
-
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
 VPATH = @srcdir@
@@ -47,10 +45,9 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-DIST_COMMON = $(noinst_HEADERS) $(srcdir)/Makefile.am \
-	$(srcdir)/Makefile.in $(top_srcdir)/Makefile.meta
-@MAINTAINER_MODE_TRUE@am__append_1 = .eqs .adt .idef .tifs
-bin_PROGRAMS = error-support$(EXEEXT)
+DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
+	$(top_srcdir)/Makefile.meta
+bin_PROGRAMS = error-support$(EXEEXT) display-error$(EXEEXT)
 subdir = ./utils
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/meta-build.m4 \
@@ -59,18 +56,17 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
 CONFIG_CLEAN_FILES =
-am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bindir)" \
-	"$(DESTDIR)$(pkgdatadir)"
+am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(pkgdatadir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
-am_error_support_OBJECTS = error-support.tif.$(OBJEXT) \
-	error-support.$(OBJEXT)
-error_support_OBJECTS = $(am_error_support_OBJECTS)
+am_display_error_OBJECTS = display-error.$(OBJEXT)
+display_error_OBJECTS = $(am_display_error_OBJECTS)
 am__DEPENDENCIES_1 =
+display_error_DEPENDENCIES = $(am__DEPENDENCIES_1)
+am_error_support_OBJECTS = error-support.$(OBJEXT) main.$(OBJEXT)
+error_support_OBJECTS = $(am_error_support_OBJECTS)
 error_support_DEPENDENCIES = $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1)
-binSCRIPT_INSTALL = $(INSTALL_SCRIPT)
-SCRIPTS = $(bin_SCRIPTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -82,8 +78,8 @@ LTCOMPILE = $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) \
 CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = $(error_support_SOURCES)
-DIST_SOURCES = $(error_support_SOURCES)
+SOURCES = $(display_error_SOURCES) $(error_support_SOURCES)
+DIST_SOURCES = $(display_error_SOURCES) $(error_support_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	html-recursive info-recursive install-data-recursive \
 	install-exec-recursive install-info-recursive \
@@ -98,7 +94,6 @@ am__vpath_adj = case $$p in \
 am__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
 pkgdataDATA_INSTALL = $(INSTALL_DATA)
 DATA = $(pkgdata_DATA)
-HEADERS = $(noinst_HEADERS)
 ETAGS = etags
 CTAGS = ctags
 DIST_SUBDIRS = $(SUBDIRS)
@@ -134,6 +129,7 @@ DEPDIR = @DEPDIR@
 DISABLE_FALSE = @DISABLE_FALSE@
 DISABLE_TRUE = @DISABLE_TRUE@
 DLLTOOL = @DLLTOOL@
+DSYMUTIL = @DSYMUTIL@
 ECHO = @ECHO@
 ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
@@ -159,6 +155,7 @@ MAINT = @MAINT@
 MAINTAINER_MODE_FALSE = @MAINTAINER_MODE_FALSE@
 MAINTAINER_MODE_TRUE = @MAINTAINER_MODE_TRUE@
 MAKEINFO = @MAKEINFO@
+NMEDIT = @NMEDIT@
 OBJDUMP = @OBJDUMP@
 OBJEXT = @OBJEXT@
 PACKAGE = @PACKAGE@
@@ -170,6 +167,7 @@ PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 PKG_CONFIG = @PKG_CONFIG@
 RANLIB = @RANLIB@
+SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
@@ -232,9 +230,21 @@ target_alias = @target_alias@
 # Put very common AM_CPPFLAGS, LDADD here, also here 
 # because of pkgconfig:
 AM_CPPFLAGS = -I$(top_srcdir)/lib $(ATERM_CFLAGS) $(TOOLBUSLIB_CFLAGS)
+
+# Note: this makes all binaries relocatable as long as the ../lib directory
+# moves with it. The extra /foo in front is to work around a check in libtool
+# which demands that all rpaths are absolute. Note that this 'solution'
+# will only work on platforms that have support for $ORIGIN substitution.
+AM_LDFLAGS = 
+#-rpath '/foo:\$$ORIGIN/../lib'
+AM_LIBTOOLFLAGS = 
 LDADD = 
-SUFFIXES = $(am__append_1)
-CLEANFILES = $(bin_SCRIPTS) error-support.idef
+
+# ToolBus rules
+SUFFIXES = .idef .isrc
+CLEANFILES = $(wildcard *.idef) $(foreach i,$(basename $(wildcard \
+	*.idef)),$i.c $i.h)
+EXTRA_DIST = $(wildcard *.c) $(wildcard *.h)
 pkgconfigdir = $(libdir)/pkgconfig
 docdatadir = $(datadir)/doc/$(PACKAGE)
 
@@ -242,8 +252,15 @@ docdatadir = $(datadir)/doc/$(PACKAGE)
 # toolbus -gentifs, tifstoc, tifstojava, apigen and asfc are available
 # on the path. If not, we will use touch to update the timestamp of
 # the needed file if it exists, and fail if it does not exist.
+# Alas, the 'which' command is not portable, so we have to hack it here:
 @MAINTAINER_MODE_TRUE@check_available = \
-@MAINTAINER_MODE_TRUE@  @if which $1; then \
+@MAINTAINER_MODE_TRUE@  @found="";  \
+@MAINTAINER_MODE_TRUE@  for p in `echo ${PATH} | tr ':' ' '`; do \
+@MAINTAINER_MODE_TRUE@    if [ -f $$p/$1 ]; then \
+@MAINTAINER_MODE_TRUE@      found=$$p; \
+@MAINTAINER_MODE_TRUE@    fi; \
+@MAINTAINER_MODE_TRUE@  done; \
+@MAINTAINER_MODE_TRUE@  if [ -f $${found}/$1 ]; then \
 @MAINTAINER_MODE_TRUE@    echo "$2"; $2; \
 @MAINTAINER_MODE_TRUE@  else \
 @MAINTAINER_MODE_TRUE@    echo "missing $1 to generate $@";  \
@@ -252,36 +269,32 @@ docdatadir = $(datadir)/doc/$(PACKAGE)
 @MAINTAINER_MODE_TRUE@    else \
 @MAINTAINER_MODE_TRUE@      echo "missing $@!";  \
 @MAINTAINER_MODE_TRUE@      false; \
-@MAINTAINER_MODE_TRUE@    fi; \
+@MAINTAINER_MODE_TRUE@    fi;  \
 @MAINTAINER_MODE_TRUE@  fi
 
 @MAINTAINER_MODE_TRUE@stemvar = $($(shell echo "$*" | tr '-' '_')$1)
 SUBDIRS = lift-error lower-error error-diff
-EXTRA_DIST = \
-	error-support.idef.src
-
-pkgdata_DATA = \
-	error-support.idef
-
-noinst_HEADERS = \
-	error-support.tif.h
-
-bin_SCRIPTS = $(PACKAGE)-config
+pkgdata_DATA = error-support.idef
 error_support_SOURCES = \
-	error-support.tif.c \
-	error-support.c
+	error-support.isrc \
+	main.c 
 
 error_support_LDADD = \
 	-L../lib -lErrorAPI \
 	$(TOOLBUSLIB_LIBS) \
 	$(ATERM_LIBS)
 
-IDEF = idef2tif
-TIFS = tifstoc
+display_error_SOURCES = \
+	display-error.c
+
+display_error_LDADD = \
+	-L../lib -lErrorAPI \
+	$(ATERM_LIBS)
+
 all: all-recursive
 
 .SUFFIXES:
-.SUFFIXES: .eqs .adt .idef .tifs .c .lo .o .obj
+.SUFFIXES: .idef .isrc .c .h .lo .o .obj
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/Makefile.meta $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -339,28 +352,12 @@ clean-binPROGRAMS:
 	  echo " rm -f $$p $$f"; \
 	  rm -f $$p $$f ; \
 	done
+display-error$(EXEEXT): $(display_error_OBJECTS) $(display_error_DEPENDENCIES) 
+	@rm -f display-error$(EXEEXT)
+	$(LINK) $(display_error_LDFLAGS) $(display_error_OBJECTS) $(display_error_LDADD) $(LIBS)
 error-support$(EXEEXT): $(error_support_OBJECTS) $(error_support_DEPENDENCIES) 
 	@rm -f error-support$(EXEEXT)
 	$(LINK) $(error_support_LDFLAGS) $(error_support_OBJECTS) $(error_support_LDADD) $(LIBS)
-install-binSCRIPTS: $(bin_SCRIPTS)
-	@$(NORMAL_INSTALL)
-	test -z "$(bindir)" || $(mkdir_p) "$(DESTDIR)$(bindir)"
-	@list='$(bin_SCRIPTS)'; for p in $$list; do \
-	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
-	  if test -f $$d$$p; then \
-	    f=`echo "$$p" | sed 's|^.*/||;$(transform)'`; \
-	    echo " $(binSCRIPT_INSTALL) '$$d$$p' '$(DESTDIR)$(bindir)/$$f'"; \
-	    $(binSCRIPT_INSTALL) "$$d$$p" "$(DESTDIR)$(bindir)/$$f"; \
-	  else :; fi; \
-	done
-
-uninstall-binSCRIPTS:
-	@$(NORMAL_UNINSTALL)
-	@list='$(bin_SCRIPTS)'; for p in $$list; do \
-	  f=`echo "$$p" | sed 's|^.*/||;$(transform)'`; \
-	  echo " rm -f '$(DESTDIR)$(bindir)/$$f'"; \
-	  rm -f "$(DESTDIR)$(bindir)/$$f"; \
-	done
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -368,8 +365,9 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/display-error.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/error-support.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/error-support.tif.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
@@ -596,10 +594,10 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-recursive
-all-am: Makefile $(PROGRAMS) $(SCRIPTS) $(DATA) $(HEADERS)
+all-am: Makefile $(PROGRAMS) $(DATA)
 installdirs: installdirs-recursive
 installdirs-am:
-	for dir in "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bindir)" "$(DESTDIR)$(pkgdatadir)"; do \
+	for dir in "$(DESTDIR)$(bindir)" "$(DESTDIR)$(pkgdatadir)"; do \
 	  test -z "$$dir" || $(mkdir_p) "$$dir"; \
 	done
 install: install-recursive
@@ -649,7 +647,7 @@ info-am:
 
 install-data-am: install-pkgdataDATA
 
-install-exec-am: install-binPROGRAMS install-binSCRIPTS
+install-exec-am: install-binPROGRAMS
 
 install-info: install-info-recursive
 
@@ -675,8 +673,8 @@ ps: ps-recursive
 
 ps-am:
 
-uninstall-am: uninstall-binPROGRAMS uninstall-binSCRIPTS \
-	uninstall-info-am uninstall-pkgdataDATA
+uninstall-am: uninstall-binPROGRAMS uninstall-info-am \
+	uninstall-pkgdataDATA
 
 uninstall-info: uninstall-info-recursive
 
@@ -686,34 +684,43 @@ uninstall-info: uninstall-info-recursive
 	distclean-compile distclean-generic distclean-libtool \
 	distclean-recursive distclean-tags distdir dvi dvi-am html \
 	html-am info info-am install install-am install-binPROGRAMS \
-	install-binSCRIPTS install-data install-data-am install-exec \
-	install-exec-am install-info install-info-am install-man \
-	install-pkgdataDATA install-strip installcheck installcheck-am \
-	installdirs installdirs-am maintainer-clean \
-	maintainer-clean-generic maintainer-clean-recursive \
-	mostlyclean mostlyclean-compile mostlyclean-generic \
-	mostlyclean-libtool mostlyclean-recursive pdf pdf-am ps ps-am \
-	tags tags-recursive uninstall uninstall-am \
-	uninstall-binPROGRAMS uninstall-binSCRIPTS uninstall-info-am \
-	uninstall-pkgdataDATA
+	install-data install-data-am install-exec install-exec-am \
+	install-info install-info-am install-man install-pkgdataDATA \
+	install-strip installcheck installcheck-am installdirs \
+	installdirs-am maintainer-clean maintainer-clean-generic \
+	maintainer-clean-recursive mostlyclean mostlyclean-compile \
+	mostlyclean-generic mostlyclean-libtool mostlyclean-recursive \
+	pdf pdf-am ps ps-am tags tags-recursive uninstall uninstall-am \
+	uninstall-binPROGRAMS uninstall-info-am uninstall-pkgdataDATA
 
+.isrc.idef:
+	sed 's@__PREFIX__@${prefix}@g' < $< > $@
 
-%.idef: %.idef.src Makefile
-	sed 's@__PREFIX__@$(prefix)@g' < $< > $@
+@MAINTAINER_MODE_TRUE@.idef.c:
+@MAINTAINER_MODE_TRUE@	$(call check_available,toolbus,toolbus-gentifs -output $*.tifs -S$<)
+@MAINTAINER_MODE_TRUE@	$(call check_available,tifstoc,tifstoc -tool $* $*.tifs $(call stemvar,_TIF_OPTIONS))
 
-$(PACKAGE)-config: Makefile
-	@(	echo "#! /bin/sh";\
-		echo "echo $(prefix)/share/$(PACKAGE)/errorapi.jar:$(prefix)/share/$(PACKAGE)/locationapi.jar" \
-	) > $@ && chmod +x $@
+@MAINTAINER_MODE_TRUE@.idef.h:
+@MAINTAINER_MODE_TRUE@	$(call check_available,toolbus,toolbus-gentifs -output $*.tifs -S$<)
+@MAINTAINER_MODE_TRUE@	$(call check_available,tifstoc,tifstoc -tool $* $*.tifs $(call stemvar,_TIF_OPTIONS))
 
-tif:
-	for i in `ls *.idef`; do \
-	  $(IDEF) $$i; \
-	  $(TIFS) -tool `basename $$i .idef` `basename $$i .idef`.tifs; \
-	done
+@MAINTAINER_MODE_FALSE@.idef.c: 
+@MAINTAINER_MODE_FALSE@	if [ -e $*.h ]; then touch $*.h; else cp ${srcdir}/$*.h ./$*.h; fi
+@MAINTAINER_MODE_FALSE@	if [ -e $*.c ]; then touch $*.c; else cp ${srcdir}/$*.c ./$*.c; fi
 
-tif-clean:
-	rm -f *.tifs *.tif.[ch]
+@MAINTAINER_MODE_FALSE@.idef.h: 
+@MAINTAINER_MODE_FALSE@	if [ -e $*.h ]; then touch $*.h; else cp ${srcdir}/$*.h ./$*.h; fi
+@MAINTAINER_MODE_FALSE@	if [ -e $*.c ]; then touch $*.c; else cp ${srcdir}/$*.c ./$*.c; fi
+
+#Hide distclean errors, see 'info automake, 13.4 Checking the distribution'
+#distcleancheck_listfiles = \
+#	find -type f -exec sh -c 'test -f $(srcdir)/{} || echo {}' ';'
+
+#ApiGen
+
+#SUFFIXES += .adt
+#
+#EXTRA_DIST += $(wildcard *.adt) $(foreach i,$(basename $(wildcard *.adt)),$i.c $i.h $i_dict.c $i_dict.h)
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

@@ -1,0 +1,7 @@
+dnl $Id: configure.ac 20243 2006-09-14 14:51:08Z economop $
+
+AC_INIT
+META_SETUP
+META_C_SETUP
+AC_PROG_LIBTOOL
+AC_OUTPUT

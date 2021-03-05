@@ -22,8 +22,6 @@
 #
 #
 
-# $Id: make_rules 8403 2003-01-24 10:06:13Z jong $
-
 
 
 srcdir = @srcdir@
@@ -48,11 +46,10 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
-	$(top_srcdir)/Makefile.meta $(top_srcdir)/man_make_rules
-@MAINTAINER_MODE_TRUE@am__append_1 = .eqs .adt .idef .tifs
+DIST_COMMON = $(noinst_HEADERS) $(srcdir)/Makefile.am \
+	$(srcdir)/Makefile.in $(top_srcdir)/Makefile.meta
 check_PROGRAMS = test-chars$(EXEEXT)
-bin_PROGRAMS = parsetablegen$(EXEEXT)
+bin_PROGRAMS = sdf2table$(EXEEXT)
 subdir = ./src
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/meta-build.m4 \
@@ -61,27 +58,29 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
 CONFIG_CLEAN_FILES =
-am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bindir)" \
-	"$(DESTDIR)$(man1dir)" "$(DESTDIR)$(pkgdatadir)"
+am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(pkgdatadir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
-am__objects_1 = parsetablegen.tif.$(OBJEXT) parsetablegen.$(OBJEXT) \
+am_sdf2table_OBJECTS = parsetablegen.$(OBJEXT) normalize.$(OBJEXT) \
+	generate.$(OBJEXT) load.$(OBJEXT) main.$(OBJEXT) \
 	ksdf2table.$(OBJEXT) atsets.$(OBJEXT) flatten.$(OBJEXT) \
 	characters.$(OBJEXT) first.$(OBJEXT) follow.$(OBJEXT) \
-	goto.$(OBJEXT) parse-table.$(OBJEXT) predicted.$(OBJEXT) \
-	priorities.$(OBJEXT) statistics.$(OBJEXT) \
-	Sdf2-Normalization.$(OBJEXT) intset.$(OBJEXT) item.$(OBJEXT) \
-	itemset.$(OBJEXT) pgen-symbol.$(OBJEXT)
-am__objects_2 =
-am_parsetablegen_OBJECTS = $(am__objects_1) $(am__objects_2)
-parsetablegen_OBJECTS = $(am_parsetablegen_OBJECTS)
+	goto.$(OBJEXT) predicted.$(OBJEXT) priorities.$(OBJEXT) \
+	Sdf2-Load.$(OBJEXT) Sdf2-Normalization.$(OBJEXT) \
+	intset.$(OBJEXT) item.$(OBJEXT) itemset.$(OBJEXT) \
+	pgen-symbol.$(OBJEXT) pgenOptions.$(OBJEXT) \
+	parseTable-data.$(OBJEXT) parseTable-stats.$(OBJEXT)
+sdf2table_OBJECTS = $(am_sdf2table_OBJECTS)
 am__DEPENDENCIES_1 =
+sdf2table_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1)
 am_test_chars_OBJECTS = test-chars.$(OBJEXT) characters.$(OBJEXT) \
 	pgen-symbol.$(OBJEXT)
 test_chars_OBJECTS = $(am_test_chars_OBJECTS)
-test_chars_DEPENDENCIES = $(am__DEPENDENCIES_1)
-binSCRIPT_INSTALL = $(INSTALL_SCRIPT)
-SCRIPTS = $(bin_SCRIPTS) $(noinst_SCRIPTS)
+test_chars_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 DEFAULT_INCLUDES = -I. -I$(srcdir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -93,11 +92,8 @@ LTCOMPILE = $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) \
 CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = $(parsetablegen_SOURCES) $(test_chars_SOURCES)
-DIST_SOURCES = $(parsetablegen_SOURCES) $(test_chars_SOURCES)
-man1dir = $(mandir)/man1
-NROFF = nroff
-MANS = $(man_MANS)
+SOURCES = $(sdf2table_SOURCES) $(test_chars_SOURCES)
+DIST_SOURCES = $(sdf2table_SOURCES) $(test_chars_SOURCES)
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
     $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
@@ -106,6 +102,7 @@ am__vpath_adj = case $$p in \
 am__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
 pkgdataDATA_INSTALL = $(INSTALL_DATA)
 DATA = $(pkgdata_DATA)
+HEADERS = $(noinst_HEADERS)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -134,6 +131,12 @@ AWK = @AWK@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
+CONFIG_SUPPORT_CFLAGS = @CONFIG_SUPPORT_CFLAGS@
+CONFIG_SUPPORT_INSTALLED_JARS = @CONFIG_SUPPORT_INSTALLED_JARS@
+CONFIG_SUPPORT_JARS = @CONFIG_SUPPORT_JARS@
+CONFIG_SUPPORT_LIBS = @CONFIG_SUPPORT_LIBS@
+CONFIG_SUPPORT_PREFIX = @CONFIG_SUPPORT_PREFIX@
+CONFIG_SUPPORT_TOOLBUSFLAGS = @CONFIG_SUPPORT_TOOLBUSFLAGS@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CXX = @CXX@
@@ -141,11 +144,18 @@ CXXCPP = @CXXCPP@
 CXXDEPMODE = @CXXDEPMODE@
 CXXFLAGS = @CXXFLAGS@
 CYGPATH_W = @CYGPATH_W@
+C_LIBRARY_CFLAGS = @C_LIBRARY_CFLAGS@
+C_LIBRARY_INSTALLED_JARS = @C_LIBRARY_INSTALLED_JARS@
+C_LIBRARY_JARS = @C_LIBRARY_JARS@
+C_LIBRARY_LIBS = @C_LIBRARY_LIBS@
+C_LIBRARY_PREFIX = @C_LIBRARY_PREFIX@
+C_LIBRARY_TOOLBUSFLAGS = @C_LIBRARY_TOOLBUSFLAGS@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
 DISABLE_FALSE = @DISABLE_FALSE@
 DISABLE_TRUE = @DISABLE_TRUE@
 DLLTOOL = @DLLTOOL@
+DSYMUTIL = @DSYMUTIL@
 ECHO = @ECHO@
 ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
@@ -177,6 +187,7 @@ MAINT = @MAINT@
 MAINTAINER_MODE_FALSE = @MAINTAINER_MODE_FALSE@
 MAINTAINER_MODE_TRUE = @MAINTAINER_MODE_TRUE@
 MAKEINFO = @MAKEINFO@
+NMEDIT = @NMEDIT@
 OBJDUMP = @OBJDUMP@
 OBJEXT = @OBJEXT@
 PACKAGE = @PACKAGE@
@@ -187,6 +198,12 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 PKG_CONFIG = @PKG_CONFIG@
+PTABLE_SUPPORT_CFLAGS = @PTABLE_SUPPORT_CFLAGS@
+PTABLE_SUPPORT_INSTALLED_JARS = @PTABLE_SUPPORT_INSTALLED_JARS@
+PTABLE_SUPPORT_JARS = @PTABLE_SUPPORT_JARS@
+PTABLE_SUPPORT_LIBS = @PTABLE_SUPPORT_LIBS@
+PTABLE_SUPPORT_PREFIX = @PTABLE_SUPPORT_PREFIX@
+PTABLE_SUPPORT_TOOLBUSFLAGS = @PTABLE_SUPPORT_TOOLBUSFLAGS@
 PT_SUPPORT_CFLAGS = @PT_SUPPORT_CFLAGS@
 PT_SUPPORT_INSTALLED_JARS = @PT_SUPPORT_INSTALLED_JARS@
 PT_SUPPORT_JARS = @PT_SUPPORT_JARS@
@@ -200,6 +217,7 @@ SDF_SUPPORT_JARS = @SDF_SUPPORT_JARS@
 SDF_SUPPORT_LIBS = @SDF_SUPPORT_LIBS@
 SDF_SUPPORT_PREFIX = @SDF_SUPPORT_PREFIX@
 SDF_SUPPORT_TOOLBUSFLAGS = @SDF_SUPPORT_TOOLBUSFLAGS@
+SED = @SED@
 SET_MAKE = @SET_MAKE@
 SGLR_CFLAGS = @SGLR_CFLAGS@
 SGLR_INSTALLED_JARS = @SGLR_INSTALLED_JARS@
@@ -269,11 +287,24 @@ target_alias = @target_alias@
 # because of pkgconfig:
 AM_CPPFLAGS = $(ASC_SUPPORT_CFLAGS) $(SDF_SUPPORT_CFLAGS) \
 	$(PT_SUPPORT_CFLAGS) $(ASF_SUPPORT_CFLAGS) \
-	$(ERROR_SUPPORT_CFLAGS) $(TOOLBUSLIB_CFLAGS) $(ATERM_CFLAGS)
+	$(ERROR_SUPPORT_CFLAGS) $(TOOLBUSLIB_CFLAGS) $(ATERM_CFLAGS) \
+	$(PTABLE_SUPPORT_CFLAGS) $(CONFIG_SUPPORT_CFLAGS) \
+	$(C_LIBRARY_CFLAGS)
+
+# Note: this makes all binaries relocatable as long as the ../lib directory
+# moves with it. The extra /foo in front is to work around a check in libtool
+# which demands that all rpaths are absolute. Note that this 'solution'
+# will only work on platforms that have support for $ORIGIN substitution.
+AM_LDFLAGS = 
+#-rpath '/foo:\$$ORIGIN/../lib'
+AM_LIBTOOLFLAGS = 
 LDADD = 
-SUFFIXES = $(am__append_1)
-CLEANFILES = parse-sdf2 sdf2table sdf2table.1 sdf2table.test \
-	parsetablegen.idef
+
+# ToolBus rules
+SUFFIXES = .idef .isrc
+CLEANFILES = $(wildcard *.idef) $(foreach i,$(basename $(wildcard \
+	*.idef)),$i.c $i.h) parse-sdf2 sdf2table sdf2table.test
+EXTRA_DIST = $(wildcard *.c) $(wildcard *.h)
 pkgconfigdir = $(libdir)/pkgconfig
 docdatadir = $(datadir)/doc/$(PACKAGE)
 
@@ -281,8 +312,15 @@ docdatadir = $(datadir)/doc/$(PACKAGE)
 # toolbus -gentifs, tifstoc, tifstojava, apigen and asfc are available
 # on the path. If not, we will use touch to update the timestamp of
 # the needed file if it exists, and fail if it does not exist.
+# Alas, the 'which' command is not portable, so we have to hack it here:
 @MAINTAINER_MODE_TRUE@check_available = \
-@MAINTAINER_MODE_TRUE@  @if which $1; then \
+@MAINTAINER_MODE_TRUE@  @found="";  \
+@MAINTAINER_MODE_TRUE@  for p in `echo ${PATH} | tr ':' ' '`; do \
+@MAINTAINER_MODE_TRUE@    if [ -f $$p/$1 ]; then \
+@MAINTAINER_MODE_TRUE@      found=$$p; \
+@MAINTAINER_MODE_TRUE@    fi; \
+@MAINTAINER_MODE_TRUE@  done; \
+@MAINTAINER_MODE_TRUE@  if [ -f $${found}/$1 ]; then \
 @MAINTAINER_MODE_TRUE@    echo "$2"; $2; \
 @MAINTAINER_MODE_TRUE@  else \
 @MAINTAINER_MODE_TRUE@    echo "missing $1 to generate $@";  \
@@ -291,55 +329,81 @@ docdatadir = $(datadir)/doc/$(PACKAGE)
 @MAINTAINER_MODE_TRUE@    else \
 @MAINTAINER_MODE_TRUE@      echo "missing $@!";  \
 @MAINTAINER_MODE_TRUE@      false; \
-@MAINTAINER_MODE_TRUE@    fi; \
+@MAINTAINER_MODE_TRUE@    fi;  \
 @MAINTAINER_MODE_TRUE@  fi
 
 @MAINTAINER_MODE_TRUE@stemvar = $($(shell echo "$*" | tr '-' '_')$1)
-POD2MAN = pod2man
-POD2TXT = pod2text
-POD2HTML = pod2html
-
-# Generic rules for the generation of documentation from POD files
-CENTER = "Meta-Environment Documentation"
+#	-DPGEN_COLLECT_STATISTICS
 TESTS = $(check_PROGRAMS)
-bin_SCRIPTS = sdf2table parse-sdf2
-noinst_SCRIPTS = sdf2table.test
 pkgdata_DATA = parsetablegen.idef
-man_MANS = sdf2table.1
-EXTRA_DIST = parsetablegen.idef.src \
-                  sdf2table.src \
-                  parse-sdf2.src \
-                  sdf2table.pod \
-                  sdf2table.1
+noinst_HEADERS = \
+	normalize.h \
+	generate.h \
+	load.h \
+	atsets.h \
+	ksdf2table.h \
+	flatten.h \
+	predicted.h \
+	goto.h \
+	follow.h \
+	intset.h \
+	characters.h \
+	item.h \
+	first.h \
+	priorities.h \
+	itemset.h \
+	pgen-symbol.h \
+	pgenOptions.h \
+	parseTable-data.h \
+	parseTable-stats.h
 
-SRCS = parsetablegen.tif.c parsetablegen.c ksdf2table.c atsets.c \
-		flatten.c characters.c first.c follow.c goto.c parse-table.c \
-		predicted.c priorities.c statistics.c \
-		Sdf2-Normalization.c intset.c item.c itemset.c pgen-symbol.c
-
-HDRS = parsetablegen.tif.h atsets.h ksdf2table.h statistics.h \
-		flatten.h predicted.h goto.h follow.h intset.h \
-		characters.h item.h first.h priorities.h itemset.h \
-		pgen-symbol.h
+sdf2table_SOURCES = \
+	parsetablegen.isrc \
+	normalize.c \
+	generate.c \
+	load.c \
+	main.c \
+	ksdf2table.c \
+	atsets.c \
+	flatten.c \
+	characters.c \
+	first.c \
+	follow.c \
+	goto.c \
+	predicted.c \
+	priorities.c \
+	Sdf2-Load.c \
+	Sdf2-Normalization.c \
+	intset.c \
+	item.c \
+	itemset.c \
+	pgen-symbol.c \
+	pgenOptions.c \
+	parseTable-data.c \
+	parseTable-stats.c
 
 test_chars_SOURCES = test-chars.c characters.c pgen-symbol.c
-test_chars_LDADD = $(ATERM_LIBS) 
-parsetablegen_SOURCES = $(SRCS) $(HDRS)
-parsetablegen_DEPENDENCIES = 
-parsetablegen_LDADD = \
+test_chars_LDADD = \
+	$(ATERM_LIBS) \
+	$(PT_SUPPORT_LIBS)
+
+sdf2table_LDADD = \
 	$(ASC_SUPPORT_LIBS) \
 	$(SDF_SUPPORT_LIBS) \
 	$(PT_SUPPORT_LIBS) \
 	$(ASF_SUPPORT_LIBS) \
 	$(ERROR_SUPPORT_LIBS) \
 	$(TOOLBUSLIB_LIBS) \
-	$(ATERM_LIBS)
+	$(ATERM_LIBS) \
+	$(PTABLE_SUPPORT_LIBS) \
+	$(CONFIG_SUPPORT_LIBS) \
+	$(C_LIBRARY_LIBS)
 
 all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .eqs .adt .idef .tifs .c .lo .o .obj
-$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/Makefile.meta $(top_srcdir)/man_make_rules $(am__configure_deps)
+.SUFFIXES: .idef .isrc .c .h .lo .o .obj
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/Makefile.meta $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -403,31 +467,12 @@ clean-checkPROGRAMS:
 	  echo " rm -f $$p $$f"; \
 	  rm -f $$p $$f ; \
 	done
-parsetablegen$(EXEEXT): $(parsetablegen_OBJECTS) $(parsetablegen_DEPENDENCIES) 
-	@rm -f parsetablegen$(EXEEXT)
-	$(LINK) $(parsetablegen_LDFLAGS) $(parsetablegen_OBJECTS) $(parsetablegen_LDADD) $(LIBS)
+sdf2table$(EXEEXT): $(sdf2table_OBJECTS) $(sdf2table_DEPENDENCIES) 
+	@rm -f sdf2table$(EXEEXT)
+	$(LINK) $(sdf2table_LDFLAGS) $(sdf2table_OBJECTS) $(sdf2table_LDADD) $(LIBS)
 test-chars$(EXEEXT): $(test_chars_OBJECTS) $(test_chars_DEPENDENCIES) 
 	@rm -f test-chars$(EXEEXT)
 	$(LINK) $(test_chars_LDFLAGS) $(test_chars_OBJECTS) $(test_chars_LDADD) $(LIBS)
-install-binSCRIPTS: $(bin_SCRIPTS)
-	@$(NORMAL_INSTALL)
-	test -z "$(bindir)" || $(mkdir_p) "$(DESTDIR)$(bindir)"
-	@list='$(bin_SCRIPTS)'; for p in $$list; do \
-	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
-	  if test -f $$d$$p; then \
-	    f=`echo "$$p" | sed 's|^.*/||;$(transform)'`; \
-	    echo " $(binSCRIPT_INSTALL) '$$d$$p' '$(DESTDIR)$(bindir)/$$f'"; \
-	    $(binSCRIPT_INSTALL) "$$d$$p" "$(DESTDIR)$(bindir)/$$f"; \
-	  else :; fi; \
-	done
-
-uninstall-binSCRIPTS:
-	@$(NORMAL_UNINSTALL)
-	@list='$(bin_SCRIPTS)'; for p in $$list; do \
-	  f=`echo "$$p" | sed 's|^.*/||;$(transform)'`; \
-	  echo " rm -f '$(DESTDIR)$(bindir)/$$f'"; \
-	  rm -f "$(DESTDIR)$(bindir)/$$f"; \
-	done
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -435,24 +480,29 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Sdf2-Load.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Sdf2-Normalization.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/atsets.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/characters.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/first.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flatten.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/follow.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/generate.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/goto.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/intset.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/item.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/itemset.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ksdf2table.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/parse-table.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/load.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/normalize.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/parseTable-data.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/parseTable-stats.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/parsetablegen.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/parsetablegen.tif.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pgen-symbol.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pgenOptions.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/predicted.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/priorities.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/statistics.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-chars.Po@am__quote@
 
 .c.o:
@@ -485,51 +535,6 @@ clean-libtool:
 distclean-libtool:
 	-rm -f libtool
 uninstall-info-am:
-install-man1: $(man1_MANS) $(man_MANS)
-	@$(NORMAL_INSTALL)
-	test -z "$(man1dir)" || $(mkdir_p) "$(DESTDIR)$(man1dir)"
-	@list='$(man1_MANS) $(dist_man1_MANS) $(nodist_man1_MANS)'; \
-	l2='$(man_MANS) $(dist_man_MANS) $(nodist_man_MANS)'; \
-	for i in $$l2; do \
-	  case "$$i" in \
-	    *.1*) list="$$list $$i" ;; \
-	  esac; \
-	done; \
-	for i in $$list; do \
-	  if test -f $(srcdir)/$$i; then file=$(srcdir)/$$i; \
-	  else file=$$i; fi; \
-	  ext=`echo $$i | sed -e 's/^.*\\.//'`; \
-	  case "$$ext" in \
-	    1*) ;; \
-	    *) ext='1' ;; \
-	  esac; \
-	  inst=`echo $$i | sed -e 's/\\.[0-9a-z]*$$//'`; \
-	  inst=`echo $$inst | sed -e 's/^.*\///'`; \
-	  inst=`echo $$inst | sed '$(transform)'`.$$ext; \
-	  echo " $(INSTALL_DATA) '$$file' '$(DESTDIR)$(man1dir)/$$inst'"; \
-	  $(INSTALL_DATA) "$$file" "$(DESTDIR)$(man1dir)/$$inst"; \
-	done
-uninstall-man1:
-	@$(NORMAL_UNINSTALL)
-	@list='$(man1_MANS) $(dist_man1_MANS) $(nodist_man1_MANS)'; \
-	l2='$(man_MANS) $(dist_man_MANS) $(nodist_man_MANS)'; \
-	for i in $$l2; do \
-	  case "$$i" in \
-	    *.1*) list="$$list $$i" ;; \
-	  esac; \
-	done; \
-	for i in $$list; do \
-	  ext=`echo $$i | sed -e 's/^.*\\.//'`; \
-	  case "$$ext" in \
-	    1*) ;; \
-	    *) ext='1' ;; \
-	  esac; \
-	  inst=`echo $$i | sed -e 's/\\.[0-9a-z]*$$//'`; \
-	  inst=`echo $$inst | sed -e 's/^.*\///'`; \
-	  inst=`echo $$inst | sed '$(transform)'`.$$ext; \
-	  echo " rm -f '$(DESTDIR)$(man1dir)/$$inst'"; \
-	  rm -f "$(DESTDIR)$(man1dir)/$$inst"; \
-	done
 install-pkgdataDATA: $(pkgdata_DATA)
 	@$(NORMAL_INSTALL)
 	test -z "$(pkgdatadir)" || $(mkdir_p) "$(DESTDIR)$(pkgdatadir)"
@@ -701,9 +706,9 @@ check-am: all-am
 	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS)
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-am
-all-am: Makefile $(PROGRAMS) $(SCRIPTS) $(MANS) $(DATA)
+all-am: Makefile $(PROGRAMS) $(DATA) $(HEADERS)
 installdirs:
-	for dir in "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bindir)" "$(DESTDIR)$(man1dir)" "$(DESTDIR)$(pkgdatadir)"; do \
+	for dir in "$(DESTDIR)$(bindir)" "$(DESTDIR)$(pkgdatadir)"; do \
 	  test -z "$$dir" || $(mkdir_p) "$$dir"; \
 	done
 install: install-am
@@ -752,13 +757,13 @@ info: info-am
 
 info-am:
 
-install-data-am: install-man install-pkgdataDATA
+install-data-am: install-pkgdataDATA
 
-install-exec-am: install-binPROGRAMS install-binSCRIPTS
+install-exec-am: install-binPROGRAMS
 
 install-info: install-info-am
 
-install-man: install-man1
+install-man:
 
 installcheck-am:
 
@@ -780,43 +785,51 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-binPROGRAMS uninstall-binSCRIPTS \
-	uninstall-info-am uninstall-man uninstall-pkgdataDATA
-
-uninstall-man: uninstall-man1
+uninstall-am: uninstall-binPROGRAMS uninstall-info-am \
+	uninstall-pkgdataDATA
 
 .PHONY: CTAGS GTAGS all all-am check check-TESTS check-am clean \
 	clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
 	clean-libtool ctags distclean distclean-compile \
 	distclean-generic distclean-libtool distclean-tags distdir dvi \
 	dvi-am html html-am info info-am install install-am \
-	install-binPROGRAMS install-binSCRIPTS install-data \
-	install-data-am install-exec install-exec-am install-info \
-	install-info-am install-man install-man1 install-pkgdataDATA \
-	install-strip installcheck installcheck-am installdirs \
-	maintainer-clean maintainer-clean-generic mostlyclean \
-	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
-	pdf pdf-am ps ps-am tags uninstall uninstall-am \
-	uninstall-binPROGRAMS uninstall-binSCRIPTS uninstall-info-am \
-	uninstall-man uninstall-man1 uninstall-pkgdataDATA
+	install-binPROGRAMS install-data install-data-am install-exec \
+	install-exec-am install-info install-info-am install-man \
+	install-pkgdataDATA install-strip installcheck installcheck-am \
+	installdirs maintainer-clean maintainer-clean-generic \
+	mostlyclean mostlyclean-compile mostlyclean-generic \
+	mostlyclean-libtool pdf pdf-am ps ps-am tags uninstall \
+	uninstall-am uninstall-binPROGRAMS uninstall-info-am \
+	uninstall-pkgdataDATA
 
-
-%.1:    %.pod
-	-$(POD2MAN) --center=${CENTER} --release=${VERSION} --section=1 $< > $@
-%.3:    %.pod
-	-$(POD2MAN) --center=${CENTER} --release=${VERSION} --section=3 $< > $@
-%.7:    %.pod
-	-$(POD2MAN) --center=${CENTER} --release=${VERSION} --section=7 $< > $@
-
-%.txt: %.pod
-	-$(POD2TEXT) $< > $@
-
-%.html: %.pod
-	-$(POD2HTML) $< > $@
-	-rm -f pod2html-*
-
-%.idef: %.idef.src Makefile
+.isrc.idef:
 	sed 's@__PREFIX__@${prefix}@g' < $< > $@
+
+@MAINTAINER_MODE_TRUE@.idef.c:
+@MAINTAINER_MODE_TRUE@	$(call check_available,toolbus,toolbus-gentifs -output $*.tifs -S$<)
+@MAINTAINER_MODE_TRUE@	$(call check_available,tifstoc,tifstoc -tool $* $*.tifs $(call stemvar,_TIF_OPTIONS))
+
+@MAINTAINER_MODE_TRUE@.idef.h:
+@MAINTAINER_MODE_TRUE@	$(call check_available,toolbus,toolbus-gentifs -output $*.tifs -S$<)
+@MAINTAINER_MODE_TRUE@	$(call check_available,tifstoc,tifstoc -tool $* $*.tifs $(call stemvar,_TIF_OPTIONS))
+
+@MAINTAINER_MODE_FALSE@.idef.c: 
+@MAINTAINER_MODE_FALSE@	if [ -e $*.h ]; then touch $*.h; else cp ${srcdir}/$*.h ./$*.h; fi
+@MAINTAINER_MODE_FALSE@	if [ -e $*.c ]; then touch $*.c; else cp ${srcdir}/$*.c ./$*.c; fi
+
+@MAINTAINER_MODE_FALSE@.idef.h: 
+@MAINTAINER_MODE_FALSE@	if [ -e $*.h ]; then touch $*.h; else cp ${srcdir}/$*.h ./$*.h; fi
+@MAINTAINER_MODE_FALSE@	if [ -e $*.c ]; then touch $*.c; else cp ${srcdir}/$*.c ./$*.c; fi
+
+#Hide distclean errors, see 'info automake, 13.4 Checking the distribution'
+#distcleancheck_listfiles = \
+#	find -type f -exec sh -c 'test -f $(srcdir)/{} || echo {}' ';'
+
+#ApiGen
+
+#SUFFIXES += .adt
+#
+#EXTRA_DIST += $(wildcard *.adt) $(foreach i,$(basename $(wildcard *.adt)),$i.c $i.h $i_dict.c $i_dict.h)
 
 # we create one sdf2table that uses source tree binaries and data 
 # this is needed for testing
@@ -834,7 +847,7 @@ uninstall-man: uninstall-man1
 	sed "s@__BINDIR__@$(bindir)@g;\
              s@__ACTIVATE__@1@g;\
              s@__PREFIX__@$(prefix)@g;\
-             s@__CHECKERDIR__@$(bindir)@g;\
+	     s@__CHECKERDIR__@$(bindir)@g;\
              s@__SGLR__@$(SGLR_PREFIX)@g;\
              s@__PT_SUPPORT__@$(PT_SUPPORT_PREFIX)@g;\
              s@__DATADIR__@$(pkgdatadir)@g;" < $< > $@ && \
@@ -845,6 +858,12 @@ asfc: Sdf2-Normalization.eqs
 
 Sdf2-Normalization.eqs:
 	eqs-dump -m languages/sdf2/normalization/Sdf2-Normalization -o $@
+
+asfc-load: Sdf2-Load.eqs
+	asfc -v -i Sdf2-Load.eqs -p ${top_builddir}/grammar/Sdf2.baf -o Sdf2-Load.c
+
+Sdf2-Load.eqs:
+	eqs-dump -m languages/sdf2/load/Sdf2 -o $@
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

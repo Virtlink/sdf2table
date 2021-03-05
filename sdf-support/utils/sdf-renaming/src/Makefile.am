@@ -1,31 +1,26 @@
-# $Id: Makefile.am 19684 2006-07-25 23:23:25Z martinrw $
+# $Id: Makefile.am 22378 2007-04-06 09:46:49Z kooiker $
 
 include $(top_srcdir)/Makefile.meta
 
-EXTRA_DIST = sdf-renaming.idef.src
-
-CLEANFILES += sdf-renaming.idef
-
+bin_PROGRAMS = sdf-renaming
 pkgdata_DATA = sdf-renaming.idef
 
-bin_PROGRAMS = sdf-renaming
+INCLUDES = \
+  -I$(top_srcdir)/lib \
+  $(SDF_SUPPORT_CFLAGS) \
+  $(ERROR_SUPPORT_CFLAGS) \
+  $(PT_SUPPORT_CFLAGS) \
+  $(TOOLBUSLIB_CFLAGS) \
+  $(ATERM_CFLAGS)
 
-sdf_renaming_SOURCES = sdf-renaming.c sdf-renaming.tif.c
-sdf_renaming_LDADD = -L$(top_builddir)/lib -lSDFME -lSDF2PT \
-		 $(PT_SUPPORT_LIBS) \
+sdf_renaming_SOURCES = \
+		       main.c \
+		       sdf-renaming.isrc
+
+sdf_renaming_LDADD = \
+		 -L$(top_builddir)/lib -lSDFME -lSDF2PT \
 		 $(ERROR_SUPPORT_LIBS) \
+		 $(PT_SUPPORT_LIBS) \
                  $(TOOLBUSLIB_LIBS) \
                  $(ATERM_LIBS) 
 
-noinst_HEADERS = sdf-renaming.tif.h
-
-AM_CPPFLAGS += \
-  -I$(top_srcdir)/lib \
-  $(ATERM_CFLAGS) \
-  $(TOOLBUSLIB_CFLAGS) \
-  $(SDF_SUPPORT_CFLAGS) \
-  $(ERROR_SUPPORT_CFLAGS) \
-  $(PT_SUPPORT_CFLAGS)
-
-%.idef: %.idef.src Makefile
-	sed 's@__PREFIX__@${prefix}@g' < $< > $@

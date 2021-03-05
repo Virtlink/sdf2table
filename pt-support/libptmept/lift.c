@@ -10,14 +10,14 @@ static ATermTable lowerCache = NULL;
 
 /*{{{  static void initGlobals()  */
 
-static void initGlobals(ATermTable myLowerCache) 
+static void initGlobals(ATermTable myliftCache, ATermTable myLowerCache) 
 {
   lowerCache = myLowerCache;
+  liftCache = myliftCache;
 
   if (e == NULL) {
     PTPT_protectOptLayout(&e);
     e = PTPT_makeOptLayoutAbsent();
-    liftCache = ATtableCreate(1024, 75);
   }
 }
 
@@ -26,7 +26,9 @@ static void initGlobals(ATermTable myLowerCache)
 
 static void storeTree(PT_Tree tree, PTPT_Tree lifted) 
 {
-  ATtablePut(liftCache, PT_TreeToTerm(tree), PTPT_TreeToTerm(lifted));
+  if (liftCache) {
+    ATtablePut(liftCache, PT_TreeToTerm(tree), PTPT_TreeToTerm(lifted));
+  }
 
   if (lowerCache) {
     ATtablePut(lowerCache, PTPT_TreeToTerm(lifted), PT_TreeToTerm(tree));
@@ -38,7 +40,12 @@ static void storeTree(PT_Tree tree, PTPT_Tree lifted)
 
 static PTPT_Tree lookupTree(PT_Tree tree)
 {
-  return PTPT_TreeFromTerm(ATtableGet(liftCache, PT_TreeToTerm(tree)));
+  if (liftCache != NULL) {
+    return PTPT_TreeFromTerm(ATtableGet(liftCache, PT_TreeToTerm(tree)));
+  }
+  else {
+    return NULL;
+  }
 }
 
 /*}}}  */
@@ -46,7 +53,9 @@ static PTPT_Tree lookupTree(PT_Tree tree)
 
 static void storeSymbol(PT_Symbol symbol, PTPT_Symbol lifted) 
 {
-  ATtablePut(liftCache, PT_SymbolToTerm(symbol), PTPT_SymbolToTerm(lifted));
+  if (liftCache) {
+    ATtablePut(liftCache, PT_SymbolToTerm(symbol), PTPT_SymbolToTerm(lifted));
+  }
 
   if (lowerCache) {
     ATtablePut(lowerCache, PTPT_SymbolToTerm(lifted), PT_SymbolToTerm(symbol));
@@ -58,7 +67,12 @@ static void storeSymbol(PT_Symbol symbol, PTPT_Symbol lifted)
 
 static PTPT_Symbol lookupSymbol(PT_Symbol symbol)
 {
-  return PTPT_SymbolFromTerm(ATtableGet(liftCache, PT_SymbolToTerm(symbol)));
+  if (liftCache != NULL) {
+    return PTPT_SymbolFromTerm(ATtableGet(liftCache, PT_SymbolToTerm(symbol)));
+  }
+  else {
+    return NULL;
+  }
 }
 
 /*}}}  */
@@ -66,7 +80,9 @@ static PTPT_Symbol lookupSymbol(PT_Symbol symbol)
 
 static void storeATerm(ATerm trm, PTPT_ATerm lifted) 
 {
-  ATtablePut(liftCache, trm, PTPT_ATermToTerm(lifted));
+  if (liftCache) {
+    ATtablePut(liftCache, trm, PTPT_ATermToTerm(lifted));
+  }
 
   if (lowerCache) {
     ATtablePut(lowerCache, PTPT_ATermToTerm(lifted), trm);
@@ -79,7 +95,12 @@ static void storeATerm(ATerm trm, PTPT_ATerm lifted)
 
 static PTPT_ATerm lookupATerm(ATerm trm)
 {
-  return PTPT_ATermFromTerm(ATtableGet(liftCache, trm));
+  if (liftCache != NULL) {
+    return PTPT_ATermFromTerm(ATtableGet(liftCache, trm));
+  }
+  else {
+    return NULL;
+  }
 }
 
 /*}}}  */
@@ -278,7 +299,7 @@ PTPT_ATerm PTPT_liftATerm(ATerm term)
   ATerm annos = AT_getAnnotations(term);
   PTPT_Annotation ann = NULL;
 
-  initGlobals(NULL);
+  initGlobals(NULL, NULL);
 
   if (ATgetType(term) != AT_INT) {
     result = lookupATerm(term);
@@ -570,7 +591,7 @@ static PTPT_Attr PTPT_liftAttr(PT_Attr attr)
     result = PTPT_makeAttrAssoc(e,e,assoc,e);
   }
   else if (PT_isAttrTerm(attr)) {
-    PTPT_ATerm term = PTPT_liftATerm(PT_getAttrTerm(attr));
+    PTPT_ATerm term = PTPT_liftATerm(PT_getAttrValue(attr));
     result = PTPT_makeAttrTerm(e,e,term,e);
   }
   else if (PT_isAttrId(attr)) {
@@ -674,14 +695,15 @@ static PTPT_Args PTPT_liftArgs(PT_Args args)
 
 /*{{{  PTPT_Tree PTPT_liftTreeCache(PT_Tree pt, ATermTable myLowerCache) */
 
-PTPT_Tree PTPT_liftTreeCache(PT_Tree pt, ATermTable myLowerCache)
+PTPT_Tree PTPT_liftTreeCache(PT_Tree pt, ATermTable myLiftCache, ATermTable myLowerCache)
 {
   PTPT_Tree result;
 
-  initGlobals(myLowerCache);
+  initGlobals(myLiftCache, myLowerCache);
 
   result = PTPT_liftTreeRec(pt);
 
+  liftCache = NULL;
   lowerCache = NULL;
 
   return result;
@@ -694,7 +716,7 @@ PTPT_Tree PTPT_liftTree(PT_Tree pt)
 {
   PTPT_Tree result;
 
-  initGlobals(NULL);
+  initGlobals(NULL, NULL);
 
   result = PTPT_liftTreeRec(pt);
 
@@ -763,7 +785,7 @@ PTPT_ParseTree PTPT_liftParseTree(PT_ParseTree pt)
   PTPT_ParseTree result;
   int ambCnt = PT_getParseTreeAmbCnt(pt);
 
-  initGlobals(NULL);
+  initGlobals(NULL, NULL);
 
   result = PTPT_makeParseTreeTop(e,e,
 				 (PTPT_Tree) PTPT_liftTreeRec(tree),

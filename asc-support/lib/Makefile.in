@@ -14,7 +14,7 @@
 
 @SET_MAKE@
 
-# $Id: Makefile.am 20833 2007-01-02 16:37:41Z jurgenv $
+# $Id: Makefile.am 24308 2007-12-01 07:44:42Z jurgenv $
 
 #
 # \file 
@@ -49,7 +49,6 @@ build_triplet = @build@
 host_triplet = @host@
 DIST_COMMON = $(include_HEADERS) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(top_srcdir)/Makefile.meta
-@MAINTAINER_MODE_TRUE@am__append_1 = .eqs .adt .idef .tifs
 check_PROGRAMS = builtin-link-test$(EXEEXT)
 subdir = ./lib
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -72,7 +71,8 @@ am__DEPENDENCIES_1 =
 libasc_support_me_la_DEPENDENCIES = $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1)
 am__objects_1 = libasc_support_me_la-builtin-common.lo \
 	libasc_support_me_la-builtin-annos.lo \
 	libasc_support_me_la-builtin-term-compare.lo \
@@ -87,9 +87,10 @@ am_libasc_support_me_la_OBJECTS = libasc_support_me_la-asc-main.lo \
 	libasc_support_me_la-asc-traversals.lo \
 	libasc_support_me_la-asc-prod2str.lo \
 	libasc_support_me_la-asc-muasf2pt.lo \
-	libasc_support_me_la-asc-parsetable.lo \
 	libasc_support_me_la-asc-client.lo \
 	libasc_support_me_la-asc-tide.lo \
+	libasc_support_me_la-asc-options.lo \
+	libasc_support_me_la-asc-parsetable.lo \
 	libasc_support_me_la-asc-ambiguity.lo \
 	libasc_support_me_la-asc-termstore.lo \
 	libasc_support_me_la-builtin-forward.lo \
@@ -99,6 +100,7 @@ libasc_support_me_la_OBJECTS = $(am_libasc_support_me_la_OBJECTS)
 am_builtin_link_test_OBJECTS = builtin-link-test.$(OBJEXT)
 builtin_link_test_OBJECTS = $(am_builtin_link_test_OBJECTS)
 builtin_link_test_DEPENDENCIES = $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
@@ -146,6 +148,12 @@ AWK = @AWK@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
+CONFIG_SUPPORT_CFLAGS = @CONFIG_SUPPORT_CFLAGS@
+CONFIG_SUPPORT_INSTALLED_JARS = @CONFIG_SUPPORT_INSTALLED_JARS@
+CONFIG_SUPPORT_JARS = @CONFIG_SUPPORT_JARS@
+CONFIG_SUPPORT_LIBS = @CONFIG_SUPPORT_LIBS@
+CONFIG_SUPPORT_PREFIX = @CONFIG_SUPPORT_PREFIX@
+CONFIG_SUPPORT_TOOLBUSFLAGS = @CONFIG_SUPPORT_TOOLBUSFLAGS@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CXX = @CXX@
@@ -153,11 +161,18 @@ CXXCPP = @CXXCPP@
 CXXDEPMODE = @CXXDEPMODE@
 CXXFLAGS = @CXXFLAGS@
 CYGPATH_W = @CYGPATH_W@
+C_LIBRARY_CFLAGS = @C_LIBRARY_CFLAGS@
+C_LIBRARY_INSTALLED_JARS = @C_LIBRARY_INSTALLED_JARS@
+C_LIBRARY_JARS = @C_LIBRARY_JARS@
+C_LIBRARY_LIBS = @C_LIBRARY_LIBS@
+C_LIBRARY_PREFIX = @C_LIBRARY_PREFIX@
+C_LIBRARY_TOOLBUSFLAGS = @C_LIBRARY_TOOLBUSFLAGS@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
 DISABLE_FALSE = @DISABLE_FALSE@
 DISABLE_TRUE = @DISABLE_TRUE@
 DLLTOOL = @DLLTOOL@
+DSYMUTIL = @DSYMUTIL@
 ECHO = @ECHO@
 ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
@@ -189,6 +204,7 @@ MAINT = @MAINT@
 MAINTAINER_MODE_FALSE = @MAINTAINER_MODE_FALSE@
 MAINTAINER_MODE_TRUE = @MAINTAINER_MODE_TRUE@
 MAKEINFO = @MAKEINFO@
+NMEDIT = @NMEDIT@
 OBJDUMP = @OBJDUMP@
 OBJEXT = @OBJEXT@
 PACKAGE = @PACKAGE@
@@ -199,6 +215,12 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 PKG_CONFIG = @PKG_CONFIG@
+PTABLE_SUPPORT_CFLAGS = @PTABLE_SUPPORT_CFLAGS@
+PTABLE_SUPPORT_INSTALLED_JARS = @PTABLE_SUPPORT_INSTALLED_JARS@
+PTABLE_SUPPORT_JARS = @PTABLE_SUPPORT_JARS@
+PTABLE_SUPPORT_LIBS = @PTABLE_SUPPORT_LIBS@
+PTABLE_SUPPORT_PREFIX = @PTABLE_SUPPORT_PREFIX@
+PTABLE_SUPPORT_TOOLBUSFLAGS = @PTABLE_SUPPORT_TOOLBUSFLAGS@
 PT_SUPPORT_CFLAGS = @PT_SUPPORT_CFLAGS@
 PT_SUPPORT_INSTALLED_JARS = @PT_SUPPORT_INSTALLED_JARS@
 PT_SUPPORT_JARS = @PT_SUPPORT_JARS@
@@ -206,6 +228,13 @@ PT_SUPPORT_LIBS = @PT_SUPPORT_LIBS@
 PT_SUPPORT_PREFIX = @PT_SUPPORT_PREFIX@
 PT_SUPPORT_TOOLBUSFLAGS = @PT_SUPPORT_TOOLBUSFLAGS@
 RANLIB = @RANLIB@
+RELATION_STORES_CFLAGS = @RELATION_STORES_CFLAGS@
+RELATION_STORES_INSTALLED_JARS = @RELATION_STORES_INSTALLED_JARS@
+RELATION_STORES_JARS = @RELATION_STORES_JARS@
+RELATION_STORES_LIBS = @RELATION_STORES_LIBS@
+RELATION_STORES_PREFIX = @RELATION_STORES_PREFIX@
+RELATION_STORES_TOOLBUSFLAGS = @RELATION_STORES_TOOLBUSFLAGS@
+SED = @SED@
 SET_MAKE = @SET_MAKE@
 SGLR_CFLAGS = @SGLR_CFLAGS@
 SGLR_INSTALLED_JARS = @SGLR_INSTALLED_JARS@
@@ -282,11 +311,21 @@ target_alias = @target_alias@
 
 # Default include directories
 AM_CPPFLAGS = $(PT_SUPPORT_CFLAGS) $(ASF_SUPPORT_CFLAGS) \
-	$(ERROR_SUPPORT_CFLAGS) $(TOOLBUSLIB_CFLAGS) $(SGLR_CFLAGS) \
-	$(TIDE_SUPPORT_CFLAGS) $(ATERM_CFLAGS)
+	$(RELATION_STORES_CFLAGS) $(ERROR_SUPPORT_CFLAGS) \
+	$(TOOLBUSLIB_CFLAGS) $(SGLR_CFLAGS) $(TIDE_SUPPORT_CFLAGS) \
+	$(ATERM_CFLAGS) $(CONFIG_SUPPORT_CFLAGS) \
+	$(PTABLE_SUPPORT_CFLAGS)
+AM_LDFLAGS = 
 LDADD = 
-SUFFIXES = $(am__append_1)
-CLEANFILES = builtin-forward.c asc-builtins.h builtin-link-test.c
+
+# ToolBus rules
+SUFFIXES = .idef .isrc
+CLEANFILES = $(wildcard *.idef) $(foreach i,$(basename $(wildcard \
+	*.idef)),$i.c $i.h) builtin-forward.c asc-builtins.h \
+	builtin-link-test.c
+
+#Below here should not be changed when adding a builtin:
+EXTRA_DIST = $(wildcard *.c) $(wildcard *.h) Library.def
 pkgconfigdir = $(libdir)/pkgconfig
 docdatadir = $(datadir)/doc/$(PACKAGE)
 
@@ -294,8 +333,15 @@ docdatadir = $(datadir)/doc/$(PACKAGE)
 # toolbus -gentifs, tifstoc, tifstojava, apigen and asfc are available
 # on the path. If not, we will use touch to update the timestamp of
 # the needed file if it exists, and fail if it does not exist.
+# Alas, the 'which' command is not portable, so we have to hack it here:
 @MAINTAINER_MODE_TRUE@check_available = \
-@MAINTAINER_MODE_TRUE@  @if which $1; then \
+@MAINTAINER_MODE_TRUE@  @found="";  \
+@MAINTAINER_MODE_TRUE@  for p in `echo ${PATH} | tr ':' ' '`; do \
+@MAINTAINER_MODE_TRUE@    if [ -f $$p/$1 ]; then \
+@MAINTAINER_MODE_TRUE@      found=$$p; \
+@MAINTAINER_MODE_TRUE@    fi; \
+@MAINTAINER_MODE_TRUE@  done; \
+@MAINTAINER_MODE_TRUE@  if [ -f $${found}/$1 ]; then \
 @MAINTAINER_MODE_TRUE@    echo "$2"; $2; \
 @MAINTAINER_MODE_TRUE@  else \
 @MAINTAINER_MODE_TRUE@    echo "missing $1 to generate $@";  \
@@ -304,7 +350,7 @@ docdatadir = $(datadir)/doc/$(PACKAGE)
 @MAINTAINER_MODE_TRUE@    else \
 @MAINTAINER_MODE_TRUE@      echo "missing $@!";  \
 @MAINTAINER_MODE_TRUE@      false; \
-@MAINTAINER_MODE_TRUE@    fi; \
+@MAINTAINER_MODE_TRUE@    fi;  \
 @MAINTAINER_MODE_TRUE@  fi
 
 @MAINTAINER_MODE_TRUE@stemvar = $($(shell echo "$*" | tr '-' '_')$1)
@@ -312,6 +358,7 @@ BUILTIN_NAMES_ARITY = \
 	set-anno_3\
 	get-anno_2\
 	get-term-anno_2 \
+	get-lex-term-anno_2 \
 	set-term-anno_3 \
 	execute-command_1 \
 	read-from-command_1 \
@@ -321,7 +368,9 @@ BUILTIN_NAMES_ARITY = \
 	lift-to-term_1 \
 	implode_1\
 	parse-file_1 \
+	parse-file-pos-info_1 \
 	parse-bytes_1 \
+	parse-bytes-pos-info_2 \
 	unparse-to-bytes_1 \
 	unparse-to-file_2 \
 	read-term-from-file_1 \
@@ -370,7 +419,8 @@ include_HEADERS = \
 	asc-muasf2pt.h \
 	asc-ambiguity.h \
 	asc-termstore.h \
-	builtin-common.h
+	builtin-common.h \
+	asc-options.h
 
 libasc_support_me_la_CPPFLAGS = $(AM_CPPFLAGS)
 libasc_support_me_la_LDFLAGS = -avoid-version -no-undefined $(AM_LDFLAGS)
@@ -381,6 +431,7 @@ libasc_support_me_la_LIBADD = \
 	$(TOOLBUSLIB_LIBS) \
 	$(TIDE_SUPPORT_LIBS) \
 	$(ERROR_SUPPORT_LIBS) \
+	$(RELATION_STORES_LIBS) \
 	$(ATERM_LIBS)
 
 libasc_support_me_la_SOURCES = \
@@ -393,9 +444,10 @@ libasc_support_me_la_SOURCES = \
 	asc-prod2str.h  \
 	asc-muasf2pt.c \
 	asc-muasf2pt.h \
-	asc-parsetable.c\
 	asc-client.c\
 	asc-tide.c\
+	asc-options.c\
+	asc-parsetable.c\
 	asc-ambiguity.c\
 	asc-termstore.c\
 	builtin-forward.c\
@@ -406,9 +458,8 @@ libasc_support_me_la_SOURCES = \
 	$(BUILTIN_SOURCEFILES)
 
 TESTS = $(check_PROGRAMS)
-
-#Below here should not be changed when adding a builtin:
-EXTRA_DIST = Library.def 
+@MAINTAINER_MODE_FALSE@ATERM_LIB = ATerm
+@MAINTAINER_MODE_TRUE@ATERM_LIB = ATerm-dbg
 builtin_link_test_SOURCES = builtin-link-test.c
 builtin_link_test_LDADD = \
 	-L. -lasc-support-me \
@@ -418,7 +469,9 @@ builtin_link_test_LDADD = \
 	$(PT_SUPPORT_LIBS) \
 	$(TOOLBUSLIB_LIBS) \
 	$(ERROR_SUPPORT_LIBS) \
-	$(ATERM_LIBS) 
+	$(ATERM_LIBS) \
+	${CONFIG_SUPPORT_LIBS} \
+	${PTABLE_SUPPORT_LIBS} 
 
 UTILS = $(top_srcdir)/utils
 GENFWD = $(UTILS)/gen-forward.sh
@@ -433,7 +486,7 @@ all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
 .SUFFIXES:
-.SUFFIXES: .eqs .adt .idef .tifs .c .lo .o .obj
+.SUFFIXES: .idef .isrc .c .h .lo .o .obj
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/Makefile.meta $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -517,6 +570,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libasc_support_me_la-asc-main.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libasc_support_me_la-asc-muasf2pt.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libasc_support_me_la-asc-nametable.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libasc_support_me_la-asc-options.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libasc_support_me_la-asc-parsetable.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libasc_support_me_la-asc-prod2str.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libasc_support_me_la-asc-support.Plo@am__quote@
@@ -596,13 +650,6 @@ libasc_support_me_la-asc-muasf2pt.lo: asc-muasf2pt.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libasc_support_me_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libasc_support_me_la-asc-muasf2pt.lo `test -f 'asc-muasf2pt.c' || echo '$(srcdir)/'`asc-muasf2pt.c
 
-libasc_support_me_la-asc-parsetable.lo: asc-parsetable.c
-@am__fastdepCC_TRUE@	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libasc_support_me_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libasc_support_me_la-asc-parsetable.lo -MD -MP -MF "$(DEPDIR)/libasc_support_me_la-asc-parsetable.Tpo" -c -o libasc_support_me_la-asc-parsetable.lo `test -f 'asc-parsetable.c' || echo '$(srcdir)/'`asc-parsetable.c; \
-@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/libasc_support_me_la-asc-parsetable.Tpo" "$(DEPDIR)/libasc_support_me_la-asc-parsetable.Plo"; else rm -f "$(DEPDIR)/libasc_support_me_la-asc-parsetable.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='asc-parsetable.c' object='libasc_support_me_la-asc-parsetable.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libasc_support_me_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libasc_support_me_la-asc-parsetable.lo `test -f 'asc-parsetable.c' || echo '$(srcdir)/'`asc-parsetable.c
-
 libasc_support_me_la-asc-client.lo: asc-client.c
 @am__fastdepCC_TRUE@	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libasc_support_me_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libasc_support_me_la-asc-client.lo -MD -MP -MF "$(DEPDIR)/libasc_support_me_la-asc-client.Tpo" -c -o libasc_support_me_la-asc-client.lo `test -f 'asc-client.c' || echo '$(srcdir)/'`asc-client.c; \
 @am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/libasc_support_me_la-asc-client.Tpo" "$(DEPDIR)/libasc_support_me_la-asc-client.Plo"; else rm -f "$(DEPDIR)/libasc_support_me_la-asc-client.Tpo"; exit 1; fi
@@ -616,6 +663,20 @@ libasc_support_me_la-asc-tide.lo: asc-tide.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='asc-tide.c' object='libasc_support_me_la-asc-tide.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libasc_support_me_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libasc_support_me_la-asc-tide.lo `test -f 'asc-tide.c' || echo '$(srcdir)/'`asc-tide.c
+
+libasc_support_me_la-asc-options.lo: asc-options.c
+@am__fastdepCC_TRUE@	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libasc_support_me_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libasc_support_me_la-asc-options.lo -MD -MP -MF "$(DEPDIR)/libasc_support_me_la-asc-options.Tpo" -c -o libasc_support_me_la-asc-options.lo `test -f 'asc-options.c' || echo '$(srcdir)/'`asc-options.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/libasc_support_me_la-asc-options.Tpo" "$(DEPDIR)/libasc_support_me_la-asc-options.Plo"; else rm -f "$(DEPDIR)/libasc_support_me_la-asc-options.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='asc-options.c' object='libasc_support_me_la-asc-options.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libasc_support_me_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libasc_support_me_la-asc-options.lo `test -f 'asc-options.c' || echo '$(srcdir)/'`asc-options.c
+
+libasc_support_me_la-asc-parsetable.lo: asc-parsetable.c
+@am__fastdepCC_TRUE@	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libasc_support_me_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libasc_support_me_la-asc-parsetable.lo -MD -MP -MF "$(DEPDIR)/libasc_support_me_la-asc-parsetable.Tpo" -c -o libasc_support_me_la-asc-parsetable.lo `test -f 'asc-parsetable.c' || echo '$(srcdir)/'`asc-parsetable.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/libasc_support_me_la-asc-parsetable.Tpo" "$(DEPDIR)/libasc_support_me_la-asc-parsetable.Plo"; else rm -f "$(DEPDIR)/libasc_support_me_la-asc-parsetable.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='asc-parsetable.c' object='libasc_support_me_la-asc-parsetable.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libasc_support_me_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libasc_support_me_la-asc-parsetable.lo `test -f 'asc-parsetable.c' || echo '$(srcdir)/'`asc-parsetable.c
 
 libasc_support_me_la-asc-ambiguity.lo: asc-ambiguity.c
 @am__fastdepCC_TRUE@	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libasc_support_me_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libasc_support_me_la-asc-ambiguity.lo -MD -MP -MF "$(DEPDIR)/libasc_support_me_la-asc-ambiguity.Tpo" -c -o libasc_support_me_la-asc-ambiguity.lo `test -f 'asc-ambiguity.c' || echo '$(srcdir)/'`asc-ambiguity.c; \
@@ -987,6 +1048,34 @@ uninstall-am: uninstall-includeHEADERS uninstall-info-am \
 	tags uninstall uninstall-am uninstall-includeHEADERS \
 	uninstall-info-am uninstall-libLTLIBRARIES
 
+.isrc.idef:
+	sed 's@__PREFIX__@${prefix}@g' < $< > $@
+
+@MAINTAINER_MODE_TRUE@.idef.c:
+@MAINTAINER_MODE_TRUE@	$(call check_available,toolbus,toolbus-gentifs -output $*.tifs -S$<)
+@MAINTAINER_MODE_TRUE@	$(call check_available,tifstoc,tifstoc -tool $* $*.tifs $(call stemvar,_TIF_OPTIONS))
+
+@MAINTAINER_MODE_TRUE@.idef.h:
+@MAINTAINER_MODE_TRUE@	$(call check_available,toolbus,toolbus-gentifs -output $*.tifs -S$<)
+@MAINTAINER_MODE_TRUE@	$(call check_available,tifstoc,tifstoc -tool $* $*.tifs $(call stemvar,_TIF_OPTIONS))
+
+@MAINTAINER_MODE_FALSE@.idef.c: 
+@MAINTAINER_MODE_FALSE@	if [ -e $*.h ]; then touch $*.h; else cp ${srcdir}/$*.h ./$*.h; fi
+@MAINTAINER_MODE_FALSE@	if [ -e $*.c ]; then touch $*.c; else cp ${srcdir}/$*.c ./$*.c; fi
+
+@MAINTAINER_MODE_FALSE@.idef.h: 
+@MAINTAINER_MODE_FALSE@	if [ -e $*.h ]; then touch $*.h; else cp ${srcdir}/$*.h ./$*.h; fi
+@MAINTAINER_MODE_FALSE@	if [ -e $*.c ]; then touch $*.c; else cp ${srcdir}/$*.c ./$*.c; fi
+
+#Hide distclean errors, see 'info automake, 13.4 Checking the distribution'
+#distcleancheck_listfiles = \
+#	find -type f -exec sh -c 'test -f $(srcdir)/{} || echo {}' ';'
+
+#ApiGen
+
+#SUFFIXES += .adt
+#
+#EXTRA_DIST += $(wildcard *.adt) $(foreach i,$(basename $(wildcard *.adt)),$i.c $i.h $i_dict.c $i_dict.h)
 
 builtin-forward.c: asc-builtins.h $(BUILTIN_SOURCEFILES) Makefile
 	$(GENFWD) "$(BUILTIN_NAMES_ARITY)" > $@

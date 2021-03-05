@@ -14,7 +14,15 @@
 
 @SET_MAKE@
 
-# $Id: Makefile.am 19677 2006-07-25 19:34:00Z martinrw $
+# $Id: Makefile.am 23708 2007-09-26 11:07:25Z kooiker $
+
+#
+# \file 
+#
+# This Makefile provides support for compiling Meta-Environment 
+# packages in a standard way 
+#
+#
 
 
 srcdir = @srcdir@
@@ -39,9 +47,9 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-subdir = ./libptmept
 DIST_COMMON = $(include_HEADERS) $(srcdir)/Makefile.am \
-	$(srcdir)/Makefile.in
+	$(srcdir)/Makefile.in $(top_srcdir)/Makefile.meta
+subdir = ./libptmept
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/meta-build.m4 \
 	$(top_srcdir)/configure.ac
@@ -114,6 +122,7 @@ DEPDIR = @DEPDIR@
 DISABLE_FALSE = @DISABLE_FALSE@
 DISABLE_TRUE = @DISABLE_TRUE@
 DLLTOOL = @DLLTOOL@
+DSYMUTIL = @DSYMUTIL@
 ECHO = @ECHO@
 ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
@@ -145,6 +154,7 @@ MAINT = @MAINT@
 MAINTAINER_MODE_FALSE = @MAINTAINER_MODE_FALSE@
 MAINTAINER_MODE_TRUE = @MAINTAINER_MODE_TRUE@
 MAKEINFO = @MAKEINFO@
+NMEDIT = @NMEDIT@
 OBJDUMP = @OBJDUMP@
 OBJEXT = @OBJEXT@
 PACKAGE = @PACKAGE@
@@ -156,6 +166,7 @@ PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 PKG_CONFIG = @PKG_CONFIG@
 RANLIB = @RANLIB@
+SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
@@ -214,6 +225,53 @@ sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
+
+# Put very common AM_CPPFLAGS, LDADD here, also here 
+# because of pkgconfig:
+AM_CPPFLAGS = 
+
+# Note: this makes all binaries relocatable as long as the ../lib directory
+# moves with it. The extra /foo in front is to work around a check in libtool
+# which demands that all rpaths are absolute. Note that this 'solution'
+# will only work on platforms that have support for $ORIGIN substitution.
+AM_LDFLAGS = 
+#-rpath '/foo:\$$ORIGIN/../lib'
+AM_LIBTOOLFLAGS = 
+LDADD = 
+
+# ToolBus rules
+SUFFIXES = .idef .isrc
+CLEANFILES = $(wildcard *.idef) $(foreach i,$(basename $(wildcard \
+	*.idef)),$i.c $i.h)
+EXTRA_DIST = $(wildcard *.c) $(wildcard *.h) AsFix.def
+pkgconfigdir = $(libdir)/pkgconfig
+docdatadir = $(datadir)/doc/$(PACKAGE)
+
+# In maintainer mode we assume that bootstrapping utilities such as
+# toolbus -gentifs, tifstoc, tifstojava, apigen and asfc are available
+# on the path. If not, we will use touch to update the timestamp of
+# the needed file if it exists, and fail if it does not exist.
+# Alas, the 'which' command is not portable, so we have to hack it here:
+@MAINTAINER_MODE_TRUE@check_available = \
+@MAINTAINER_MODE_TRUE@  @found="";  \
+@MAINTAINER_MODE_TRUE@  for p in `echo ${PATH} | tr ':' ' '`; do \
+@MAINTAINER_MODE_TRUE@    if [ -f $$p/$1 ]; then \
+@MAINTAINER_MODE_TRUE@      found=$$p; \
+@MAINTAINER_MODE_TRUE@    fi; \
+@MAINTAINER_MODE_TRUE@  done; \
+@MAINTAINER_MODE_TRUE@  if [ -f $${found}/$1 ]; then \
+@MAINTAINER_MODE_TRUE@    echo "$2"; $2; \
+@MAINTAINER_MODE_TRUE@  else \
+@MAINTAINER_MODE_TRUE@    echo "missing $1 to generate $@";  \
+@MAINTAINER_MODE_TRUE@    if [ -f $@ ]; then \
+@MAINTAINER_MODE_TRUE@      echo "touch $@"; touch $@; \
+@MAINTAINER_MODE_TRUE@    else \
+@MAINTAINER_MODE_TRUE@      echo "missing $@!";  \
+@MAINTAINER_MODE_TRUE@      false; \
+@MAINTAINER_MODE_TRUE@    fi;  \
+@MAINTAINER_MODE_TRUE@  fi
+
+@MAINTAINER_MODE_TRUE@stemvar = $($(shell echo "$*" | tr '-' '_')$1)
 lib_LTLIBRARIES = libPTMEPT.la
 include_HEADERS = \
 	PTMEPT.h \
@@ -225,15 +283,14 @@ libPTMEPT_la_LDFLAGS = -avoid-version -no-undefined $(AM_LDFLAGS)
 libPTMEPT_la_LIBADD = ../libmept/libmept.la $(ERROR_SUPPORT_LIBS) $(ATERM_LIBS)
 libPTMEPT_la_SOURCES = PTMEPT.c PTMEPT_dict.c $(UTILSRCS)
 UTILSRCS = lift.c lower.c
-EXTRA_DIST = AsFix.def
 
 # Developers only:
-LIBRARY = ../../asf-library/library
+LIBRARY = ../../sdf-library/library
 all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .c .lo .o .obj
-$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__configure_deps)
+.SUFFIXES: .idef .isrc .c .h .lo .o .obj
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/Makefile.meta $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -428,6 +485,7 @@ distclean-tags:
 	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH tags
 
 distdir: $(DISTFILES)
+	$(mkdir_p) $(distdir)/..
 	@srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`; \
 	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's|.|.|g'`; \
 	list='$(DISTFILES)'; for file in $$list; do \
@@ -478,6 +536,7 @@ install-strip:
 mostlyclean-generic:
 
 clean-generic:
+	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
@@ -551,6 +610,34 @@ uninstall-am: uninstall-includeHEADERS uninstall-info-am \
 	uninstall-includeHEADERS uninstall-info-am \
 	uninstall-libLTLIBRARIES
 
+.isrc.idef:
+	sed 's@__PREFIX__@${prefix}@g' < $< > $@
+
+@MAINTAINER_MODE_TRUE@.idef.c:
+@MAINTAINER_MODE_TRUE@	$(call check_available,toolbus,toolbus-gentifs -output $*.tifs -S$<)
+@MAINTAINER_MODE_TRUE@	$(call check_available,tifstoc,tifstoc -tool $* $*.tifs $(call stemvar,_TIF_OPTIONS))
+
+@MAINTAINER_MODE_TRUE@.idef.h:
+@MAINTAINER_MODE_TRUE@	$(call check_available,toolbus,toolbus-gentifs -output $*.tifs -S$<)
+@MAINTAINER_MODE_TRUE@	$(call check_available,tifstoc,tifstoc -tool $* $*.tifs $(call stemvar,_TIF_OPTIONS))
+
+@MAINTAINER_MODE_FALSE@.idef.c: 
+@MAINTAINER_MODE_FALSE@	if [ -e $*.h ]; then touch $*.h; else cp ${srcdir}/$*.h ./$*.h; fi
+@MAINTAINER_MODE_FALSE@	if [ -e $*.c ]; then touch $*.c; else cp ${srcdir}/$*.c ./$*.c; fi
+
+@MAINTAINER_MODE_FALSE@.idef.h: 
+@MAINTAINER_MODE_FALSE@	if [ -e $*.h ]; then touch $*.h; else cp ${srcdir}/$*.h ./$*.h; fi
+@MAINTAINER_MODE_FALSE@	if [ -e $*.c ]; then touch $*.c; else cp ${srcdir}/$*.c ./$*.c; fi
+
+#Hide distclean errors, see 'info automake, 13.4 Checking the distribution'
+#distcleancheck_listfiles = \
+#	find -type f -exec sh -c 'test -f $(srcdir)/{} || echo {}' ';'
+
+#ApiGen
+
+#SUFFIXES += .adt
+#
+#EXTRA_DIST += $(wildcard *.adt) $(foreach i,$(basename $(wildcard *.adt)),$i.c $i.h $i_dict.c $i_dict.h)
 
 AsFix.def:
 	(echo "definition"; \

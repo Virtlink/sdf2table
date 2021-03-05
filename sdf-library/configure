@@ -1652,7 +1652,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 # args: $[]1 : top module
-function meta_requires() {
+meta_requires() {
   meta_require_closure=""
   meta_pkg_config_path="$(echo "$PKG_CONFIG_PATH" | tr ':' ' ')"
   if test -z  "${meta_pkg_config_path}"; then
@@ -1663,7 +1663,7 @@ function meta_requires() {
   echo ${meta_require_closure}
 }
 
-function meta_recursive_requires() {
+meta_recursive_requires() {
   meta_require_pcfile=""
   meta_require_kids=""
 
@@ -1684,7 +1684,7 @@ function meta_recursive_requires() {
 
 }
 
-function meta_find_pkg_config_file() {
+meta_find_pkg_config_file() {
   meta_find_pkg_config_result=""
 
     for entry in $meta_pkg_config_path; do
@@ -2034,7 +2034,7 @@ fi
 
 # Define the identity of the package.
  PACKAGE=sdf-library
- VERSION=1.0
+ VERSION=1.0.2
 
 
 cat >>confdefs.h <<_ACEOF
@@ -2183,7 +2183,7 @@ am__tar='${AMTAR} chof - "$$tardir"'; am__untar='${AMTAR} xf -'
   ac_config_files="$ac_config_files sdf-library.pc"
 
 
-        ac_config_files="$ac_config_files ./Makefile ./library/Makefile ./library/basic/Makefile ./library/languages/Makefile ./library/languages/ansi-c/Makefile ./library/languages/ansi-c/syntax/Makefile ./library/languages/asf/Makefile ./library/languages/asf/syntax/Makefile ./library/languages/asfix/Makefile ./library/languages/asfix/syntax/Makefile ./library/languages/aterm/Makefile ./library/languages/aterm/syntax/Makefile ./library/languages/box/Makefile ./library/languages/box/syntax/Makefile ./library/languages/casl/Makefile ./library/languages/casl/syntax/Makefile ./library/languages/cpp/Makefile ./library/languages/cpp/syntax/Makefile ./library/languages/fdl/Makefile ./library/languages/fdl/syntax/Makefile ./library/languages/generic-cpp/Makefile ./library/languages/generic-cpp/syntax/Makefile ./library/languages/graph/Makefile ./library/languages/graph/syntax/Makefile ./library/languages/java/Makefile ./library/languages/java/syntax/Makefile ./library/languages/pico/Makefile ./library/languages/pico/examples/Makefile ./library/languages/pico/syntax/Makefile ./library/languages/sdf2/Makefile ./library/languages/sdf2/idioms/Makefile ./library/languages/sdf2/syntax/Makefile"
+        ac_config_files="$ac_config_files ./Makefile ./library/Makefile ./library/basic/Makefile ./library/languages/yacc/syntax/Makefile ./library/languages/yacc/Makefile ./library/languages/box/syntax/Makefile ./library/languages/box/Makefile ./library/languages/Makefile ./library/languages/generic-cpp/syntax/Makefile ./library/languages/generic-cpp/Makefile ./library/languages/casl/syntax/Makefile ./library/languages/casl/Makefile ./library/languages/pico/syntax/Makefile ./library/languages/pico/Makefile ./library/languages/pico/examples/Makefile ./library/languages/fortran/syntax/Makefile ./library/languages/fortran/Makefile ./library/languages/java/syntax/Makefile ./library/languages/java/Makefile ./library/languages/logo/syntax/Makefile ./library/languages/logo/Makefile ./library/languages/aterm/syntax/Makefile ./library/languages/aterm/Makefile ./library/languages/fdl/syntax/Makefile ./library/languages/fdl/Makefile ./library/languages/cpp/syntax/Makefile ./library/languages/cpp/Makefile ./library/languages/xml/syntax/Makefile ./library/languages/xml/Makefile ./library/languages/asfix/syntax/Makefile ./library/languages/asfix/Makefile ./library/languages/graph/syntax/Makefile ./library/languages/graph/Makefile ./library/languages/asf/syntax/Makefile ./library/languages/asf/Makefile ./library/languages/sdf2/syntax/Makefile ./library/languages/sdf2/Makefile ./library/languages/sdf2/idioms/Makefile ./library/languages/ebnf/syntax/Makefile ./library/languages/ebnf/Makefile ./library/languages/ansi-c/syntax/Makefile ./library/languages/ansi-c/Makefile ./library/languages/bnf/syntax/Makefile ./library/languages/bnf/Makefile"
 
 
   { echo "$as_me:$LINENO: checking whether to enable maintainer-specific portions of Makefiles" >&5
@@ -2273,6 +2273,63 @@ echo "${ECHO_T}no" >&6; }
 
 
 
+
+  if test -z "$JAVA" ; then
+
+
+if ! test -d META-INF ; then
+  mkdir META-INF
+fi
+if ! test -d .settings ; then
+  mkdir .settings
+fi
+
+REQUIRED_BUNDLES=""
+if test -n ""; then
+  REQUIRED_BUNDLES=`echo "" | tr '-' '_' | tr ' ' ','`
+  ECLIPSE_REQUIRES=
+
+  if test -n "$ECLIPSE_REQUIRES"; then
+    REQUIRED_BUNDLES="${REQUIRED_BUNDLES},${ECLIPSE_REQUIRES}"
+  fi
+fi
+
+cat > META-INF/MANIFEST.MF << ENDCAT
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: sdf-library
+Eclipse-LazyStart: true
+Bundle-SymbolicName: `echo sdf-library | tr '-' '_'`;singleton:=true
+Bundle-Version: 1.0.2
+Bundle-ClassPath: .
+Require-Bundle: `echo ${REQUIRED_BUNDLES} | sed "s@,@,# @g" | tr '#' '\n'`
+ENDCAT
+
+# Remove empty clauses from the manifest
+MANIFEST=`cat META-INF/MANIFEST.MF | sed '/.*: \t*$/d'`
+echo "${MANIFEST}" > META-INF/MANIFEST.MF
+
+cat > .project << ENDCAT
+<?xml version="1.0" encoding="UTF-8"?>
+<projectDescription>
+	<name>sdf-library</name>
+	<comment></comment>
+	<projects>
+	</projects>
+	<buildSpec>
+		<buildCommand>
+			<name>org.eclipse.pde.ManifestBuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+	</buildSpec>
+	<natures>
+		<nature>org.eclipse.pde.PluginNature</nature>
+	</natures>
+</projectDescription>
+ENDCAT
+
+  fi
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -2860,35 +2917,47 @@ do
     "./Makefile") CONFIG_FILES="$CONFIG_FILES ./Makefile" ;;
     "./library/Makefile") CONFIG_FILES="$CONFIG_FILES ./library/Makefile" ;;
     "./library/basic/Makefile") CONFIG_FILES="$CONFIG_FILES ./library/basic/Makefile" ;;
-    "./library/languages/Makefile") CONFIG_FILES="$CONFIG_FILES ./library/languages/Makefile" ;;
-    "./library/languages/ansi-c/Makefile") CONFIG_FILES="$CONFIG_FILES ./library/languages/ansi-c/Makefile" ;;
-    "./library/languages/ansi-c/syntax/Makefile") CONFIG_FILES="$CONFIG_FILES ./library/languages/ansi-c/syntax/Makefile" ;;
-    "./library/languages/asf/Makefile") CONFIG_FILES="$CONFIG_FILES ./library/languages/asf/Makefile" ;;
-    "./library/languages/asf/syntax/Makefile") CONFIG_FILES="$CONFIG_FILES ./library/languages/asf/syntax/Makefile" ;;
-    "./library/languages/asfix/Makefile") CONFIG_FILES="$CONFIG_FILES ./library/languages/asfix/Makefile" ;;
-    "./library/languages/asfix/syntax/Makefile") CONFIG_FILES="$CONFIG_FILES ./library/languages/asfix/syntax/Makefile" ;;
-    "./library/languages/aterm/Makefile") CONFIG_FILES="$CONFIG_FILES ./library/languages/aterm/Makefile" ;;
-    "./library/languages/aterm/syntax/Makefile") CONFIG_FILES="$CONFIG_FILES ./library/languages/aterm/syntax/Makefile" ;;
-    "./library/languages/box/Makefile") CONFIG_FILES="$CONFIG_FILES ./library/languages/box/Makefile" ;;
+    "./library/languages/yacc/syntax/Makefile") CONFIG_FILES="$CONFIG_FILES ./library/languages/yacc/syntax/Makefile" ;;
+    "./library/languages/yacc/Makefile") CONFIG_FILES="$CONFIG_FILES ./library/languages/yacc/Makefile" ;;
     "./library/languages/box/syntax/Makefile") CONFIG_FILES="$CONFIG_FILES ./library/languages/box/syntax/Makefile" ;;
-    "./library/languages/casl/Makefile") CONFIG_FILES="$CONFIG_FILES ./library/languages/casl/Makefile" ;;
-    "./library/languages/casl/syntax/Makefile") CONFIG_FILES="$CONFIG_FILES ./library/languages/casl/syntax/Makefile" ;;
-    "./library/languages/cpp/Makefile") CONFIG_FILES="$CONFIG_FILES ./library/languages/cpp/Makefile" ;;
-    "./library/languages/cpp/syntax/Makefile") CONFIG_FILES="$CONFIG_FILES ./library/languages/cpp/syntax/Makefile" ;;
-    "./library/languages/fdl/Makefile") CONFIG_FILES="$CONFIG_FILES ./library/languages/fdl/Makefile" ;;
-    "./library/languages/fdl/syntax/Makefile") CONFIG_FILES="$CONFIG_FILES ./library/languages/fdl/syntax/Makefile" ;;
-    "./library/languages/generic-cpp/Makefile") CONFIG_FILES="$CONFIG_FILES ./library/languages/generic-cpp/Makefile" ;;
+    "./library/languages/box/Makefile") CONFIG_FILES="$CONFIG_FILES ./library/languages/box/Makefile" ;;
+    "./library/languages/Makefile") CONFIG_FILES="$CONFIG_FILES ./library/languages/Makefile" ;;
     "./library/languages/generic-cpp/syntax/Makefile") CONFIG_FILES="$CONFIG_FILES ./library/languages/generic-cpp/syntax/Makefile" ;;
-    "./library/languages/graph/Makefile") CONFIG_FILES="$CONFIG_FILES ./library/languages/graph/Makefile" ;;
-    "./library/languages/graph/syntax/Makefile") CONFIG_FILES="$CONFIG_FILES ./library/languages/graph/syntax/Makefile" ;;
-    "./library/languages/java/Makefile") CONFIG_FILES="$CONFIG_FILES ./library/languages/java/Makefile" ;;
-    "./library/languages/java/syntax/Makefile") CONFIG_FILES="$CONFIG_FILES ./library/languages/java/syntax/Makefile" ;;
+    "./library/languages/generic-cpp/Makefile") CONFIG_FILES="$CONFIG_FILES ./library/languages/generic-cpp/Makefile" ;;
+    "./library/languages/casl/syntax/Makefile") CONFIG_FILES="$CONFIG_FILES ./library/languages/casl/syntax/Makefile" ;;
+    "./library/languages/casl/Makefile") CONFIG_FILES="$CONFIG_FILES ./library/languages/casl/Makefile" ;;
+    "./library/languages/pico/syntax/Makefile") CONFIG_FILES="$CONFIG_FILES ./library/languages/pico/syntax/Makefile" ;;
     "./library/languages/pico/Makefile") CONFIG_FILES="$CONFIG_FILES ./library/languages/pico/Makefile" ;;
     "./library/languages/pico/examples/Makefile") CONFIG_FILES="$CONFIG_FILES ./library/languages/pico/examples/Makefile" ;;
-    "./library/languages/pico/syntax/Makefile") CONFIG_FILES="$CONFIG_FILES ./library/languages/pico/syntax/Makefile" ;;
+    "./library/languages/fortran/syntax/Makefile") CONFIG_FILES="$CONFIG_FILES ./library/languages/fortran/syntax/Makefile" ;;
+    "./library/languages/fortran/Makefile") CONFIG_FILES="$CONFIG_FILES ./library/languages/fortran/Makefile" ;;
+    "./library/languages/java/syntax/Makefile") CONFIG_FILES="$CONFIG_FILES ./library/languages/java/syntax/Makefile" ;;
+    "./library/languages/java/Makefile") CONFIG_FILES="$CONFIG_FILES ./library/languages/java/Makefile" ;;
+    "./library/languages/logo/syntax/Makefile") CONFIG_FILES="$CONFIG_FILES ./library/languages/logo/syntax/Makefile" ;;
+    "./library/languages/logo/Makefile") CONFIG_FILES="$CONFIG_FILES ./library/languages/logo/Makefile" ;;
+    "./library/languages/aterm/syntax/Makefile") CONFIG_FILES="$CONFIG_FILES ./library/languages/aterm/syntax/Makefile" ;;
+    "./library/languages/aterm/Makefile") CONFIG_FILES="$CONFIG_FILES ./library/languages/aterm/Makefile" ;;
+    "./library/languages/fdl/syntax/Makefile") CONFIG_FILES="$CONFIG_FILES ./library/languages/fdl/syntax/Makefile" ;;
+    "./library/languages/fdl/Makefile") CONFIG_FILES="$CONFIG_FILES ./library/languages/fdl/Makefile" ;;
+    "./library/languages/cpp/syntax/Makefile") CONFIG_FILES="$CONFIG_FILES ./library/languages/cpp/syntax/Makefile" ;;
+    "./library/languages/cpp/Makefile") CONFIG_FILES="$CONFIG_FILES ./library/languages/cpp/Makefile" ;;
+    "./library/languages/xml/syntax/Makefile") CONFIG_FILES="$CONFIG_FILES ./library/languages/xml/syntax/Makefile" ;;
+    "./library/languages/xml/Makefile") CONFIG_FILES="$CONFIG_FILES ./library/languages/xml/Makefile" ;;
+    "./library/languages/asfix/syntax/Makefile") CONFIG_FILES="$CONFIG_FILES ./library/languages/asfix/syntax/Makefile" ;;
+    "./library/languages/asfix/Makefile") CONFIG_FILES="$CONFIG_FILES ./library/languages/asfix/Makefile" ;;
+    "./library/languages/graph/syntax/Makefile") CONFIG_FILES="$CONFIG_FILES ./library/languages/graph/syntax/Makefile" ;;
+    "./library/languages/graph/Makefile") CONFIG_FILES="$CONFIG_FILES ./library/languages/graph/Makefile" ;;
+    "./library/languages/asf/syntax/Makefile") CONFIG_FILES="$CONFIG_FILES ./library/languages/asf/syntax/Makefile" ;;
+    "./library/languages/asf/Makefile") CONFIG_FILES="$CONFIG_FILES ./library/languages/asf/Makefile" ;;
+    "./library/languages/sdf2/syntax/Makefile") CONFIG_FILES="$CONFIG_FILES ./library/languages/sdf2/syntax/Makefile" ;;
     "./library/languages/sdf2/Makefile") CONFIG_FILES="$CONFIG_FILES ./library/languages/sdf2/Makefile" ;;
     "./library/languages/sdf2/idioms/Makefile") CONFIG_FILES="$CONFIG_FILES ./library/languages/sdf2/idioms/Makefile" ;;
-    "./library/languages/sdf2/syntax/Makefile") CONFIG_FILES="$CONFIG_FILES ./library/languages/sdf2/syntax/Makefile" ;;
+    "./library/languages/ebnf/syntax/Makefile") CONFIG_FILES="$CONFIG_FILES ./library/languages/ebnf/syntax/Makefile" ;;
+    "./library/languages/ebnf/Makefile") CONFIG_FILES="$CONFIG_FILES ./library/languages/ebnf/Makefile" ;;
+    "./library/languages/ansi-c/syntax/Makefile") CONFIG_FILES="$CONFIG_FILES ./library/languages/ansi-c/syntax/Makefile" ;;
+    "./library/languages/ansi-c/Makefile") CONFIG_FILES="$CONFIG_FILES ./library/languages/ansi-c/Makefile" ;;
+    "./library/languages/bnf/syntax/Makefile") CONFIG_FILES="$CONFIG_FILES ./library/languages/bnf/syntax/Makefile" ;;
+    "./library/languages/bnf/Makefile") CONFIG_FILES="$CONFIG_FILES ./library/languages/bnf/Makefile" ;;
 
   *) { { echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5
 echo "$as_me: error: invalid argument: $ac_config_target" >&2;}
@@ -3326,6 +3395,9 @@ which seems to be undefined.  Please make sure it is defined." >&2;}
     "sdf-library.pc":F)
 cat sdf-library.pc | grep -v "^Libs" | grep -v "^Cflags" | sed -e 's/\#uninstalled //g' > sdf-library-uninstalled.pc
 echo "PkgConfigPath=$PKG_CONFIG_PATH" >> sdf-library.pc
+if test "a" != "a${BUILD_ID}" ; then
+  echo "BuildId=${BUILD_ID}" >> sdf-library.pc
+fi
  ;;
 
   esac

@@ -14,8 +14,15 @@
 
 @SET_MAKE@
 
-# $Id: Makefile.am 21403 2007-02-19 22:26:44Z jurgenv $
+# $Id: Makefile.am 23523 2007-09-10 13:43:41Z jurgenv $
 
+#
+# \file 
+#
+# This Makefile provides support for compiling Meta-Environment 
+# packages in a standard way 
+#
+#
 
 
 srcdir = @srcdir@
@@ -40,12 +47,13 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
+DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
+	$(top_srcdir)/Makefile.meta
 bin_PROGRAMS = flattenPT$(EXEEXT) unparsePT$(EXEEXT) \
 	unparseProd$(EXEEXT) addPosInfo$(EXEEXT) ambtracker$(EXEEXT) \
-	apply-function$(EXEEXT) liftPT$(EXEEXT) comparePT$(EXEEXT)
+	apply-function$(EXEEXT) liftPT$(EXEEXT) comparePT$(EXEEXT) \
+	orderPT$(EXEEXT)
 subdir = ./utils
-DIST_COMMON = $(noinst_HEADERS) $(srcdir)/Makefile.am \
-	$(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/meta-build.m4 \
 	$(top_srcdir)/configure.ac
@@ -56,17 +64,17 @@ CONFIG_CLEAN_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(pkgdatadir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
-am_addPosInfo_OBJECTS = position-annotator.tif.$(OBJEXT) \
+am_addPosInfo_OBJECTS = position-annotator.$(OBJEXT) \
 	addPosInfo.$(OBJEXT)
 addPosInfo_OBJECTS = $(am_addPosInfo_OBJECTS)
 am__DEPENDENCIES_1 =
 addPosInfo_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_ambtracker_OBJECTS = ambtracker-main.$(OBJEXT) \
-	ambiguity-reporter.tif.$(OBJEXT)
+	ambiguity-reporter.$(OBJEXT)
 ambtracker_OBJECTS = $(am_ambtracker_OBJECTS)
 ambtracker_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
-am_apply_function_OBJECTS = apply-function.tif.$(OBJEXT) \
-	apply-function.$(OBJEXT)
+am_apply_function_OBJECTS = apply-function.$(OBJEXT) \
+	apply-function-main.$(OBJEXT)
 apply_function_OBJECTS = $(am_apply_function_OBJECTS)
 apply_function_DEPENDENCIES = $(am__DEPENDENCIES_1)
 am_comparePT_OBJECTS = comparePT-main.$(OBJEXT)
@@ -78,7 +86,10 @@ flattenPT_DEPENDENCIES = $(am__DEPENDENCIES_1)
 am_liftPT_OBJECTS = liftPT-main.$(OBJEXT)
 liftPT_OBJECTS = $(am_liftPT_OBJECTS)
 liftPT_DEPENDENCIES = $(am__DEPENDENCIES_1)
-am_unparsePT_OBJECTS = unparser.tif.$(OBJEXT) unparsePT-main.$(OBJEXT)
+am_orderPT_OBJECTS = orderPT-main.$(OBJEXT)
+orderPT_OBJECTS = $(am_orderPT_OBJECTS)
+orderPT_DEPENDENCIES = $(am__DEPENDENCIES_1)
+am_unparsePT_OBJECTS = unparser.$(OBJEXT) unparsePT-main.$(OBJEXT)
 unparsePT_OBJECTS = $(am_unparsePT_OBJECTS)
 unparsePT_DEPENDENCIES = ../libmept/libmept.la $(am__DEPENDENCIES_1)
 am_unparseProd_OBJECTS = unparseProd-main.$(OBJEXT)
@@ -97,12 +108,12 @@ LINK = $(LIBTOOL) --tag=CC --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
 SOURCES = $(addPosInfo_SOURCES) $(ambtracker_SOURCES) \
 	$(apply_function_SOURCES) $(comparePT_SOURCES) \
-	$(flattenPT_SOURCES) $(liftPT_SOURCES) $(unparsePT_SOURCES) \
-	$(unparseProd_SOURCES)
+	$(flattenPT_SOURCES) $(liftPT_SOURCES) $(orderPT_SOURCES) \
+	$(unparsePT_SOURCES) $(unparseProd_SOURCES)
 DIST_SOURCES = $(addPosInfo_SOURCES) $(ambtracker_SOURCES) \
 	$(apply_function_SOURCES) $(comparePT_SOURCES) \
-	$(flattenPT_SOURCES) $(liftPT_SOURCES) $(unparsePT_SOURCES) \
-	$(unparseProd_SOURCES)
+	$(flattenPT_SOURCES) $(liftPT_SOURCES) $(orderPT_SOURCES) \
+	$(unparsePT_SOURCES) $(unparseProd_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	html-recursive info-recursive install-data-recursive \
 	install-exec-recursive install-info-recursive \
@@ -117,7 +128,6 @@ am__vpath_adj = case $$p in \
 am__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
 pkgdataDATA_INSTALL = $(INSTALL_DATA)
 DATA = $(pkgdata_DATA)
-HEADERS = $(noinst_HEADERS)
 ETAGS = etags
 CTAGS = ctags
 DIST_SUBDIRS = $(SUBDIRS)
@@ -153,6 +163,7 @@ DEPDIR = @DEPDIR@
 DISABLE_FALSE = @DISABLE_FALSE@
 DISABLE_TRUE = @DISABLE_TRUE@
 DLLTOOL = @DLLTOOL@
+DSYMUTIL = @DSYMUTIL@
 ECHO = @ECHO@
 ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
@@ -184,6 +195,7 @@ MAINT = @MAINT@
 MAINTAINER_MODE_FALSE = @MAINTAINER_MODE_FALSE@
 MAINTAINER_MODE_TRUE = @MAINTAINER_MODE_TRUE@
 MAKEINFO = @MAKEINFO@
+NMEDIT = @NMEDIT@
 OBJDUMP = @OBJDUMP@
 OBJEXT = @OBJEXT@
 PACKAGE = @PACKAGE@
@@ -195,6 +207,7 @@ PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 PKG_CONFIG = @PKG_CONFIG@
 RANLIB = @RANLIB@
+SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
@@ -253,19 +266,54 @@ sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
+
+# Put very common AM_CPPFLAGS, LDADD here, also here 
+# because of pkgconfig:
+AM_CPPFLAGS = 
+
+# Note: this makes all binaries relocatable as long as the ../lib directory
+# moves with it. The extra /foo in front is to work around a check in libtool
+# which demands that all rpaths are absolute. Note that this 'solution'
+# will only work on platforms that have support for $ORIGIN substitution.
+AM_LDFLAGS = 
+#-rpath '/foo:\$$ORIGIN/../lib'
+AM_LIBTOOLFLAGS = 
+LDADD = 
+
+# ToolBus rules
+SUFFIXES = .idef .isrc
+CLEANFILES = $(wildcard *.idef) $(foreach i,$(basename $(wildcard \
+	*.idef)),$i.c $i.h)
+EXTRA_DIST = $(wildcard *.c) $(wildcard *.h)
+pkgconfigdir = $(libdir)/pkgconfig
+docdatadir = $(datadir)/doc/$(PACKAGE)
+
+# In maintainer mode we assume that bootstrapping utilities such as
+# toolbus -gentifs, tifstoc, tifstojava, apigen and asfc are available
+# on the path. If not, we will use touch to update the timestamp of
+# the needed file if it exists, and fail if it does not exist.
+# Alas, the 'which' command is not portable, so we have to hack it here:
+@MAINTAINER_MODE_TRUE@check_available = \
+@MAINTAINER_MODE_TRUE@  @found="";  \
+@MAINTAINER_MODE_TRUE@  for p in `echo ${PATH} | tr ':' ' '`; do \
+@MAINTAINER_MODE_TRUE@    if [ -f $$p/$1 ]; then \
+@MAINTAINER_MODE_TRUE@      found=$$p; \
+@MAINTAINER_MODE_TRUE@    fi; \
+@MAINTAINER_MODE_TRUE@  done; \
+@MAINTAINER_MODE_TRUE@  if [ -f $${found}/$1 ]; then \
+@MAINTAINER_MODE_TRUE@    echo "$2"; $2; \
+@MAINTAINER_MODE_TRUE@  else \
+@MAINTAINER_MODE_TRUE@    echo "missing $1 to generate $@";  \
+@MAINTAINER_MODE_TRUE@    if [ -f $@ ]; then \
+@MAINTAINER_MODE_TRUE@      echo "touch $@"; touch $@; \
+@MAINTAINER_MODE_TRUE@    else \
+@MAINTAINER_MODE_TRUE@      echo "missing $@!";  \
+@MAINTAINER_MODE_TRUE@      false; \
+@MAINTAINER_MODE_TRUE@    fi;  \
+@MAINTAINER_MODE_TRUE@  fi
+
+@MAINTAINER_MODE_TRUE@stemvar = $($(shell echo "$*" | tr '-' '_')$1)
 SUBDIRS = implodePT filterPT
-EXTRA_DIST = \
-	unparser.idef.src \
-	position-annotator.idef.src \
-	apply-function.idef.src \
-	ambiguity-reporter.idef.src
-
-CLEANFILES = \
-	unparser.idef \
-	position-annotator.idef \
-	apply-function.idef \
-	ambiguity-reporter.idef
-
 INCLUDES = \
 	-I$(top_srcdir)/libmept \
 	-I$(top_srcdir)/libasfix2 \
@@ -281,22 +329,16 @@ pkgdata_DATA = \
 	apply-function.idef \
 	ambiguity-reporter.idef 
 
-noinst_HEADERS = \
-	unparser.tif.h \
-	apply-function.tif.h \
-	position-annotator.tif.h  \
-	ambiguity-reporter.tif.h 
-
 apply_function_SOURCES = \
-	apply-function.tif.c \
-	apply-function.c
+	apply-function.isrc \
+	apply-function-main.c
 
 apply_function_LDADD = \
 	-L../libmept -lmept \
 	$(TOOLBUSLIB_LIBS)
 
 addPosInfo_SOURCES = \
-	position-annotator.tif.c \
+	position-annotator.isrc \
 	addPosInfo.c
 
 addPosInfo_LDADD = \
@@ -316,7 +358,7 @@ liftPT_LDADD = \
 	$(ATERM_LIBS)
 
 unparsePT_SOURCES = \
-	unparser.tif.c \
+	unparser.isrc \
 	unparsePT-main.c
 
 unparsePT_LDADD = \
@@ -330,6 +372,13 @@ comparePT_LDADD = \
 	-L../libmept -lmept \
 	$(ATERM_LIBS)
 
+orderPT_SOURCES = \
+	orderPT-main.c
+
+orderPT_LDADD = \
+	-L../libmept -lmept \
+	$(ATERM_LIBS)
+
 unparseProd_SOURCES = unparseProd-main.c
 unparseProd_LDADD = \
 	-L../libmept -lmept \
@@ -337,20 +386,18 @@ unparseProd_LDADD = \
 
 ambtracker_SOURCES = \
 	ambtracker-main.c \
-	ambiguity-reporter.tif.c
+	ambiguity-reporter.isrc
 
 ambtracker_LDADD = \
 	-L../libmept -lmept \
 	$(TOOLBUSLIB_LIBS) \
 	$(ERROR_SUPPORT_LIBS)
 
-IDEF = idef2tif
-TIFS = tifstoc
 all: all-recursive
 
 .SUFFIXES:
-.SUFFIXES: .c .lo .o .obj
-$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__configure_deps)
+.SUFFIXES: .idef .isrc .c .h .lo .o .obj
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/Makefile.meta $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -425,6 +472,9 @@ flattenPT$(EXEEXT): $(flattenPT_OBJECTS) $(flattenPT_DEPENDENCIES)
 liftPT$(EXEEXT): $(liftPT_OBJECTS) $(liftPT_DEPENDENCIES) 
 	@rm -f liftPT$(EXEEXT)
 	$(LINK) $(liftPT_LDFLAGS) $(liftPT_OBJECTS) $(liftPT_LDADD) $(LIBS)
+orderPT$(EXEEXT): $(orderPT_OBJECTS) $(orderPT_DEPENDENCIES) 
+	@rm -f orderPT$(EXEEXT)
+	$(LINK) $(orderPT_LDFLAGS) $(orderPT_OBJECTS) $(orderPT_LDADD) $(LIBS)
 unparsePT$(EXEEXT): $(unparsePT_OBJECTS) $(unparsePT_DEPENDENCIES) 
 	@rm -f unparsePT$(EXEEXT)
 	$(LINK) $(unparsePT_LDFLAGS) $(unparsePT_OBJECTS) $(unparsePT_LDADD) $(LIBS)
@@ -439,17 +489,18 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/addPosInfo.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ambiguity-reporter.tif.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ambiguity-reporter.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ambtracker-main.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/apply-function-main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/apply-function.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/apply-function.tif.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/comparePT-main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flattenPT-main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/liftPT-main.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/position-annotator.tif.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/orderPT-main.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/position-annotator.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unparsePT-main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unparseProd-main.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unparser.tif.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unparser.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
@@ -632,6 +683,7 @@ distclean-tags:
 	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH tags
 
 distdir: $(DISTFILES)
+	$(mkdir_p) $(distdir)/..
 	@srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`; \
 	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's|.|.|g'`; \
 	list='$(DISTFILES)'; for file in $$list; do \
@@ -675,7 +727,7 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-recursive
-all-am: Makefile $(PROGRAMS) $(DATA) $(HEADERS)
+all-am: Makefile $(PROGRAMS) $(DATA)
 installdirs: installdirs-recursive
 installdirs-am:
 	for dir in "$(DESTDIR)$(bindir)" "$(DESTDIR)$(pkgdatadir)"; do \
@@ -774,18 +826,34 @@ uninstall-info: uninstall-info-recursive
 	pdf pdf-am ps ps-am tags tags-recursive uninstall uninstall-am \
 	uninstall-binPROGRAMS uninstall-info-am uninstall-pkgdataDATA
 
-
-tif:
-	for i in `ls *.idef`; do \
-	  $(IDEF) $$i; \
-	  $(TIFS) -tool `basename $$i .idef` `basename $$i .idef`.tifs; \
-	done
-
-tif-clean:
-	rm -f *.tifs *.tif.[ch]
-
-%.idef: %.idef.src Makefile
+.isrc.idef:
 	sed 's@__PREFIX__@${prefix}@g' < $< > $@
+
+@MAINTAINER_MODE_TRUE@.idef.c:
+@MAINTAINER_MODE_TRUE@	$(call check_available,toolbus,toolbus-gentifs -output $*.tifs -S$<)
+@MAINTAINER_MODE_TRUE@	$(call check_available,tifstoc,tifstoc -tool $* $*.tifs $(call stemvar,_TIF_OPTIONS))
+
+@MAINTAINER_MODE_TRUE@.idef.h:
+@MAINTAINER_MODE_TRUE@	$(call check_available,toolbus,toolbus-gentifs -output $*.tifs -S$<)
+@MAINTAINER_MODE_TRUE@	$(call check_available,tifstoc,tifstoc -tool $* $*.tifs $(call stemvar,_TIF_OPTIONS))
+
+@MAINTAINER_MODE_FALSE@.idef.c: 
+@MAINTAINER_MODE_FALSE@	if [ -e $*.h ]; then touch $*.h; else cp ${srcdir}/$*.h ./$*.h; fi
+@MAINTAINER_MODE_FALSE@	if [ -e $*.c ]; then touch $*.c; else cp ${srcdir}/$*.c ./$*.c; fi
+
+@MAINTAINER_MODE_FALSE@.idef.h: 
+@MAINTAINER_MODE_FALSE@	if [ -e $*.h ]; then touch $*.h; else cp ${srcdir}/$*.h ./$*.h; fi
+@MAINTAINER_MODE_FALSE@	if [ -e $*.c ]; then touch $*.c; else cp ${srcdir}/$*.c ./$*.c; fi
+
+#Hide distclean errors, see 'info automake, 13.4 Checking the distribution'
+#distcleancheck_listfiles = \
+#	find -type f -exec sh -c 'test -f $(srcdir)/{} || echo {}' ';'
+
+#ApiGen
+
+#SUFFIXES += .adt
+#
+#EXTRA_DIST += $(wildcard *.adt) $(foreach i,$(basename $(wildcard *.adt)),$i.c $i.h $i_dict.c $i_dict.h)
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

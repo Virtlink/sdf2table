@@ -48,7 +48,6 @@ build_triplet = @build@
 host_triplet = @host@
 DIST_COMMON = $(include_HEADERS) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(top_srcdir)/Makefile.meta
-@MAINTAINER_MODE_TRUE@am__append_1 = .eqs .adt .idef .tifs
 subdir = ./lib
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/meta-build.m4 \
@@ -70,11 +69,8 @@ LTLIBRARIES = $(lib_LTLIBRARIES)
 am__DEPENDENCIES_1 =
 libtide_adapter_la_DEPENDENCIES = $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1)
-am_libtide_adapter_la_OBJECTS = libtide_adapter_la-TA.lo \
-	libtide_adapter_la-TA_dict.lo \
-	libtide_adapter_la-tide-adapter.lo \
-	libtide_adapter_la-debug-adapter.tif.lo \
-	libtide_adapter_la-debug-adapter.lo
+am_libtide_adapter_la_OBJECTS = debug-adapter.lo TA.lo TA_dict.lo \
+	tide-adapter.lo debug-tool.lo
 libtide_adapter_la_OBJECTS = $(am_libtide_adapter_la_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -127,6 +123,7 @@ DEPDIR = @DEPDIR@
 DISABLE_FALSE = @DISABLE_FALSE@
 DISABLE_TRUE = @DISABLE_TRUE@
 DLLTOOL = @DLLTOOL@
+DSYMUTIL = @DSYMUTIL@
 ECHO = @ECHO@
 ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
@@ -152,6 +149,7 @@ MAINT = @MAINT@
 MAINTAINER_MODE_FALSE = @MAINTAINER_MODE_FALSE@
 MAINTAINER_MODE_TRUE = @MAINTAINER_MODE_TRUE@
 MAKEINFO = @MAKEINFO@
+NMEDIT = @NMEDIT@
 OBJDUMP = @OBJDUMP@
 OBJEXT = @OBJEXT@
 PACKAGE = @PACKAGE@
@@ -163,6 +161,7 @@ PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 PKG_CONFIG = @PKG_CONFIG@
 RANLIB = @RANLIB@
+SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
@@ -224,10 +223,23 @@ target_alias = @target_alias@
 
 # Put very common AM_CPPFLAGS, LDADD here, also here 
 # because of pkgconfig:
-AM_CPPFLAGS = 
+AM_CPPFLAGS = $(ATERM_CFLAGS) $(TOOLBUSLIB_CFLAGS) \
+	-DDISABLE_DYNAMIC_CHECKING
+
+# Note: this makes all binaries relocatable as long as the ../lib directory
+# moves with it. The extra /foo in front is to work around a check in libtool
+# which demands that all rpaths are absolute. Note that this 'solution'
+# will only work on platforms that have support for $ORIGIN substitution.
+AM_LDFLAGS = 
+#-rpath '/foo:\$$ORIGIN/../lib'
+AM_LIBTOOLFLAGS = 
 LDADD = 
-SUFFIXES = $(am__append_1)
-CLEANFILES = $(wildcard *.tifs)
+
+# ToolBus rules
+SUFFIXES = .idef .isrc
+CLEANFILES = $(wildcard *.idef) $(foreach i,$(basename $(wildcard \
+	*.idef)),$i.c $i.h)
+EXTRA_DIST = $(wildcard *.c) $(wildcard *.h) TA.adt
 pkgconfigdir = $(libdir)/pkgconfig
 docdatadir = $(datadir)/doc/$(PACKAGE)
 
@@ -235,8 +247,15 @@ docdatadir = $(datadir)/doc/$(PACKAGE)
 # toolbus -gentifs, tifstoc, tifstojava, apigen and asfc are available
 # on the path. If not, we will use touch to update the timestamp of
 # the needed file if it exists, and fail if it does not exist.
+# Alas, the 'which' command is not portable, so we have to hack it here:
 @MAINTAINER_MODE_TRUE@check_available = \
-@MAINTAINER_MODE_TRUE@  @if which $1; then \
+@MAINTAINER_MODE_TRUE@  @found="";  \
+@MAINTAINER_MODE_TRUE@  for p in `echo ${PATH} | tr ':' ' '`; do \
+@MAINTAINER_MODE_TRUE@    if [ -f $$p/$1 ]; then \
+@MAINTAINER_MODE_TRUE@      found=$$p; \
+@MAINTAINER_MODE_TRUE@    fi; \
+@MAINTAINER_MODE_TRUE@  done; \
+@MAINTAINER_MODE_TRUE@  if [ -f $${found}/$1 ]; then \
 @MAINTAINER_MODE_TRUE@    echo "$2"; $2; \
 @MAINTAINER_MODE_TRUE@  else \
 @MAINTAINER_MODE_TRUE@    echo "missing $1 to generate $@";  \
@@ -245,12 +264,11 @@ docdatadir = $(datadir)/doc/$(PACKAGE)
 @MAINTAINER_MODE_TRUE@    else \
 @MAINTAINER_MODE_TRUE@      echo "missing $@!";  \
 @MAINTAINER_MODE_TRUE@      false; \
-@MAINTAINER_MODE_TRUE@    fi; \
+@MAINTAINER_MODE_TRUE@    fi;  \
 @MAINTAINER_MODE_TRUE@  fi
 
 @MAINTAINER_MODE_TRUE@stemvar = $($(shell echo "$*" | tr '-' '_')$1)
-EXTRA_DIST = TA.adt adapter.idef
-pkgdata_DATA = adapter.idef
+pkgdata_DATA = debug-adapter.idef
 lib_LTLIBRARIES = libtide-adapter.la
 include_HEADERS = \
 	TA.h \
@@ -258,21 +276,20 @@ include_HEADERS = \
 	tide-adapter.h \
 	tide-common.h
 
-libtide_adapter_la_CPPFLAGS = $(ATERM_CFLAGS) $(TOOLBUSLIB_CFLAGS) -DDISABLE_DYNAMIC_CHECKING
 libtide_adapter_la_LDFLAGS = -avoid-version -no-undefined $(AM_LDFLAGS)
 libtide_adapter_la_LIBADD = $(ATERM_LIBS) $(TOOLBUSLIB_LIBS)
 libtide_adapter_la_SOURCES = \
+	debug-adapter.isrc \
 	TA.c \
 	TA_dict.c \
 	tide-adapter.c \
-	debug-adapter.tif.c \
-	debug-adapter.tif.h \
-	debug-adapter.c
+	debug-tool.c
 
+debug_adapter_TIF_OPTIONS = -prefix ta_
 all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .eqs .adt .idef .tifs .c .lo .o .obj
+.SUFFIXES: .idef .isrc .c .h .lo .o .obj
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/Makefile.meta $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -338,11 +355,11 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libtide_adapter_la-TA.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libtide_adapter_la-TA_dict.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libtide_adapter_la-debug-adapter.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libtide_adapter_la-debug-adapter.tif.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libtide_adapter_la-tide-adapter.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TA.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TA_dict.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/debug-adapter.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/debug-tool.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tide-adapter.Plo@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
@@ -364,41 +381,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $<
-
-libtide_adapter_la-TA.lo: TA.c
-@am__fastdepCC_TRUE@	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libtide_adapter_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libtide_adapter_la-TA.lo -MD -MP -MF "$(DEPDIR)/libtide_adapter_la-TA.Tpo" -c -o libtide_adapter_la-TA.lo `test -f 'TA.c' || echo '$(srcdir)/'`TA.c; \
-@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/libtide_adapter_la-TA.Tpo" "$(DEPDIR)/libtide_adapter_la-TA.Plo"; else rm -f "$(DEPDIR)/libtide_adapter_la-TA.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='TA.c' object='libtide_adapter_la-TA.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libtide_adapter_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libtide_adapter_la-TA.lo `test -f 'TA.c' || echo '$(srcdir)/'`TA.c
-
-libtide_adapter_la-TA_dict.lo: TA_dict.c
-@am__fastdepCC_TRUE@	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libtide_adapter_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libtide_adapter_la-TA_dict.lo -MD -MP -MF "$(DEPDIR)/libtide_adapter_la-TA_dict.Tpo" -c -o libtide_adapter_la-TA_dict.lo `test -f 'TA_dict.c' || echo '$(srcdir)/'`TA_dict.c; \
-@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/libtide_adapter_la-TA_dict.Tpo" "$(DEPDIR)/libtide_adapter_la-TA_dict.Plo"; else rm -f "$(DEPDIR)/libtide_adapter_la-TA_dict.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='TA_dict.c' object='libtide_adapter_la-TA_dict.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libtide_adapter_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libtide_adapter_la-TA_dict.lo `test -f 'TA_dict.c' || echo '$(srcdir)/'`TA_dict.c
-
-libtide_adapter_la-tide-adapter.lo: tide-adapter.c
-@am__fastdepCC_TRUE@	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libtide_adapter_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libtide_adapter_la-tide-adapter.lo -MD -MP -MF "$(DEPDIR)/libtide_adapter_la-tide-adapter.Tpo" -c -o libtide_adapter_la-tide-adapter.lo `test -f 'tide-adapter.c' || echo '$(srcdir)/'`tide-adapter.c; \
-@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/libtide_adapter_la-tide-adapter.Tpo" "$(DEPDIR)/libtide_adapter_la-tide-adapter.Plo"; else rm -f "$(DEPDIR)/libtide_adapter_la-tide-adapter.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='tide-adapter.c' object='libtide_adapter_la-tide-adapter.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libtide_adapter_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libtide_adapter_la-tide-adapter.lo `test -f 'tide-adapter.c' || echo '$(srcdir)/'`tide-adapter.c
-
-libtide_adapter_la-debug-adapter.tif.lo: debug-adapter.tif.c
-@am__fastdepCC_TRUE@	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libtide_adapter_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libtide_adapter_la-debug-adapter.tif.lo -MD -MP -MF "$(DEPDIR)/libtide_adapter_la-debug-adapter.tif.Tpo" -c -o libtide_adapter_la-debug-adapter.tif.lo `test -f 'debug-adapter.tif.c' || echo '$(srcdir)/'`debug-adapter.tif.c; \
-@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/libtide_adapter_la-debug-adapter.tif.Tpo" "$(DEPDIR)/libtide_adapter_la-debug-adapter.tif.Plo"; else rm -f "$(DEPDIR)/libtide_adapter_la-debug-adapter.tif.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='debug-adapter.tif.c' object='libtide_adapter_la-debug-adapter.tif.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libtide_adapter_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libtide_adapter_la-debug-adapter.tif.lo `test -f 'debug-adapter.tif.c' || echo '$(srcdir)/'`debug-adapter.tif.c
-
-libtide_adapter_la-debug-adapter.lo: debug-adapter.c
-@am__fastdepCC_TRUE@	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libtide_adapter_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libtide_adapter_la-debug-adapter.lo -MD -MP -MF "$(DEPDIR)/libtide_adapter_la-debug-adapter.Tpo" -c -o libtide_adapter_la-debug-adapter.lo `test -f 'debug-adapter.c' || echo '$(srcdir)/'`debug-adapter.c; \
-@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/libtide_adapter_la-debug-adapter.Tpo" "$(DEPDIR)/libtide_adapter_la-debug-adapter.Plo"; else rm -f "$(DEPDIR)/libtide_adapter_la-debug-adapter.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='debug-adapter.c' object='libtide_adapter_la-debug-adapter.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libtide_adapter_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libtide_adapter_la-debug-adapter.lo `test -f 'debug-adapter.c' || echo '$(srcdir)/'`debug-adapter.c
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -618,12 +600,34 @@ uninstall-am: uninstall-includeHEADERS uninstall-info-am \
 	uninstall-am uninstall-includeHEADERS uninstall-info-am \
 	uninstall-libLTLIBRARIES uninstall-pkgdataDATA
 
+.isrc.idef:
+	sed 's@__PREFIX__@${prefix}@g' < $< > $@
 
-tifs:
-	toolbus -gentifs adapter.idef -output adapter.idef.tifs
-	tifstoc	-tool debug-adapter \
-		-prefix ta_ \
-		adapter.idef.tifs
+@MAINTAINER_MODE_TRUE@.idef.c:
+@MAINTAINER_MODE_TRUE@	$(call check_available,toolbus,toolbus-gentifs -output $*.tifs -S$<)
+@MAINTAINER_MODE_TRUE@	$(call check_available,tifstoc,tifstoc -tool $* $*.tifs $(call stemvar,_TIF_OPTIONS))
+
+@MAINTAINER_MODE_TRUE@.idef.h:
+@MAINTAINER_MODE_TRUE@	$(call check_available,toolbus,toolbus-gentifs -output $*.tifs -S$<)
+@MAINTAINER_MODE_TRUE@	$(call check_available,tifstoc,tifstoc -tool $* $*.tifs $(call stemvar,_TIF_OPTIONS))
+
+@MAINTAINER_MODE_FALSE@.idef.c: 
+@MAINTAINER_MODE_FALSE@	if [ -e $*.h ]; then touch $*.h; else cp ${srcdir}/$*.h ./$*.h; fi
+@MAINTAINER_MODE_FALSE@	if [ -e $*.c ]; then touch $*.c; else cp ${srcdir}/$*.c ./$*.c; fi
+
+@MAINTAINER_MODE_FALSE@.idef.h: 
+@MAINTAINER_MODE_FALSE@	if [ -e $*.h ]; then touch $*.h; else cp ${srcdir}/$*.h ./$*.h; fi
+@MAINTAINER_MODE_FALSE@	if [ -e $*.c ]; then touch $*.c; else cp ${srcdir}/$*.c ./$*.c; fi
+
+#Hide distclean errors, see 'info automake, 13.4 Checking the distribution'
+#distcleancheck_listfiles = \
+#	find -type f -exec sh -c 'test -f $(srcdir)/{} || echo {}' ';'
+
+#ApiGen
+
+#SUFFIXES += .adt
+#
+#EXTRA_DIST += $(wildcard *.adt) $(foreach i,$(basename $(wildcard *.adt)),$i.c $i.h $i_dict.c $i_dict.h)
 
 regen:
 	adt-to-c -i TA.adt --prefix TA_ --name TA

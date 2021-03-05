@@ -36,7 +36,7 @@ static ATermTable cache = NULL;
 
 static ATerm makeKey(int offset, PT_Tree tree)
 {
-	return (ATerm) ATmakeAppl2(ATmakeAFun("key",2,ATfalse), (ATerm) tree, 
+	return (ATerm) ATmakeAppl2(ATmakeAFun("key",2,ATfalse), PT_TreeToTerm(tree), 
 			(ATerm) ATmakeInt(offset));
 }
 
@@ -52,12 +52,12 @@ static void cleanupCache()
 
 static void cacheTree(int offset, PT_Tree tree, PT_Tree annotated)
 {
-	ATtablePut(cache, makeKey(offset, tree), (ATerm) annotated);
+	ATtablePut(cache, makeKey(offset, tree), PT_TreeToTerm(annotated));
 }
 
 static PT_Tree getCachedTree(int offset, PT_Tree tree)
 {
-	return (PT_Tree) ATtableGet(cache, makeKey(offset, tree));
+	return PT_TreeFromTerm(ATtableGet(cache, makeKey(offset, tree)));
 }
 
 typedef struct PT_Position_Tag {
@@ -85,9 +85,9 @@ ATbool PT_hasTreeLocation(PT_Tree tree)
 }
 
 
-LOC_Location PT_getTreeLocation(PT_Tree tree)
+ERR_Location PT_getTreeLocation(PT_Tree tree)
 {
-  return LOC_LocationFromTerm(
+  return ERR_LocationFromTerm(
            ATgetAnnotation(PT_TreeToTerm(tree), ATparse(POS_INFO_ANNO)));
 }
 
@@ -102,19 +102,19 @@ PT_Tree PT_removeTreeLocation(PT_Tree tree)
 ATbool PT_getTreePosInfo(PT_Tree tree, char **path,  int *start_line, int *start_col,
 		       int *end_line, int *end_col)
 {
-  LOC_Location location = PT_getTreeLocation(tree);
-  LOC_Area area;
+  ERR_Location location = PT_getTreeLocation(tree);
+  ERR_Area area;
 
   if (!location) {
     return ATfalse;
   }
 
-  area = LOC_getLocationArea(location);
-  *path = LOC_getLocationFilename(location);
-  *start_line= LOC_getAreaBeginLine(area);
-  *start_col= LOC_getAreaBeginColumn(area);
-  *end_line= LOC_getAreaEndLine(area);
-  *end_col= LOC_getAreaEndColumn(area);
+  area = ERR_getLocationArea(location);
+  *path = ERR_getLocationFilename(location);
+  *start_line= ERR_getAreaBeginLine(area);
+  *start_col= ERR_getAreaBeginColumn(area);
+  *end_line= ERR_getAreaEndLine(area);
+  *end_col= ERR_getAreaEndColumn(area);
 
   return ATtrue;
 }
@@ -124,8 +124,8 @@ static ATerm PT_makePosInfo(const char *path, int line1, int col1,
                                               int line2, int col2,
                                               int offset, int length)
 {
-  LOC_Area area = LOC_makeAreaArea(line1, col1, line2, col2, offset, length);
-  LOC_Location location = LOC_makeLocationAreaInFile(path, area);
+  ERR_Area area = ERR_makeAreaArea(line1, col1, line2, col2, offset, length);
+  ERR_Location location = ERR_makeLocationAreaInFile(path, area);
 
   return (ATerm) location;
 }
@@ -173,9 +173,11 @@ static void PT_calcTreePosInfo(PT_Tree tree, int *lines, int *cols, int *offset)
 
 /* The volatile attribute fixes a bug (#674) on Darwin; but we do not know 
  * why. The bug dissappears when instruction scheduling optimizations are
- * turned off, which inspired us to try volatile.  
+ * turned off, which inspired us to try volatile. 
+ * The volatile was removed now, since apigen generates casts via a union
+ * that fixes problems with type punned aliasing. 
  */ 
-static PT_Tree PT_addTreePosInfo(volatile PT_Tree tree, PT_Position* current)
+static PT_Tree PT_addTreePosInfo(/*volatile*/ PT_Tree tree, PT_Position* current)
 {
   PT_Tree input = tree;
   int start_line = current->line;
@@ -184,11 +186,11 @@ static PT_Tree PT_addTreePosInfo(volatile PT_Tree tree, PT_Position* current)
   PT_Tree result = getCachedTree(current->offset, tree);
 
   if (result != NULL) {
-	  LOC_Location loc = PT_getTreeLocation(result);
-	  LOC_Area area = LOC_getLocationArea(loc);
-	  current->col = LOC_getAreaEndColumn(area);
-	  current->line = LOC_getAreaEndLine(area);
-	  current->offset += LOC_getAreaLength(area);
+	  ERR_Location loc = PT_getTreeLocation(result);
+	  ERR_Area area = ERR_getLocationArea(loc);
+	  current->col = ERR_getAreaEndColumn(area);
+	  current->line = ERR_getAreaEndLine(area);
+	  current->offset += ERR_getAreaLength(area);
 	  return result;
   }
 
@@ -392,21 +394,21 @@ PT_ParseTree PT_addParseTreePosInfoSome(const char *path,
 
 
 
-static ATbool PT_containsAreaOffset(LOC_Area haystack, PT_PosInFile *needle)
+static ATbool PT_containsAreaOffset(ERR_Area haystack, PT_PosInFile *needle)
 {
-  int start = LOC_getAreaOffset(haystack);
-  int end = start + LOC_getAreaLength(haystack);
+  int start = ERR_getAreaOffset(haystack);
+  int end = start + ERR_getAreaLength(haystack);
 
   return (start < needle->offset) && (needle->offset <= end);
 }
 
 
-static ATbool PT_containsAreaLineColumn(LOC_Area haystack, PT_PosInFile *needle)
+static ATbool PT_containsAreaLineColumn(ERR_Area haystack, PT_PosInFile *needle)
 {
-  int beginLine = LOC_getAreaBeginLine(haystack);
-  int endLine = LOC_getAreaEndLine(haystack);
-  int beginCol = LOC_getAreaBeginColumn(haystack);
-  int endCol = LOC_getAreaEndColumn(haystack);
+  int beginLine = ERR_getAreaBeginLine(haystack);
+  int endLine = ERR_getAreaEndLine(haystack);
+  int beginCol = ERR_getAreaBeginColumn(haystack);
+  int endCol = ERR_getAreaEndColumn(haystack);
 
   if (beginLine <= needle->line && endLine >= needle->line) {
     if (beginLine == endLine) {
@@ -428,10 +430,10 @@ static ATbool PT_containsAreaLineColumn(LOC_Area haystack, PT_PosInFile *needle)
 
 
 
-PT_Tree PT_findTreeAtPosition(PT_Tree tree, ATbool (*contain)(LOC_Area area, PT_PosInFile *position), PT_PosInFile pos)
+PT_Tree PT_findTreeAtPosition(PT_Tree tree, ATbool (*contain)(ERR_Area area, PT_PosInFile *position), PT_PosInFile pos)
 {
-  LOC_Area area;
-  LOC_Location location;
+  ERR_Area area;
+  ERR_Location location;
   PT_Args args;
 
   assert(tree != NULL);
@@ -441,7 +443,7 @@ PT_Tree PT_findTreeAtPosition(PT_Tree tree, ATbool (*contain)(LOC_Area area, PT_
     return NULL;
   }
 
-  area = LOC_getLocationArea(location);
+  area = ERR_getLocationArea(location);
   if (!contain(area, &pos)) {
     return NULL;
   }

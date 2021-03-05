@@ -1,4 +1,4 @@
-/* $Id: pt2sdf.c 17212 2006-01-05 08:14:42Z jurgenv $ */
+/* $Id: pt2sdf.c 24937 2008-03-27 14:46:10Z jurgenv $ */
 
 /*{{{  includes */
 
@@ -42,7 +42,7 @@ static SDF_Attribute PTAttrToSDFAttribute(PT_Attr ptAttr)
     result = SDF_makeAttributeAssoc(sdfAssoc);
   }
   else if (PT_isAttrTerm(ptAttr)) {
-    ATerm term = PT_getAttrTerm(ptAttr);
+    ATerm term = PT_getAttrValue(ptAttr);
     ATabort("Conversion of plain ATerm not yet implemented: %t\n", term);
     result = NULL;
   }

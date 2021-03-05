@@ -1,4 +1,16 @@
-/*{{{  includes */
+/* $Id: intset.c 22922 2007-06-04 08:44:39Z economop $ */
+
+/**
+ * \file
+ *
+ * IntSets are an efficient implementation of integer sets. They represent an 
+ * integer by setting the appropriate bit in an array. Each element in that 
+ * array represents the number of bits in an unsigned long. Therefore, on a 
+ * 32-bit machine, each element in the IntSet represents 32 production 
+ * numbers. To check if a production number is in an IntSet we find the correct
+ * element in the array by dividing the production number by 32. Then by 
+ * modding the production number by 32 we find the bit for that production.
+ */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -6,19 +18,10 @@
 
 #include "intset.h"
 
-/*}}}  */
-
-/*{{{  defines */
-
 #define BITS_PER_LONG (sizeof(unsigned long)*8)
 #define NR_LONGS(max) ((((max)-1)/BITS_PER_LONG)+1)
 
-/*}}}  */
-
-/*{{{  IS_IntSet IS_create(int max_int) */
-
-IS_IntSet IS_create(int max_int)
-{
+IS_IntSet IS_create(int max_int) {
   IS_IntSet set;
 
   set = calloc(NR_LONGS(max_int), sizeof(unsigned long));
@@ -30,27 +33,15 @@ IS_IntSet IS_create(int max_int)
   return set;
 }
 
-/*}}}  */
-/*{{{  void IS_destroy(IS_IntSet set) */
-
-void IS_destroy(IS_IntSet set)
-{
+void IS_destroy(IS_IntSet set) {
   free(set);
 }
 
-/*}}}  */
-/*{{{  void IS_flush(IS_IntSet set, int max_int) */
-
-void IS_flush(IS_IntSet set, int max_int)
-{
+void IS_flush(IS_IntSet set, int max_int) {
   memset(set, 0, NR_LONGS(max_int)*sizeof(unsigned long));
 }
 
-/*}}}  */
-/*{{{  void IS_add(IS_IntSet set, int i) */
-
-int IS_add(IS_IntSet set, int i)
-{
+int IS_add(IS_IntSet set, int i) {
   int index;
   unsigned long mask;
 
@@ -65,11 +56,7 @@ int IS_add(IS_IntSet set, int i)
   return 1;
 }
 
-/*}}}  */
-/*{{{  void IS_remove(IS_IntSet set, int i) */
-
-void IS_remove(IS_IntSet set, int i)
-{
+void IS_remove(IS_IntSet set, int i) {
   int index;
   unsigned long mask;
 
@@ -79,11 +66,7 @@ void IS_remove(IS_IntSet set, int i)
   set[index] &= ~mask;
 }
 
-/*}}}  */
-/*{{{  int  IS_contains(IS_IntSet set, int i) */
-
-int  IS_contains(IS_IntSet set, int i)
-{
+int  IS_contains(IS_IntSet set, int i) {
   int index;
   unsigned long mask;
 
@@ -93,5 +76,4 @@ int  IS_contains(IS_IntSet set, int i)
   return (set[index] & mask) == 0 ? 0 : 1;
 }
 
-/*}}}  */
 

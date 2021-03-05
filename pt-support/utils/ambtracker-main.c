@@ -1,4 +1,4 @@
-/* $Id: ambtracker-main.c 18309 2006-04-13 19:23:25Z jurgenv $ */
+/* $Id: ambtracker-main.c 22349 2007-04-04 13:17:14Z kooiker $ */
 
 /*{{{  standard includes */
 
@@ -14,7 +14,7 @@
 #include <aterm2.h>
 #include "MEPT-utils.h"
 #include <Error-utils.h>
-#include <ambiguity-reporter.tif.h>
+#include <ambiguity-reporter.h>
 
 /*}}}  */
 /*{{{  globals */

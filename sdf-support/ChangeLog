@@ -1,4 +1,26 @@
-$Id: ChangeLog 20920 2007-01-12 14:46:45Z jurgenv $
+$Id: ChangeLog 25755 2008-06-09 11:43:30Z jurgenv $
+
+Mon Jun  9 13:29:54 CEST 2008 <jurgenv@cwi.nl>
+ * sdf-support.pc.in: Bumped to version 2.4
+
+Wed Apr 16 11:15:33 CEST 2008 <jurgenv@cwi.nl>
+ * lib/SDFME.*: regenerated API to fix issues with type punned
+   aliasing.
+
+Thu Mar 27 10:20:53 EDT 2008 <jurgenv@cwi.nl>
+ * src/pt2sdf.c: little change after change in MEPT.adt
+
+Mon Mar 12 19:03:46 CET 2007 <economop@cwi.nl>
+ * test/pt2sdf-test.c: commented out an ATwarning.
+
+Fri Mar  9 19:14:56 CET 2007 <jurgenv@cwi.nl>
+ * regenerated with more brackets around macro arguments, and less debugging
+   stuff.
+
+Thu Mar  8 19:03:58 CET 2007 <{economop,kooiker,jurgenv}@cwi.nl>
+ * **: regenerated all API's in this package with a new version of 
+   ApiGen that generates more efficient code for the is-alternative 
+   predicates.
 
 Fri Jan 12 15:45:37 CET 2007 <jurgenv@cwi.nl>
  * src/SDFME.[ch]: regenerated with new syntax for "." operator.

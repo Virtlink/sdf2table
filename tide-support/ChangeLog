@@ -1,4 +1,21 @@
 
+
+Mon Jun  9 13:24:34 CEST 2008 <jurgenv@cwi.nl>
+ * tide-support.pc.in: Bumped version to 1.3
+
+Fri May  9 11:27:11 2008    <bruntink@cwi.nl>
+  * lib/debug-adapter.{c,h}: Added to repository because it cannot
+    be generated without the toolbus.
+
+Fri Apr 25 13:48:15 CEST 2008 <{jurgenv,bruntink}@cwi.nl>
+  * lib/*: this directory was broken after adaptations to Makefile.meta wrt use of tifstoc
+  Fixed this by renaming debug-adapter.c to debug-tool.c and adapter.isrc to debug-adapter.isrc
+
+Tue Mar 11 13:31:48 CEST 2008 <lankamp@cwi.nl>
+ * Added workaround for the queued ToolBus event problem. When sending an
+ event one should wait for the acknowledgement before continueing, to prevent
+ events from being send on the wrong socket in toolbuslib.
+
 Mon Aug 15 15:08:29 CEST 2005 <jong@cwi.nl>
  * configure.in:
    - add libtool support

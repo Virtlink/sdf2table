@@ -1,4 +1,201 @@
-$Id: ChangeLog 21317 2007-02-14 08:37:12Z jurgenv $
+$Id: ChangeLog 25756 2008-06-09 11:43:31Z jurgenv $
+
+Mon Jun  9 13:30:33 CEST 2008 <jurgenv@cwi.nl>
+ * pgen.pc.in: Bumped to version 2.6.1
+
+Thu Jan 24 11:23:03 CET 2008 <economop@cwi.nl>
+ * Removed the svnmerge-integrated property that was left over from a branch 
+   merge.
+
+Thu Jan 10 16:18:26 CET 2008 <economop@cwi.nl>
+ * src/*: collected some more statistics.
+
+Thu Jan 10 11:20:58 CET 2008 <economop@cwi.nl>
+ * src/main.c: corrected function call of options initialization.
+
+Wed Jan  9 18:53:09 CET 2008 <economop@cwi.nl>
+ * src/pgenOptions.{c,h}: rewrote some get options functions to macros and 
+   added the stats filename value. Added PGEN prefix to avoid global variable
+   naming conflict with global variables in SGLR.
+ * src/parseTable-stats.{c,h}: rewrote to use macros. It is the same design as
+   the SGLR statistics logging.
+ * Added the PGEN_COLLECT_STATISTICS evironment variable. This needs to be set
+   if statistics are to be collected.
+
+Thu Dec 20 03:23:17 CET 2007 <economop@cwi.nl>
+ * src/Sdf2-Load.c: regenerated to update variable and function names used in 
+   load.c.
+ * src/load.c: renamed extern variables and functions to match definitions in 
+   Sdf2-Load.c.
+ * src/main.c: reformatted.
+
+Sun Dec  2 16:08:25 EST 2007 <jurgenv@cwi.nl>
+ * Bumped version to 2.6
+
+Sun Dec  2 15:52:41 EST 2007 <jurgenv@cwi.nl>
+ * src/sdf2table.src,src/parse-sdf2.src: removed scripts
+ * src/parsetablegen: renamed to sdf2table
+ * src/main.c,Load-Sdf2.c: added functionality of sdf2table script and
+   some more to the main parse table generator program. It can find and
+   parse SDF modules on a search path now. It can parse full SDF definitions
+   if given as input. See sdf2table -h for an explanation. 
+ * ChangeLog: The reason for these changes is to get rid of the shell 
+   script dependency, to increase the usability of SDF on Windows. 
+   Also, there was never a good commandline for collecting SDF modules 
+   offered by SDF. Both Meta-Environment and StrategoXT provided their 
+   own stuff. SDF should be fully functional independent of these two products.
+
+Thu Sep 13 11:40:34 CEST 2007 <economop@cwi.nl>
+ * test/regressionTests.sh.src: removed the redundant -a option from
+   comparePT and added ordering of ambiguities, using orderPT, for when 
+   comparePT fails.
+
+Thu Aug 16 16:40:06 CEST 2007 <economop@cwi.nl>
+ * test/termsCommandLines, test/errorneousCommandLines: switched on the 
+   injection and preference counting filters to match the old tests. Need to 
+   regenerate new tests with sglr's default behaviour.
+
+Thu Aug 16 16:22:40 CEST 2007 <economop@cwi.nl>
+ * test/termsCommandLines: changed the cyclic regression tests so that the 
+   injection and preference counting filters are switched off. These filters
+   do not work correctly on cyclic trees! If an ambiguous node is encountered
+   on the traversal of a 'counting' filter we assume that we have already
+   counted all ambiguous branches (as filtering is done from the bottom up) 
+   and therefore each branch must have an equal number of injections. As an 
+   optimization we only traverse one of the branches. However, if the 
+   ambiguous tree has a cyclic branch then the assumption does not hold and
+   the filtering results depend on the order of the children of an ambiguous
+   node. This caused the mdj.cycle regression test to fail.
+ * test/terms/{bi,mdj}.asfix2.org: regenerated with the injection and 
+   preference counting filters switched off.
+
+Wed Jul 11 13:27:33 CEST 2007 <economop@cwi.nl>
+ * sdf-checker/src/sdfchecker.isrc: reverted changes. 
+ * sdf-checker/src/main.c: kept the -m command line option but removed the 
+   ModuleID argument from the toolbus invocation. "Main" is used for the
+   toolbus invocation, so that the behaviour is the same as before. The
+   sdf-checker will eventually be re-implemented, but until then I'll leave it
+   as is.
+
+Thu Jun  7 17:10:49 CEST 2007 <economop@cwi.nl>
+ * sdf-checker/src/main.c: Added the module name as a command line option. 
+   I'm working towards fixing bug 656, but this fix stops sdfchecker from 
+   reporting when a module name is not defined. I'll fix this later...
+
+Tue Jun  5 12:33:05 CEST 2007 <economop@cwi.nl>
+ * src/goto.c: fixed bug #752. We were adding reductions after each follow
+   restriction was processed instead of only after all restrictions were
+   processed. This led to some reductions being added for lookahead symbols
+   that later became invalid. I also optimised the iteration over the lookahead 
+   list.
+ * test/tables/Follower.tbl: regenerated as the parse table changed.
+
+Mon Jun  4 10:43:30 CEST 2007 <economop@cwi.nl>
+ * Documentation added.
+
+Sun May 27 12:14:01 CEST 2007 <jurgenv@cwi.nl>
+ * test/tables/Sdf2.tbl: regenerated this regression table. The bugfix in
+   goto.c filters more reductions in Sdf2.tbl. The regression parse forest
+   does not change with this different table. The speed of the parser does
+   improve slightly. My analysis is that the follow restrictions on LAYOUT?
+   in Sdf2.sdf are meant for speed; they filter conflicts and not actual
+   ambiguity.
+
+Sat May 26 10:05:26 CEST 2007 <jurgenv@cwi.nl>
+ * src/goto.c: fixed bug #752. The filterReductions function applies follow
+   restrictions by removing and splitting reductions on certain lookaheads.
+   It was rewritten from a recursive function to an iterative loop earlier.
+   The error occurred in situations where there were more multiple character
+   lookahead restrictions for the same symbol, and also reductions possible 
+   for a different symbol with the same lookahead (i.e. a reduce/reduce 
+   conflict). In the old recursive code each restriction would limit the
+   possible reductions for certain lookaheads more, while in the new code
+   each restriction was applied to the original set of lookahead characters.
+   Note: I'm having trouble producing a small regression test for this
+   bug.
+
+Mon Apr 16 16:50:33 CEST 2007 <economop@cwi.nl>
+ * Added forgotten files.
+
+Mon Apr 16 15:06:26 CEST 2007 <economop@cwi.nl>
+ * Tidied up the regression tests:
+   - there were redundant terms in the test directory that the script wasn't 
+     testing. I removed them. 
+   - test/regressionTest: Created one script that performs the parse table 
+     generation tests and the parsing of terms and erroneous input.
+   - test/termsCommandLines, test/erroneousCommandLines: added. These files 
+     allow us to set the options for sdf2table and sglr.
+   - test/lang-types: removed.
+   - test/tables/Sdf2.tbl: copied the parse table from the sglr test directory.
+   - test/grammars/Sdf2.sdf: copied the grammar from the sglr test directory.
+   - test/terms/mdj.{asfix2.org,cycle2}: added.
+   - test/true.asfix2.org: copied from sglr as old copy wasn't a summary.
+
+Mon Mar 19 16:38:07 CET 2007 <economop@cwi.nl>
+ * Manually applied Martin's second 64-bit fix from bug 720.
+
+Mon Mar 19 13:48:06 CET 2007 <economop@cwi.nl>
+ * Manually applied Martin's 64-bit fix from bug 607. 
+
+Fri Mar 16 10:37:56 CET 2007 <{jurgenv,kooiker}@cwi.nl>
+ * src/parseTable-data.c: protect to static variable
+
+Wed Mar 14 15:25:02 CET 2007 <{economop,kooiker}@cwi.nl>
+ * Merged apified-pgen branch into trunk.
+
+Mon Mar 12 18:41:20 CET 2007 <economop@cwi.nl>
+ * Merged revisions 21145-21795 via svnmerge from
+   svn+ssh://svn.cwi.nl/pgen/trunk
+
+Mon Mar 12 18:35:55 CET 2007 <economop@cwi.nl>
+ * Merged revisions 21094-21098 via svnmerge from 
+   svn+ssh://svn.cwi.nl/pgen/trunk
+   Resolved some conflicts with the new interface of toasfix function.
+
+Mon Mar 12 17:27:08 CET 2007 <economop@cwi.nl>
+ * Merged revisions 21013-21089 via svnmerge from 
+   svn+ssh://svn.cwi.nl/pgen/trunk
+   Regenerated the Backquote test to use the apified tables. The Backquote.sdf 
+   grammar had some undefined sorts that I added, but it appears that 
+   the sdfchecker still doesn't deal with some of the sorts correctly -- it
+   still thinks they are undefined.
+
+Mon Mar 12 17:12:26 CET 2007 <economop@cwi.nl>
+ * Merged revisions 20955 via svnmerge from 
+   svn+ssh://svn.cwi.nl/pgen/trunk
+   Needed to regenerate Sdf2.baf and the regression test parse tables as the
+   Sdf2.def had changed in the merge.
+
+Mon Mar 12 16:52:15 CET 2007 <economop@cwi.nl>
+ * Merged revisions 20936-20938 via svnmerge from 
+   svn+ssh://svn.cwi.nl/pgen/trunk
+   I had already incorporated the void pointer casts to avoid the type punned
+   pointer warning with gcc 4, but still needed to resolve some conflicts.
+
+Mon Mar 12 15:56:43 CET 2007 <economop@cwi.nl>
+ * Merged revisions 20918 via svnmerge from svn+ssh://svn.cwi.nl/pgen/trunk
+   These are the changes that Jurgen made to deal with transitive and 
+   non-transitive priorities. The Sdf2 definition changed so Sdf2.baf 
+   and the regression test parse tables were regenerated.
+
+Mon Mar 12 09:39:59 CET 2007 <economop@cwi.nl>
+ * src/processGrammar.{c,h}: renamed to ksdf2table.{c,h} to make merge with
+   trunk easier.
+
+Mon Mar 12 09:32:15 CET 2007 <economop@cwi.nl>
+ * src/ksdf2table.{c,h}: renamed files to processGrammar.{c,h}.
+
+Mon Mar 12 09:27:18 CET 2007 <economop@cwi.nl>
+ * src/ksdf2table.{c,h}: copied from revision 18253 and replaced contents with 
+   src/processGrammar.{c,h}. I should have renamed the files and not removed 
+   them. This will make merging with trunk easier, I think.
+ * src/processGrammar.{c,h}: removed.
+
+Wed Mar  7 16:38:19 CET 2007 <kooiker@cwi.nl>
+ * sdf-checker/src/*: regenerated after fixing warnings and errors
+
+Fri Mar  2 10:32:52 CET 2007 <economop@cwi.nl>
+ * src/pgenOptions.c: using the new config-support API.
 
 Wed Feb 14 08:50:33 CET 2007 <jurgenv@cwi.nl>
  * sdf-checker/src/Sdf-Checker.c: regenerated after fixing a weird bug (import
@@ -16,6 +213,12 @@ Fri Jan 26 09:28:10 CET 2007 <jurgenv@cwi.nl>
  * sdf-checker/src/sdfchecker.c: adapted to new interface of toasfix function.
 
 Thu Jan 25 19:07:17 CET 2007 <jurgenv@cwi.nl>
+ * approximately around this time: added semantics of non-transitive
+   priorities. Associativity is translated to non-transitieve priorities
+   in specific arguments. The priority closure computation is only done
+   using transitive priorities after that.
+
+Thu Jan 25 19:07:17 CET 2007 <jurgenv@cwi.nl>
  * tests/grammars: added Backquote test grammar
 
 Tue 2007-01-23    <storm@cwi.nl>
@@ -23,6 +226,10 @@ Tue 2007-01-23    <storm@cwi.nl>
     sorts (only completely uppercase sorts with no dashes were 
     correctly lifted to syntax). (closes #694)
 
+Mon Jan 22 13:55:16 CET 2007 <economop@cwi.nl>
+ * src/goto.c: added (void *) casts in ATprotectArray to avoid
+   'dereferencing type punned pointers' warnings.
+   
 Thu Jan 18 18:12:59 CET 2007 <martin.bravenboer@gmail.com>
 
   Fixes for Bug 685: Associatvity no longer applied to parse table
@@ -58,10 +265,33 @@ Fri Jan 12 15:35:46 CET 2007 <jurgenv@cwi.nl>
    tests for the terms parsed with the new tables did not need any
    updating.
 
+Mon Sep 18 10:41:40 CEST 2006 <economop@cwi.nl>
+ * Merged from trunk and updated the build environment.
+
 Wed Sep 13 15:54:37 CEST 2006 <economop@cwi.nl>
  * src/Sdf2-Normalization.c: regenerated because the normalisation was
    changed.
 
+Wed Jun 28 14:05:22 CEST 2006 <economop@cwi.nl>
+ * test/tables/Ambi.tbl: generated Ambi.tbl that was incorrectly removed in
+   the previous commit.
+
+Tue Jun 27 17:02:33 CEST 2006 <economop@cwi.nl>
+ * Imported from trunk.
+ * Regenerated the |lang| regression tests since both the trunk and the branch 
+   generated slightly different parse tables (mostly actions in different 
+   orders).
+ * Regenerated the regression test for |x-rated.flow| since the old version of
+   SGLR doesn't use summaries for the errors.
+ * Commented out the reject production from the |Flat.sdf| grammar and 
+   regenerated test. It triggered the erroneous behaviour in SGLR, and Jurgen 
+   and I cannot understand why the reject was there anyway.
+ * Updated the |bi.cycle| regression test to use the count of ambiguities the
+   refactored filtering in SGLR produces. 
+ * Removed redundant |Ambi.tbl| from test/tables.
+
+Thu May 18 14:52:34 CEST 2006 <economop@cwi.nl>
+ * Committed missed changes to comments from the migration from CVS. 
 Wed May  3 14:00:05 CEST 2006 <jurgenv@cwi.nl>
  * Bumped to 2.4
 
@@ -102,6 +332,53 @@ Wed Apr 19 20:37:59 CEST 2006 <jurgenv@cwi.nl>
    are not the same anymore, but the parse trees are still the same
    this is a good hint that the change in the parse table was not wrong.
  
+Tue Apr 18 16:28:24 CEST 2006 <economop@cwi.nl>
+ * Changed |conflicts| to |PGEN_isPriorityConflict|.
+ * Instead of manually reversing the symbols on the lhs of a production in 
+   |init_dependency| use |PT_reverseSymbols|.
+ * Removed a premature optimisation from the |union_follow_sets|. The
+   optimisation terminated the search for dependencies if there were no 
+   dependencies in the set, instead of iterating over the production numbers. 
+					  
+Mon Apr 10 14:55:30 CEST 2006 <economop@cwi.nl>
+ * Moved priority_table into |parseTable-data.c|.
+
+Mon Apr  3 10:33:54 CEST 2006 <ecconomop@cwi.nl>
+ * Changes pgen to use |processGrammar.{c,h}| instead of |ksdf2table.{c,h}|.
+
+Mon Apr  3 10:15:41 CEST 2006 <economop@cwi.nl>
+ * Renamed |ksdf2table.{c,h}| to |processGrammar.{c,h}|.
+
+Wed Mar 29 15:33:55 CEST 2006 <economop@cwi.nl>
+ * Removed the Win32 macro checks for the toolbus.
+
+Tue Mar 28 16:25:52 CEST 2006 <economop@cwi.nl>
+ * Imported changes from trunk using cvsmerge.
+
+Mon Mar 27 16:24:05 CEST 2006 <economop@cwi.nl>
+ * Continued refactoring...
+ * Renamed |SDFflattenLookAhead| to |implodeLookahead| and split up recursion.
+ * Apified the implosion of the follow restrictions.
+ * Renamed |restrict| to |filterReductions| in goto.c and changed the
+   recursion to iteration. As a result the order that the reduce with
+   lookahead reductions are printed in the parse tables has reversed.
+ * Regenerated the regression test for Follower as the parse table
+   representation has changed.
+ * Created |parseTable-data.{c,h}| which encapsulates the data structures used
+   during parse table generation. Most, if not all, global variables and
+   macros have disappeared. 
+ * Created |parseTable-stats.{c,h}| which encapsulates the statistics logging
+   and printing during parse table generation.
+ * Added some comments ;-)
+
+Fri Mar 17 13:45:49 CET 2006 <economop@cwi.nl>
+ * Using the new statistics logging in |c-library| package and removed
+   statistics.{c,h}.
+ * Created |pgenOptions.{c,h}| to handle the command line options.
+
+Wed Mar  8 17:35:24 CET 2006 <economop@cwi.nl>
+ * Completed apification and removed most macros.
+
 
 Fri Mar 10 11:36:53 CET 2006 <kooiker@cwi.nl>
  * **/Makefile.am:
@@ -110,6 +387,15 @@ Fri Mar 10 11:36:53 CET 2006 <kooiker@cwi.nl>
 Tue Feb 28 11:13:30 CET 2006 <kooiker@cwi.nl>
  * {removevarsyntax/src/removevarsyntax, sdf-checker/src/sdfchecker}.c:
    - printing default usage exits with exit value 1
+
+Mon Feb 27 17:31:54 CET 2006 <economop@cwi.nl>
+ * Continuing apification...
+ * Removed |parse-table.c|.
+
+Thu Feb 23 17:29:42 CET 2006 <economop@cwi.nl>
+ * Apifying parse table creation...
+ * Completed apification of |characters.c|.
+ * Moved the parse tables generated by the regression tests to /var/tmp.
 
 Tue Feb 21 15:07:51 CET 2006 <jurgenv@cwi.nl>
  * pgen/Sdf2-Normalization.c: reactivated promoting productions
@@ -124,6 +410,16 @@ Tue Feb 21 15:07:51 CET 2006 <jurgenv@cwi.nl>
 Tue Feb 21 13:29:51 CET 2006 <jurgenv@cwi.nl>
  * sdfchecker/src/*: closed bug 464, added full support for
    renamings.
+
+Tue Feb 14 15:05:30 CET 2006 <economop@cwi.nl>
+ * Not using new parse table format yet. Will apify according to the old format
+   first.
+ * Merged from trunk.
+
+Thu Feb  9 15:28:59 CET 2006 <economop@cwi.nl>
+ * In process of using new parsetable format
+ * This branch uses a new parse table defined in |ptable-support|.
+ * Removed the vi folding tags from all c files.
 
 Tue Jan 31 17:55:26 CET 2006 <jurgenv@cwi.nl>
  * removevarssyntax: This tool removes the variable definitions

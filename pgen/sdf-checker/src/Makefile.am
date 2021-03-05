@@ -1,4 +1,4 @@
-# $Id: Makefile.am 19696 2006-07-26 02:13:32Z martinrw $
+# $Id: Makefile.am 22958 2007-06-07 15:13:53Z economop $
 
 include $(top_srcdir)/Makefile.meta
 
@@ -6,18 +6,15 @@ bin_PROGRAMS = sdfchecker
 
 pkgdata_DATA = sdfchecker.idef
 
-EXTRA_DIST = sdfchecker.idef.src 
+AM_CPPFLAGS += \
+	$(SDF_SUPPORT_CFLAGS) \
+	$(ASC_SUPPORT_CFLAGS) \
+	-DASF_WITH_ANNOS
 
-CLEANFILES += sdfchecker.idef
-
-noinst_HEADERS = sdfchecker.tif.h
-
-sdfchecker_CPPFLAGS = $(ASC_SUPPORT_CFLAGS) -DASF_WITH_ANNOS
-sdfchecker_SOURCES  = sdfchecker.c Sdf-Checker.c sdfchecker.tif.c
-sdfchecker_LDADD    = $(ASC_SUPPORT_LIBS)
-
-%.idef: %.idef.src Makefile
-	sed 's@__PREFIX__@${prefix}@g' < $< > $@
+sdfchecker_SOURCES  = sdfchecker.isrc main.c Sdf-Checker.c
+sdfchecker_LDADD    = \
+	$(SDF_SUPPORT_LIBS) \
+	$(ASC_SUPPORT_LIBS)
 
 asfc:
 	asfc -va -i Sdf-Checker.eqs -o Sdf-Checker.c

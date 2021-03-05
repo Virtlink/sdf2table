@@ -14,7 +14,7 @@
 
 @SET_MAKE@
 
-# $Id: Makefile.am 17022 2005-11-16 15:19:39Z jurgenv $
+# $Id: Makefile.am 21956 2007-03-15 14:40:19Z kooiker $
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
 VPATH = @srcdir@
@@ -68,6 +68,12 @@ AWK = @AWK@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
+CONFIG_SUPPORT_CFLAGS = @CONFIG_SUPPORT_CFLAGS@
+CONFIG_SUPPORT_INSTALLED_JARS = @CONFIG_SUPPORT_INSTALLED_JARS@
+CONFIG_SUPPORT_JARS = @CONFIG_SUPPORT_JARS@
+CONFIG_SUPPORT_LIBS = @CONFIG_SUPPORT_LIBS@
+CONFIG_SUPPORT_PREFIX = @CONFIG_SUPPORT_PREFIX@
+CONFIG_SUPPORT_TOOLBUSFLAGS = @CONFIG_SUPPORT_TOOLBUSFLAGS@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CXX = @CXX@
@@ -75,11 +81,18 @@ CXXCPP = @CXXCPP@
 CXXDEPMODE = @CXXDEPMODE@
 CXXFLAGS = @CXXFLAGS@
 CYGPATH_W = @CYGPATH_W@
+C_LIBRARY_CFLAGS = @C_LIBRARY_CFLAGS@
+C_LIBRARY_INSTALLED_JARS = @C_LIBRARY_INSTALLED_JARS@
+C_LIBRARY_JARS = @C_LIBRARY_JARS@
+C_LIBRARY_LIBS = @C_LIBRARY_LIBS@
+C_LIBRARY_PREFIX = @C_LIBRARY_PREFIX@
+C_LIBRARY_TOOLBUSFLAGS = @C_LIBRARY_TOOLBUSFLAGS@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
 DISABLE_FALSE = @DISABLE_FALSE@
 DISABLE_TRUE = @DISABLE_TRUE@
 DLLTOOL = @DLLTOOL@
+DSYMUTIL = @DSYMUTIL@
 ECHO = @ECHO@
 ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
@@ -111,6 +124,7 @@ MAINT = @MAINT@
 MAINTAINER_MODE_FALSE = @MAINTAINER_MODE_FALSE@
 MAINTAINER_MODE_TRUE = @MAINTAINER_MODE_TRUE@
 MAKEINFO = @MAKEINFO@
+NMEDIT = @NMEDIT@
 OBJDUMP = @OBJDUMP@
 OBJEXT = @OBJEXT@
 PACKAGE = @PACKAGE@
@@ -121,6 +135,12 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 PKG_CONFIG = @PKG_CONFIG@
+PTABLE_SUPPORT_CFLAGS = @PTABLE_SUPPORT_CFLAGS@
+PTABLE_SUPPORT_INSTALLED_JARS = @PTABLE_SUPPORT_INSTALLED_JARS@
+PTABLE_SUPPORT_JARS = @PTABLE_SUPPORT_JARS@
+PTABLE_SUPPORT_LIBS = @PTABLE_SUPPORT_LIBS@
+PTABLE_SUPPORT_PREFIX = @PTABLE_SUPPORT_PREFIX@
+PTABLE_SUPPORT_TOOLBUSFLAGS = @PTABLE_SUPPORT_TOOLBUSFLAGS@
 PT_SUPPORT_CFLAGS = @PT_SUPPORT_CFLAGS@
 PT_SUPPORT_INSTALLED_JARS = @PT_SUPPORT_INSTALLED_JARS@
 PT_SUPPORT_JARS = @PT_SUPPORT_JARS@
@@ -128,6 +148,7 @@ PT_SUPPORT_LIBS = @PT_SUPPORT_LIBS@
 PT_SUPPORT_PREFIX = @PT_SUPPORT_PREFIX@
 PT_SUPPORT_TOOLBUSFLAGS = @PT_SUPPORT_TOOLBUSFLAGS@
 RANLIB = @RANLIB@
+SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
@@ -186,17 +207,31 @@ sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
-EXTRA_DIST = Path.asfix2.org Path.casl Point.asfix2.org Point.casl \
-             Weird.asfix2.org Weird.casl all-chars.asfix2.org \
-             all-chars.flt big.asfix2.org big.pico exp.asfix2.org \
-             exp.simcob zilvervl.asfix2.org zilvervl.rmo \
-             nested.isle nested.asfix2.org program.asfix2.org \
-             program.jcb evalstat.jcb evalstat.asfix2.org \
-             lit.pfr lit.asfix2.org skips.acts skips.asfix2.org \
-             test.cobisl test.asfix2.org rec.acts2 rec.asfix2.org \
-	     f.pre f.asfix2.org sin.exp sin.asfix2.org \
-             expression.chi expression.asfix2.org ar.ambrule ar.asfix2.org \
-	     bi.cycle bi.asfix2.org
+EXTRA_DIST = all-chars.asfix2.org all-chars.flt \
+		ar.ambrule ar.asfix2.org \
+		bi.asfix2.org bi.cycle \
+		big.asfix2.org big.pico \
+		booleans.asfix2.org booleans.lst \
+		cond.asfix2.org cond.pfr \
+		evalstat.jcb evalstat.asfix2.org \
+		exp.asfix2.org exp.simcob \
+		expression.chi expression.asfix2.org \
+		f.pre f.asfix2.org \
+		lit.pfr lit.asfix2.org \
+		mdj.asfix2.org mdj.cycle2 \
+		nested.isle nested.asfix2.org \
+		Path.asfix2.org Path.casl \
+		Point.asfix2.org Point.casl \
+		program.asfix2.org program.jcb \
+		rec.acts2 rec.asfix2.org \
+		Sdf2.asfix2.org Sdf2.sdf \
+		sin.exp sin.asfix2.org \
+		skips.acts skips.asfix2.org \
+		st.asfix2.org st.tcbl \
+		test.cobisl test.asfix2.org \
+		tippered.asfix2.org tippered.flow \
+		Weird.asfix2.org Weird.casl \
+		zilvervl.asfix2.org zilvervl.rmo 
 
 all: all-am
 

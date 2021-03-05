@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /nix/store/vdzbaimmqgnzbv41jlz04h0pfwxi9vc6-bash-3.2-p39/bin/sh
 # depcomp - compile a program generating dependencies as side-effects
 
 scriptversion=2005-07-09.11

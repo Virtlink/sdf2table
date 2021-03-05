@@ -1,10 +1,8 @@
+/* $Id: goto.h 21928 2007-03-14 14:25:49Z economop $ */
+
 #ifndef GOTO_H
 #define GOTO_H
 
-#include "item.h"
-
-void action_insert(CC_Class *cc2, ATermList elems2);
-
-extern int max_gotos;
+void createDFA(); 
 
 #endif

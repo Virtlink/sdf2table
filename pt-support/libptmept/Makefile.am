@@ -1,4 +1,6 @@
-# $Id: Makefile.am 19677 2006-07-25 19:34:00Z martinrw $
+# $Id: Makefile.am 23708 2007-09-26 11:07:25Z kooiker $
+
+include $(top_srcdir)/Makefile.meta
 
 lib_LTLIBRARIES = libPTMEPT.la
 include_HEADERS = \
@@ -11,11 +13,12 @@ libPTMEPT_la_LDFLAGS  = -avoid-version -no-undefined $(AM_LDFLAGS)
 libPTMEPT_la_LIBADD   = ../libmept/libmept.la $(ERROR_SUPPORT_LIBS) $(ATERM_LIBS)
 libPTMEPT_la_SOURCES = PTMEPT.c PTMEPT_dict.c $(UTILSRCS)
 
+
 UTILSRCS = lift.c lower.c
-EXTRA_DIST = AsFix.def
+EXTRA_DIST += AsFix.def
 
 # Developers only:
-LIBRARY=../../asf-library/library
+LIBRARY=../../sdf-library/library
 
 AsFix.def:
 	(echo "definition"; \

@@ -1,4 +1,4 @@
-# $Id: Makefile.am 20833 2007-01-02 16:37:41Z jurgenv $
+# $Id: Makefile.am 24308 2007-12-01 07:44:42Z jurgenv $
 
 include $(top_srcdir)/Makefile.meta
 
@@ -6,6 +6,7 @@ BUILTIN_NAMES_ARITY=\
 	set-anno_3\
 	get-anno_2\
 	get-term-anno_2 \
+	get-lex-term-anno_2 \
 	set-term-anno_3 \
 	execute-command_1 \
 	read-from-command_1 \
@@ -15,7 +16,9 @@ BUILTIN_NAMES_ARITY=\
 	lift-to-term_1 \
 	implode_1\
 	parse-file_1 \
+	parse-file-pos-info_1 \
 	parse-bytes_1 \
+	parse-bytes-pos-info_2 \
 	unparse-to-bytes_1 \
 	unparse-to-file_2 \
 	read-term-from-file_1 \
@@ -64,7 +67,8 @@ include_HEADERS = \
 	asc-muasf2pt.h \
 	asc-ambiguity.h \
 	asc-termstore.h \
-	builtin-common.h
+	builtin-common.h \
+	asc-options.h
 
 libasc_support_me_la_CPPFLAGS = $(AM_CPPFLAGS)
 libasc_support_me_la_LDFLAGS  = -avoid-version -no-undefined $(AM_LDFLAGS)
@@ -75,6 +79,7 @@ libasc_support_me_la_LIBADD = \
 	$(TOOLBUSLIB_LIBS) \
 	$(TIDE_SUPPORT_LIBS) \
 	$(ERROR_SUPPORT_LIBS) \
+	$(RELATION_STORES_LIBS) \
 	$(ATERM_LIBS)
 
 libasc_support_me_la_SOURCES = \
@@ -87,9 +92,10 @@ libasc_support_me_la_SOURCES = \
 	asc-prod2str.h  \
 	asc-muasf2pt.c \
 	asc-muasf2pt.h \
-	asc-parsetable.c\
 	asc-client.c\
 	asc-tide.c\
+	asc-options.c\
+	asc-parsetable.c\
 	asc-ambiguity.c\
 	asc-termstore.c\
 	builtin-forward.c\
@@ -103,22 +109,31 @@ libasc_support_me_la_SOURCES = \
 AM_CPPFLAGS += \
 	$(PT_SUPPORT_CFLAGS) \
 	$(ASF_SUPPORT_CFLAGS) \
+	$(RELATION_STORES_CFLAGS) \
 	$(ERROR_SUPPORT_CFLAGS) \
 	$(TOOLBUSLIB_CFLAGS) \
 	$(SGLR_CFLAGS) \
 	$(TIDE_SUPPORT_CFLAGS) \
-	$(ATERM_CFLAGS) 
+	$(ATERM_CFLAGS) \
+	$(CONFIG_SUPPORT_CFLAGS) \
+	$(PTABLE_SUPPORT_CFLAGS)
 
 TESTS = $(check_PROGRAMS)
 
 #Below here should not be changed when adding a builtin:
 
-EXTRA_DIST = Library.def 
+EXTRA_DIST += Library.def 
 
 # To check whether we implemented all the builtins mentioned we
 # generate a program that calls all builtins and try to compile and link 
 # it:
 check_PROGRAMS = builtin-link-test
+
+if MAINTAINER_MODE
+ATERM_LIB = ATerm-dbg
+else
+ATERM_LIB = ATerm
+endif
 
 builtin_link_test_SOURCES=builtin-link-test.c
 builtin_link_test_LDADD = \
@@ -129,7 +144,9 @@ builtin_link_test_LDADD = \
 	$(PT_SUPPORT_LIBS) \
 	$(TOOLBUSLIB_LIBS) \
 	$(ERROR_SUPPORT_LIBS) \
-	$(ATERM_LIBS) 
+	$(ATERM_LIBS) \
+	${CONFIG_SUPPORT_LIBS} \
+	${PTABLE_SUPPORT_LIBS} 
 
 UTILS=$(top_srcdir)/utils
 GENFWD=$(UTILS)/gen-forward.sh

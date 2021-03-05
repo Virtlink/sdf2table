@@ -16,6 +16,9 @@ PT_Tree  ASC_get_anno(ATerm type , ATerm arg0, ATerm arg1);
 PT_Tree  ASFE_get_term_anno(PT_Symbol type , PT_Tree arg0, PT_Tree arg1);
 PT_Tree  ASC_get_term_anno(ATerm type , ATerm arg0, ATerm arg1);
 
+PT_Tree  ASFE_get_lex_term_anno(PT_Symbol type , PT_Tree arg0, PT_Tree arg1);
+PT_Tree  ASC_get_lex_term_anno(ATerm type , ATerm arg0, ATerm arg1);
+
 PT_Tree  ASFE_set_term_anno(PT_Symbol type , PT_Tree arg0, PT_Tree arg1, PT_Tree arg2);
 PT_Tree  ASC_set_term_anno(ATerm type , ATerm arg0, ATerm arg1, ATerm arg2);
 
@@ -43,8 +46,14 @@ PT_Tree  ASC_implode(ATerm type , ATerm arg0);
 PT_Tree  ASFE_parse_file(PT_Symbol type , PT_Tree arg0);
 PT_Tree  ASC_parse_file(ATerm type , ATerm arg0);
 
+PT_Tree  ASFE_parse_file_pos_info(PT_Symbol type , PT_Tree arg0);
+PT_Tree  ASC_parse_file_pos_info(ATerm type , ATerm arg0);
+
 PT_Tree  ASFE_parse_bytes(PT_Symbol type , PT_Tree arg0);
 PT_Tree  ASC_parse_bytes(ATerm type , ATerm arg0);
+
+PT_Tree  ASFE_parse_bytes_pos_info(PT_Symbol type , PT_Tree arg0, PT_Tree arg1);
+PT_Tree  ASC_parse_bytes_pos_info(ATerm type , ATerm arg0, ATerm arg1);
 
 PT_Tree  ASFE_unparse_to_bytes(PT_Symbol type , PT_Tree arg0);
 PT_Tree  ASC_unparse_to_bytes(ATerm type , ATerm arg0);
@@ -91,6 +100,9 @@ int main(void)
     ASFE_get_term_anno(NULL , NULL, NULL);
     ASC_get_term_anno(NULL , NULL, NULL);
 
+    ASFE_get_lex_term_anno(NULL , NULL, NULL);
+    ASC_get_lex_term_anno(NULL , NULL, NULL);
+
     ASFE_set_term_anno(NULL , NULL, NULL, NULL);
     ASC_set_term_anno(NULL , NULL, NULL, NULL);
 
@@ -118,8 +130,14 @@ int main(void)
     ASFE_parse_file(NULL , NULL);
     ASC_parse_file(NULL , NULL);
 
+    ASFE_parse_file_pos_info(NULL , NULL);
+    ASC_parse_file_pos_info(NULL , NULL);
+
     ASFE_parse_bytes(NULL , NULL);
     ASC_parse_bytes(NULL , NULL);
+
+    ASFE_parse_bytes_pos_info(NULL , NULL, NULL);
+    ASC_parse_bytes_pos_info(NULL , NULL, NULL);
 
     ASFE_unparse_to_bytes(NULL , NULL);
     ASC_unparse_to_bytes(NULL , NULL);

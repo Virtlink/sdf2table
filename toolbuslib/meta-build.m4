@@ -3,6 +3,7 @@ dnl META_ left in configure is the sign a macro was not defined, or there was
 dnl a typo in a macro invocation.
 m4_pattern_forbid([^META_])
 m4_pattern_allow([^META_STUDIO])
+m4_pattern_allow([^META_ECLIPSE])
 m4_pattern_allow([^_PKG_ERRORS])
 
 
@@ -47,6 +48,12 @@ AC_DEFUN([META_SETUP],
   AC_SUBST([EXTERNAL_JARS])
   AC_SUBST([EXTERNAL_INSTALLED_JARS])
   AC_SUBST([TOOLBUSFLAGS])
+
+  if test -z "$JAVA" ; then
+     META_GENERATE_ECLIPSE_PLUGIN_FILES(META_GET_PKG_VAR([Name]),META_GET_PKG_VAR([Version]),[],[],[],[$PACKAGE_ALL_DEPS],[])
+  fi
+ ])
+
 ])
 
 
@@ -88,7 +95,7 @@ AC_DEFUN([META_ARG_WITH_PACKAGE],
 
   if test "${AC_Var[]_PREFIX:+set}" = set; then
     AC_MSG_RESULT([yes])
-    TMP_PKGCONFIG_PATH="$AC_Var[]_PREFIX/lib/pkgconfig"
+    TMP_PKGCONFIG_PATH="${AC_Var[]_PREFIX}/lib/pkgconfig"
     META_IF_NOT_CONTAINS([${PKG_CONFIG_PATH}],[${TMP_PKGCONFIG_PATH}],[
       PKG_CONFIG_PATH="${TMP_PKGCONFIG_PATH}:${PKG_CONFIG_PATH}"
     ])
@@ -132,6 +139,7 @@ dnl and extends the variables:
 dnl
 dnl   EXTERNAL_JARS: JARS to use at build time.
 dnl   EXTERNAL_INSTALLED_JARS: JARS to use after installation.
+dnl   PACKAGE_ALL_DEPS: transitive dependencies
 dnl
 AC_DEFUN([META_INSPECT_PACKAGE],
 [m4_pushdef([AC_Var], AS_TR_CPP([$1]))dnl
@@ -139,13 +147,13 @@ AC_DEFUN([META_INSPECT_PACKAGE],
 
   AC_MSG_CHECKING([prefix of package $1])
   AC_Var[]_FOUND_PREFIX=$($PKG_CONFIG --variable=prefix "$1")
-  if test -z "$AC_Var[]_FOUND_PREFIX"; then
+  if test -z "${AC_Var[]_FOUND_PREFIX}"; then
     AC_MSG_ERROR([package $1 does not specify its prefix in the pkg-config file.
            Report this error to the maintainer of this package.])
   fi
 
   if test "${AC_Var[]_PREFIX:+set}" = set; then
-    AC_MSG_RESULT([explicitly set: $AC_Var[]_PREFIX])
+    AC_MSG_RESULT([explicitly set: ${AC_Var[]_PREFIX}])
 
     AC_MSG_CHECKING([if package $1 at this prefix equals the explicitly set package])
     # in a bundle, the package will not yet be installed.
@@ -153,27 +161,27 @@ AC_DEFUN([META_INSPECT_PACKAGE],
         AC_MSG_RESULT([skipped (bundle)])
     else
       # compare found prefix to the actual prefix out of the .pc file at the given prefix
-      if test -e "$AC_Var[]_PREFIX/lib/pkgconfig/$1.pc"; then
-        AC_Var[]_ACTUAL_PREFIX="$(grep 'prefix=.*' $AC_Var[]_PREFIX/lib/pkgconfig/$1.pc | cut -f2 -d= | tr -d '@<:@:blank:@:>@')"
-        if test "x$AC_Var[]_ACTUAL_PREFIX" = "x$AC_Var[]_FOUND_PREFIX"; then
+      if test -e "${AC_Var[]_PREFIX}/lib/pkgconfig/$1.pc"; then
+        AC_Var[]_ACTUAL_PREFIX="$(grep 'prefix=.*' ${AC_Var[]_PREFIX}/lib/pkgconfig/$1.pc | cut -f2 -d= | tr -d '@<:@:blank:@:>@')"
+        if test "x${AC_Var[]_ACTUAL_PREFIX}" = "x${AC_Var[]_FOUND_PREFIX}"; then
           AC_MSG_RESULT([yes])
         else
           AC_MSG_RESULT([no])
-          AC_MSG_ERROR([prefix of $1 explicitly set to $AC_Var[]_PREFIX,
-            but pkg-config found $1 at $AC_Var[]_FOUND_PREFIX.
-            Please check your PKG_CONFIG_PATH, or remove $2 from $AC_Var[]_FOUND_PREFIX, 
+          AC_MSG_ERROR([prefix of $1 explicitly set to ${AC_Var[]_PREFIX},
+            but pkg-config found $1 at ${AC_Var[]_FOUND_PREFIX}.
+            Please check your PKG_CONFIG_PATH, or remove $2 from ${AC_Var[]_FOUND_PREFIX}, 
             or install the packages at a unique location.])
         fi
       else
         AC_MSG_RESULT([cannot check])
-        AC_MSG_ERROR([$2 does not provide a pkg-config file at $AC_Var[]_PREFIX/lib/pkgconfig/$1.pc. Please check your installation.])
+        AC_MSG_ERROR([$2 does not provide a pkg-config file at ${AC_Var[]_PREFIX}/lib/pkgconfig/$1.pc. Please check your installation.])
       fi
     fi
   else
-    AC_MSG_RESULT([$AC_Var[]_FOUND_PREFIX])
+    AC_MSG_RESULT([${AC_Var[]_FOUND_PREFIX}])
   fi
 
-  AC_Var[]_PREFIX="$AC_Var[]_FOUND_PREFIX"
+  AC_Var[]_PREFIX="${AC_Var[]_FOUND_PREFIX}"
 
   AC_SUBST(AC_Var[]_CFLAGS)
   AC_SUBST(AC_Var[]_LIBS)
@@ -183,10 +191,26 @@ AC_DEFUN([META_INSPECT_PACKAGE],
   meta_dependencies=$(meta_requires $1)
   AC_MSG_RESULT([$meta_dependencies])
 
+  META_MERGE_DEPENDENCIES([$meta_dependencies])
+
   META_INSPECT_PACKAGE_JARS([$1],[AC_Var],[${meta_dependencies}])
   META_INSPECT_PACKAGE_TOOLBUSFLAGS([$1],[AC_Var],[${meta_dependencies}])
 
 m4_popdef([AC_Var])dnl
+])
+
+dnl META_MERGE_DEPENDENCIES(NEWDEPS)
+dnl -------------------------------
+AC_DEFUN([META_MERGE_DEPENDENCIES],[
+  for j in $1; do
+    if test -z "${PACKAGE_ALL_DEPS}"; then
+      PACKAGE_ALL_DEPS=$1
+    else
+      META_IF_NOT_CONTAINS([${PACKAGE_ALL_DEPS}],[$j],[
+        PACKAGE_ALL_DEPS="${PACKAGE_ALL_DEPS} $[]j"
+      ])
+    fi
+  done 
 ])
 
 dnl META_INSPECT_PACKAGE_JARS(PACKAGE,PACKAGEVAR,DEPENDENCIES)
@@ -305,11 +329,11 @@ AC_ARG_WITH([$1],
     AC_MSG_RESULT([no])
     AC_MSG_CHECKING([for installed $2 program])
     AC_PATH_PROGS(AC_Var[]_PREFIX,$2,[no])
-    if test "x$AC_Var[]_PREFIX" = "xno" ; then
+    if test "x${AC_Var[]_PREFIX}" = "xno" ; then
       AC_MSG_RESULT([no])
       AC_MSG_ERROR([Required software \"$1\" not found.])
     else
-      AC_Var[]_PREFIX=`dirname \`dirname $AC_Var[]_PREFIX\``
+      AC_Var[]_PREFIX=`dirname \`dirname ${AC_Var[]_PREFIX}\``
       AC_MSG_RESULT([yes])
     fi
   fi
@@ -338,6 +362,8 @@ AC_DEFUN([META_JAVA_SETUP],[
 
   JAVA_TEST_CLASS=META_GET_PKG_USER_VAR([TestClass])
   AC_SUBST([JAVA_TEST_CLASS])
+
+  META_GENERATE_ECLIPSE_PLUGIN_FILES_FOR_JAVA(META_GET_PKG_VAR([Name]),META_GET_PKG_VAR([Version]),[$JAVA_JAR],[$JAVA_PACKAGES],[$PACKAGE_ALL_DEPS],[$JAVA_MAIN_CLASS],[$JAVA_LOCAL_JARS])
 ])
 
 dnl META_C_SETUP()
@@ -368,7 +394,7 @@ dnl META_GET_PKG_VAR_LIST(VARNAME)
 dnl ------------------------------
 dnl Is substituted by the value of VARNAME from a pkg-config file, 
 dnl without trimming, at reconf time
-AC_DEFUN([META_GET_PKG_VAR_LIST],[esyscmd([grep "$1:" *.pc.in | cut -f 2 -d ':' | tr '[,]' '[ ]'])])
+AC_DEFUN([META_GET_PKG_VAR_LIST],[esyscmd([grep "$1:" *.pc.in | cut -f 2 -d ':' | tr -d '[:space:]' | tr '[,]' '[ ]'])])
 
 dnl META_GET_PKG_USER_VAR(VARNAME)
 dnl ------------------------------
@@ -393,6 +419,188 @@ dnl ---------------------------------
 AC_DEFUN([META_GENERATE_PKG_CONFIG_FILES],[
 cat $1.pc | grep -v "^Libs" | grep -v "^Cflags" | sed -e 's/\#uninstalled //g' > $1-uninstalled.pc
 echo "PkgConfigPath=$PKG_CONFIG_PATH" >> $1.pc
+if test "a" != "a${BUILD_ID}" ; then
+  echo "BuildId=${BUILD_ID}" >> $1.pc
+fi
+])
+
+dnl META_GENERATE_ECLIPSE_PLUGIN_FILES_FOR_JAVA(PKGNAME,VERSION,JARFILE,PACKAGES,DEPS,MAINCLASS,LOCALJARS)
+dnl ----------------------------------
+AC_DEFUN([META_GENERATE_ECLIPSE_PLUGIN_FILES_FOR_JAVA],[
+
+if ! test -d META-INF ; then
+  mkdir META-INF
+fi
+if ! test -d .settings ; then
+  mkdir .settings
+fi
+if test -z "${EXTERNAL_JARS}"; then
+  BUNDLE_CLASSPATH=$3,`echo ${EXTERNAL_JARS} | tr ':' ','`
+else
+  BUNDLE_CLASSPATH=$3
+fi
+
+if ! test -z "$7"; then
+  BUNDLE_CLASSPATH="${BUNDLE_CLASSPATH},`echo "$7" | tr ':' ','`"
+fi
+
+REQUIRED_BUNDLES=""
+if test -n "$5"; then
+  REQUIRED_BUNDLES=`echo "$5" | tr '-' '_' | tr ' ' ','`
+  ECLIPSE_REQUIRES=META_GET_PKG_USER_VAR_PLAIN([EclipseRequires])
+
+  if test -n "$ECLIPSE_REQUIRES"; then
+    REQUIRED_BUNDLES="${REQUIRED_BUNDLES},${ECLIPSE_REQUIRES}"
+
+	META_REQUIRE_SOFTWARE(eclipse,plugins)
+
+	ECLIPSE_BUNDLES=`ls ${ECLIPSE_PREFIX}/plugins | grep .jar`
+
+	for BUNDLE in ${ECLIPSE_BUNDLES}; do
+		  EXTERNAL_JARS+=:${ECLIPSE_PREFIX}/plugins/${BUNDLE}
+		  EXTERNAL_INSTALLED_JARS+=:${ECLIPSE_PREFIX}/plugins/${BUNDLE}
+	done
+  fi
+fi
+
+cat > META-INF/MANIFEST.MF << ENDCAT
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: $1
+Eclipse-LazyStart: true
+Bundle-SymbolicName: `echo $1 | tr '-' '_'`;singleton:=true
+Bundle-Version: $2
+Bundle-ClassPath: `echo "${BUNDLE_CLASSPATH}" | sed "s@,@,# @g" | tr '#' '\n'`
+Export-Package: `echo "$4" | sed "s@,@,# @g" | tr '#' '\n'`
+Require-Bundle: `echo ${REQUIRED_BUNDLES} | sed "s@,@,# @g" | tr '#' '\n'`
+Bundle-Activator: $6
+ENDCAT
+
+# Remove empty clauses from the manifest
+MANIFEST=`cat META-INF/MANIFEST.MF | sed '/.*:[ \t]*$/d'`
+echo "${MANIFEST}" > META-INF/MANIFEST.MF
+
+cat > .settings/org.eclipse.jdt.core.prefs << ENDCAT
+eclipse.preferences.version=1
+org.eclipse.jdt.core.compiler.codegen.inlineJsrBytecode=enabled
+org.eclipse.jdt.core.compiler.codegen.targetPlatform=1.5
+org.eclipse.jdt.core.compiler.codegen.unusedLocal=preserve
+org.eclipse.jdt.core.compiler.compliance=1.5
+org.eclipse.jdt.core.compiler.debug.lineNumber=generate
+org.eclipse.jdt.core.compiler.debug.localVariable=generate
+org.eclipse.jdt.core.compiler.debug.sourceFile=generate
+org.eclipse.jdt.core.compiler.problem.assertIdentifier=error
+org.eclipse.jdt.core.compiler.problem.enumIdentifier=error
+org.eclipse.jdt.core.compiler.source=1.5
+ENDCAT
+
+cat > .settings/org.eclipse.jdt.ui.prefs << ENDCAT
+eclipse.preferences.version=1
+internal.default.compliance=default
+ENDCAT
+
+cat > build.properties << ENDCAT
+source.$3 = src/
+bin.includes = META-INF/,.,`echo "${BUNDLE_CLASSPATH}" | sed "s@,@,\\\\\\ @g" | sed "s@ @# @g" | tr '#' '\n'`
+ENDCAT
+
+BUNDLE_LOCAL_JARS=`echo $7 | tr ':' ' '`
+
+cat > .classpath << ENDCAT
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+  <classpathentry kind="src" path="src"/>
+  <classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+  <classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
+  <classpathentry kind="output" path="bin"/>
+`for i in ${BUNDLE_LOCAL_JARS}; do \
+   echo "<classpathentry exported=\"true\" kind=\"lib\" path=\"$[]i\"/>"; \
+ done`
+</classpath>
+ENDCAT
+
+cat > .project << ENDCAT
+<?xml version="1.0" encoding="UTF-8"?>
+<projectDescription>
+	<name>$1</name>
+	<comment></comment>
+	<projects>
+	</projects>
+	<buildSpec>
+		<buildCommand>
+			<name>org.eclipse.jdt.core.javabuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+		<buildCommand>
+			<name>org.eclipse.pde.ManifestBuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+	</buildSpec>
+	<natures>
+		<nature>org.eclipse.jdt.core.javanature</nature>
+		<nature>org.eclipse.pde.PluginNature</nature>
+	</natures>
+</projectDescription>
+ENDCAT
+])
+
+dnl META_GENERATE_ECLIPSE_PLUGIN_FILES(PKGNAME,VERSION,JARFILE,PACKAGES,DEPS,MAINCLASS,LOCALJARS)
+dnl ----------------------------------
+AC_DEFUN([META_GENERATE_ECLIPSE_PLUGIN_FILES],[
+
+if ! test -d META-INF ; then
+  mkdir META-INF
+fi
+if ! test -d .settings ; then
+  mkdir .settings
+fi
+
+REQUIRED_BUNDLES=""
+if test -n "$5"; then
+  REQUIRED_BUNDLES=`echo "$5" | tr '-' '_' | tr ' ' ','`
+  ECLIPSE_REQUIRES=META_GET_PKG_USER_VAR_PLAIN([EclipseRequires])
+
+  if test -n "$ECLIPSE_REQUIRES"; then
+    REQUIRED_BUNDLES="${REQUIRED_BUNDLES},${ECLIPSE_REQUIRES}"
+  fi
+fi
+
+cat > META-INF/MANIFEST.MF << ENDCAT
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: $1
+Eclipse-LazyStart: true
+Bundle-SymbolicName: `echo $1 | tr '-' '_'`;singleton:=true
+Bundle-Version: $2
+Bundle-ClassPath: .
+Require-Bundle: `echo ${REQUIRED_BUNDLES} | sed "s@,@,# @g" | tr '#' '\n'`
+ENDCAT
+
+# Remove empty clauses from the manifest
+MANIFEST=`cat META-INF/MANIFEST.MF | sed '/.*:[ \t]*$/d'`
+echo "${MANIFEST}" > META-INF/MANIFEST.MF
+
+cat > .project << ENDCAT
+<?xml version="1.0" encoding="UTF-8"?>
+<projectDescription>
+	<name>$1</name>
+	<comment></comment>
+	<projects>
+	</projects>
+	<buildSpec>
+		<buildCommand>
+			<name>org.eclipse.pde.ManifestBuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+	</buildSpec>
+	<natures>
+		<nature>org.eclipse.pde.PluginNature</nature>
+	</natures>
+</projectDescription>
+ENDCAT
 ])
 
 dnl META_IF_NOT_CONTAINS(STRING,SUBSTRING,CODE)
@@ -409,7 +617,7 @@ AC_DEFUN([META_IF_NOT_CONTAINS],[
 dnl A shell function for getting the recursive requirements of a package
 AC_DEFUN([META_RECURSIVE_REQUIRES],[
 # args: $[]1 : top module
-function meta_requires() {
+meta_requires() {
   meta_require_closure=""
   meta_pkg_config_path="$(echo "$[]PKG_CONFIG_PATH" | tr ':' ' ')"
   if test -z  "${meta_pkg_config_path}"; then
@@ -420,7 +628,7 @@ function meta_requires() {
   echo ${meta_require_closure}
 }
 
-function meta_recursive_requires() {
+meta_recursive_requires() {
   meta_require_pcfile=""
   meta_require_kids=""
 
@@ -436,7 +644,7 @@ function meta_recursive_requires() {
 }
 
 dnl This is really something that should be supported by pkg-config
-function meta_find_pkg_config_file() {
+meta_find_pkg_config_file() {
   meta_find_pkg_config_result=""
 
   dnl First examine the path for uninstalled pkg-config files.

@@ -70,6 +70,11 @@ PT_Tree forwardBuiltin(ATerm builtin, PT_Tree input)
     PT_Tree arg1 = getBuiltinArgument(input, 1);
     result = ASFE_get_term_anno(type , arg0, arg1);
   }
+  if (!strcmp(name, "get-lex-term-anno")) {
+    PT_Tree arg0 = getBuiltinArgument(input, 0);
+    PT_Tree arg1 = getBuiltinArgument(input, 1);
+    result = ASFE_get_lex_term_anno(type , arg0, arg1);
+  }
   if (!strcmp(name, "set-term-anno")) {
     PT_Tree arg0 = getBuiltinArgument(input, 0);
     PT_Tree arg1 = getBuiltinArgument(input, 1);
@@ -109,9 +114,18 @@ PT_Tree forwardBuiltin(ATerm builtin, PT_Tree input)
     PT_Tree arg0 = getBuiltinArgument(input, 0);
     result = ASFE_parse_file(type , arg0);
   }
+  if (!strcmp(name, "parse-file-pos-info")) {
+    PT_Tree arg0 = getBuiltinArgument(input, 0);
+    result = ASFE_parse_file_pos_info(type , arg0);
+  }
   if (!strcmp(name, "parse-bytes")) {
     PT_Tree arg0 = getBuiltinArgument(input, 0);
     result = ASFE_parse_bytes(type , arg0);
+  }
+  if (!strcmp(name, "parse-bytes-pos-info")) {
+    PT_Tree arg0 = getBuiltinArgument(input, 0);
+    PT_Tree arg1 = getBuiltinArgument(input, 1);
+    result = ASFE_parse_bytes_pos_info(type , arg0, arg1);
   }
   if (!strcmp(name, "unparse-to-bytes")) {
     PT_Tree arg0 = getBuiltinArgument(input, 0);

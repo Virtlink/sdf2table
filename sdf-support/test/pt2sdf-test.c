@@ -1,4 +1,4 @@
-/* $Id: pt2sdf-test.c 8430 2003-02-04 09:25:31Z jong $ */
+/* $Id: pt2sdf-test.c 21859 2007-03-12 18:04:46Z economop $ */
 
 /*{{{  includes */
 
@@ -39,6 +39,7 @@ static int testPT2SDF(void)
   /*ATwarning("ptProduction: %t\n", ptProduction);*/
 
   sdfProduction = PTProductionToSDFProduction(ptProduction);
+  /*ATwarning("%t\n", sdfProduction);*/
   assert(SDF_isValidProduction(sdfProduction));
   /*ATwarning("sdfProduction: %t\n", sdfProduction);*/
 

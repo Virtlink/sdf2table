@@ -3,7 +3,7 @@
 
 #include <aterm2.h> 
 #include <atb-tool.h>
-#include <sglr.h>
+#include <sglrInterface.h>
 #include <MEPT-utils.h>
 #include <asc-muasf2pt.h>
 
@@ -125,6 +125,7 @@ extern void print_memo_table_sizes();
 typedef ATerm (*funcptr)();
 
 void c_rehash(int newsize);
+void unregister_all();
 unsigned int calc_hash(ATerm t);
 void register_prod(ATerm prod, funcptr func, AFun sym);
 
@@ -299,8 +300,9 @@ ATerm lookup_prod(AFun sym);
 #define null() (ATerm)(ATempty)
 #define list_head(l) (ATgetFirst((ATermList)l))
 #define list_tail(l) (ATerm)(ATgetNext((ATermList)l))
-/*#define conc(l1,l2) (ATerm)(ATconcat((ATermList)l1,(ATermList)l2))*/
 #define cons(l1,l2) (ATerm)(ATconcat((ATermList)l1,(ATermList)l2))
+#define cons_sep_1(l1,s1,l2) ((ATerm) ((ATisEmpty((ATermList) l1) || ATisEmpty((ATermList) l2)) ? ATconcat((ATermList) l1,(ATermList) l2) : ATconcat((ATermList) l1,ATinsert((ATermList) l2,s1))))
+#define cons_sep_3(l1,s1,s2,s3,l2) ((ATerm) ((ATisEmpty((ATermList) l1) || ATisEmpty((ATermList) l2)) ? ATconcat((ATermList) l1,(ATermList) l2) : ATconcat((ATermList) l1,ATinsert(ATinsert(ATinsert((ATermList) l2,s3),s2),s1))))
 #define append(l,t) (ATerm)(ATappend((ATermList)l,t))
 #define insert(t,l) (ATerm)(ATinsert((ATermList)l,t))
 #define list_last(l) (ATgetLast((ATermList)l))
@@ -348,7 +350,7 @@ int asc_support_main(ATerm *bottom, int argc, char *argv[],
                      void (*register_all)(void),
                      void (*resolve_all)(void),
                      void (*init_all)(void),
-		     char *tableBaf,
+		     unsigned const char *tableBaf,
 		     size_t tableSize, 
 		     ATbool parseInput,
 		     ATBhandler handler
@@ -360,8 +362,10 @@ int asc_support_main(ATerm *bottom, int argc, char *argv[],
 void setKeepLayout(ATbool on) ;
 ATerm callLiteralConstructor(PT_Symbol symbol);
 ATerm innermost(PT_Tree tree);
-ATerm getParseTable();
-void setParseTable(ATerm tbl);
+PTBL_ParseTable getParseTable();
+void setParseTable(PTBL_ParseTable tbl);
+const char *getParseTableID();
+ATbool loadParseTable(); 
 void initParser(const char *toolname, const char *filename);
 void setKeepAnnotations(ATbool on);
 void setCid(int cur_cid);

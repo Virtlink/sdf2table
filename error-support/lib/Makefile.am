@@ -1,9 +1,5 @@
-# $Id: Makefile.am 19283 2006-07-25 08:19:08Z jurgenv $
+# $Id: Makefile.am 25775 2008-06-09 14:32:47Z jurgenv $
 include $(top_srcdir)/Makefile.meta
-
-pkgdata_DATA = errorapi.jar locationapi.jar
-
-EXTRA_DIST = errorapi.jar locationapi.jar
 
 lib_LTLIBRARIES = libErrorAPI.la libLocationAPI.la
 
@@ -31,7 +27,8 @@ libErrorAPI_la_SOURCES = \
 	display.c \
 	lift.c \
 	lower.c \
-	manager.c
+	manager.c \
+	Error-utils.c
 
 libLocationAPI_la_CPPFLAGS = $(ATERM_CFLAGS)
 libLocationAPI_la_LDFLAGS  = -avoid-version -no-undefined $(AM_LDFLAGS)
@@ -69,15 +66,6 @@ imploded-error-api: MetaErrors.def Makefile
 	sdf2-to-c --imploded --input $< --prefix ERR_ --output Error
 	indent Error.h
 
-java-error-api: MetaErrors.def Makefile
-	sdf2-to-java \
-		--imploded \
-		--input $< \
-		--name errorapi \
-		--output . \
-		--version ${VERSION}
-	mv errorapi-${VERSION}.jar errorapi.jar
-
 ABS_LOCATION_MODULES = \
 	$(foreach i, \
 	${BASIC_MODULES} ${LOCATION_MODULES}, \
@@ -96,12 +84,4 @@ imploded-location-api: Location.def Makefile
 	sdf2-to-c --imploded --input $< --prefix LOC_ --output Location
 	indent Location.h
 
-java-location-api: Location.def Makefile
-	sdf2-to-java \
-		--imploded \
-		--input $< \
-		--name locationapi \
-		--output . \
-		--version ${VERSION}
-	mv locationapi-${VERSION}.jar locationapi.jar
 endif

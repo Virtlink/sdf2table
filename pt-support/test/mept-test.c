@@ -1,5 +1,5 @@
 
-/* $Id: mept-test.c 16971 2005-11-10 12:28:32Z jurgenv $
+/* $Id: mept-test.c 24311 2007-12-01 15:40:36Z jurgenv $
  *
  * In this file we test some features of the pt-support library
  */
@@ -14,19 +14,18 @@
 
 void testCompare()
 {
-  ATbool modAmbOrdering = ATfalse;
   ATbool modLayout = ATtrue;
 
   test_assert("true > false", 
 	      PT_compareTree(PT_getParseTreeTree(PT_ParseTreeFromTerm(True)),
 			     PT_getParseTreeTree(PT_ParseTreeFromTerm(False)),
-                             modAmbOrdering, modLayout)
+                             modLayout)
 	      > 0);
 
   test_assert("false < true", 
 	      PT_compareTree(PT_getParseTreeTree(PT_ParseTreeFromTerm(False)),
 			     PT_getParseTreeTree(PT_ParseTreeFromTerm(True)),
-                             modAmbOrdering, modLayout)
+                             modLayout)
 	      < 0);
 
   test_assert("whitespace difference",
@@ -34,7 +33,7 @@ void testCompare()
 		             TrueAndFalse)),
 			     PT_getParseTreeTree(PT_ParseTreeFromTerm(
 			     OtherTrueAndFalse)),
-                             modAmbOrdering, modLayout)
+                             modLayout)
 	      == 0);
 
   test_assert("annotations difference",
@@ -42,7 +41,7 @@ void testCompare()
 			     TrueAndFalse)),
 			     PT_getParseTreeTree(PT_ParseTreeFromTerm(
 			     AnnotatedTrueAndFalse)),
-                             modAmbOrdering, modLayout)
+                             modLayout)
 	      == 0);
 
 
@@ -51,31 +50,31 @@ void testCompare()
 						),
 			     PT_getParseTreeTree(PT_ParseTreeFromTerm(DeclareB)
 						),
-                             modAmbOrdering, modLayout)
+                             modLayout)
 	      < 0);
 
   test_assert("2 > 10",
 	      PT_compareTree(PT_getParseTreeTree(PT_ParseTreeFromTerm(Two)),
 			     PT_getParseTreeTree(PT_ParseTreeFromTerm(Ten)),
-                             modAmbOrdering, modLayout)
+                             modLayout)
 	      > 0);
 
   test_assert("20 > 10",
 	      PT_compareTree(PT_getParseTreeTree(PT_ParseTreeFromTerm(Twenty)),
 			     PT_getParseTreeTree(PT_ParseTreeFromTerm(Ten)),
-                             modAmbOrdering, modLayout)
+                             modLayout)
 	      > 0);
 
   test_assert("compare modulo amb ordering is true",
-	      PT_compareTree(PT_getParseTreeTop(PT_ParseTreeFromTerm(amb1)),
-			     PT_getParseTreeTop(PT_ParseTreeFromTerm(amb2)),
-                             ATtrue, ATfalse)
-	      == 0);
+      PT_compareTree(PT_orderAmbiguities(PT_getParseTreeTop(PT_ParseTreeFromTerm(amb1))),
+        PT_orderAmbiguities(PT_getParseTreeTop(PT_ParseTreeFromTerm(amb2))),
+        ATfalse)
+      == 0);
 
   test_assert("compare modulo amb ordering is false",
 	      PT_compareTree(PT_getParseTreeTop(PT_ParseTreeFromTerm(amb1)),
 			     PT_getParseTreeTop(PT_ParseTreeFromTerm(amb2)),
-                             ATfalse, ATfalse)
+                             ATfalse)
 	      != 0);
 }
 
@@ -84,8 +83,8 @@ void testCompare()
 void testPosInfo() {
   PT_ParseTree parseTree = PT_addParseTreePosInfo("-", PT_ParseTreeFromTerm(Integers));
   PT_Tree tree = PT_getParseTreeTree(parseTree);
-  LOC_Location location;
-  LOC_Area area;
+  ERR_Location location;
+  ERR_Area area;
   int beginLine;
   int endLine;
   int beginColumn;
@@ -96,13 +95,13 @@ void testPosInfo() {
   assert(PT_hasTreeLocation(tree));
 
   location = PT_getTreeLocation(tree);
-  area = LOC_getLocationArea(location);
-  beginLine = LOC_getAreaBeginLine(area);
-  endLine = LOC_getAreaEndLine(area);
-  beginColumn = LOC_getAreaBeginColumn(area);
-  endColumn = LOC_getAreaEndColumn(area);
-  offset = LOC_getAreaOffset(area);
-  length = LOC_getAreaLength(area);
+  area = ERR_getLocationArea(location);
+  beginLine = ERR_getAreaBeginLine(area);
+  endLine = ERR_getAreaEndLine(area);
+  beginColumn = ERR_getAreaBeginColumn(area);
+  endColumn = ERR_getAreaEndColumn(area);
+  offset = ERR_getAreaOffset(area);
+  length = ERR_getAreaLength(area);
 
   test_assert("beginline", beginLine == 1);
   test_assert("endline", endLine == 2);
@@ -120,7 +119,7 @@ int main(int argc, char *argv[])
 
   ATinit(argc, argv, &bottomOfStack);
   PT_initMEPTApi();
-  LOC_initLocationApi();
+  ERR_initErrorApi();
   init_terms_dict();
 
   testCompare();

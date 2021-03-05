@@ -1,4 +1,6 @@
-# $Id: Makefile.am 19677 2006-07-25 19:34:00Z martinrw $
+# $Id: Makefile.am 23708 2007-09-26 11:07:25Z kooiker $
+
+include $(top_srcdir)/Makefile.meta
 
 lib_LTLIBRARIES = libmept.la
 
@@ -28,7 +30,7 @@ include_HEADERS = \
 	MEPT-yield.h \
 	MEPT-yieldprod.h
 
-libmept_la_CPPFLAGS = $(ERROR_SUPPORT_CFLAGS) $(ATERM_CFLAGS) -DDISABLE_DYNAMIC_CHECKING
+libmept_la_CPPFLAGS = $(ERROR_SUPPORT_CFLAGS) $(ATERM_CFLAGS) -DDISABLE_DYNAMIC_CHECKING -DFAST_API
 libmept_la_LDFLAGS  = -avoid-version -no-undefined $(AM_LDFLAGS)
 libmept_la_LIBADD   = $(ERROR_SUPPORT_LIBS) $(ATERM_LIBS)
 libmept_la_SOURCES = \
