@@ -1,0 +1,72 @@
+This bundle consists of the following packages:
+
+c-library-1.1pre26177-029m3k14
+  Subversion URL: svn+ssh://svn.cwi.nl/c-library/trunk
+  Subversion revision: 26177
+  Source distribution: http://releases.strategoxt.org/c-library-with-aterm64/c-library-1.1pre26177-029m3k14/./c-library-1.1.tar.gz
+
+toolbuslib-1.0pre26184-dzpr9dwx
+  Subversion URL: svn+ssh://svn.cwi.nl/toolbuslib/trunk
+  Subversion revision: 26184
+  Source distribution: http://releases.strategoxt.org/toolbuslib-with-aterm64/toolbuslib-1.0pre26184-dzpr9dwx/./toolbuslib-1.0.tar.gz
+
+config-support-1.2pre26179-1i198qwf
+  Subversion URL: svn+ssh://svn.cwi.nl/config-support/trunk
+  Subversion revision: 26179
+  Source distribution: http://releases.strategoxt.org/config-support-with-aterm64/config-support-1.2pre26179-1i198qwf/./config-support-1.2.tar.gz
+
+error-support-1.5.1pre26180-6li1jprc
+  Subversion URL: svn+ssh://svn.cwi.nl/error-support/trunk
+  Subversion revision: 26180
+  Source distribution: http://releases.strategoxt.org/error-support-with-aterm64/error-support-1.5.1pre26180-6li1jprc/./error-support-1.5.1.tar.gz
+
+pt-support-2.3pre26194-w4rhcwz1
+  Subversion URL: svn+ssh://svn.cwi.nl/pt-support/trunk
+  Subversion revision: 26194
+  Source distribution: http://releases.strategoxt.org/pt-support-with-aterm64/pt-support-2.3pre26194-w4rhcwz1/./pt-support-2.3.tar.gz
+
+asf-support-1.7pre26174-v98ypjyv
+  Subversion URL: svn+ssh://svn.cwi.nl/asf-support/trunk
+  Subversion revision: 26174
+  Source distribution: http://releases.strategoxt.org/asf-support-with-aterm64/asf-support-1.7pre26174-v98ypjyv/./asf-support-1.7.tar.gz
+
+sdf-support-2.4pre26204-86svcfbi
+  Subversion URL: svn+ssh://svn.cwi.nl/sdf-support/trunk
+  Subversion revision: 26204
+  Source distribution: http://releases.strategoxt.org/sdf-support-with-aterm64/sdf-support-2.4pre26204-86svcfbi/./sdf-support-2.4.tar.gz
+
+ptable-support-1.1pre26193-dkwn2jwa
+  Subversion URL: svn+ssh://svn.cwi.nl/ptable-support/trunk
+  Subversion revision: 26193
+  Source distribution: http://releases.strategoxt.org/ptable-support-with-aterm64/ptable-support-1.1pre26193-dkwn2jwa/./ptable-support-1.1.tar.gz
+
+sglr-4.5.2pre26202-lqp1pibi
+  Subversion URL: svn+ssh://svn.cwi.nl/sglr/trunk
+  Subversion revision: 26202
+  Source distribution: http://releases.strategoxt.org/sglr-with-aterm64/sglr-4.5.2pre26202-lqp1pibi/./sglr-4.5.2.tar.gz
+
+tide-support-1.3pre26185-p2vg8a4a
+  Subversion URL: svn+ssh://svn.cwi.nl/tide-support/trunk
+  Subversion revision: 26185
+  Source distribution: http://releases.strategoxt.org/tide-support-with-aterm64/tide-support-1.3pre26185-p2vg8a4a/./tide-support-1.3.tar.gz
+
+relation-stores-0.1.1pre25249-96m912kk
+  Subversion URL: svn+ssh://svn.cwi.nl/relation-stores/trunk
+  Subversion revision: 25249
+  Source distribution: http://releases.strategoxt.org/relation-stores-with-aterm64/relation-stores-0.1.1pre25249-96m912kk/./relation-stores-0.1.1.tar.gz
+
+asc-support-2.4pre25044-q7sxh1h9
+  Subversion URL: svn+ssh://svn.cwi.nl/asc-support/trunk
+  Subversion revision: 25044
+  Source distribution: http://releases.strategoxt.org/asc-support-with-aterm64/asc-support-2.4pre25044-q7sxh1h9/./asc-support-2.4.tar.gz
+
+pgen-2.6.1pre26192-mkpkkgg3
+  Subversion URL: svn+ssh://svn.cwi.nl/pgen/trunk
+  Subversion revision: 26192
+  Source distribution: http://releases.strategoxt.org/pgen-with-aterm64/pgen-2.6.1pre26192-mkpkkgg3/./pgen-2.6.1.tar.gz
+
+sdf-library-1.0.2pre26207-cwz4qx0h
+  Subversion URL: svn+ssh://svn.cwi.nl/sdf-library/trunk
+  Subversion revision: 26207
+  Source distribution: http://releases.strategoxt.org/sdf-library/sdf-library-1.0.2pre26207-cwz4qx0h/./sdf-library-1.0.2.tar.gz
+

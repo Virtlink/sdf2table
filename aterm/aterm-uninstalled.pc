@@ -4,5 +4,5 @@ Maintainers=e.t.j.scheffers@TUE.nl,jurgenv@cwi.nl
 Name: aterm
 Description: Abstract data type for exchanging tree-like data structures
 Version: 2.6
-Libs: -L/sdf2bundle/aterm-2.6/aterm -lATerm
-Cflags: -I/sdf2bundle/aterm-2.6/aterm
+Libs: -L/repo/aterm/aterm -lATerm
+Cflags: -I/repo/aterm/aterm

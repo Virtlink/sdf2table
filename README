@@ -1,38 +1,12 @@
-# Sdf2table
+# SDF2Table
+This is the legacy `sdf2table` tool.
 
-To compile:
+To build, invoke `make`. The artifacts will appear in the `dist/` directory.
+This build requires Docker.
 
-1.  Install the following packages:
-    - `build-essential`
-    - `curl`
-    - `pkg-config`
-    - `graphviz`
+By default, the artifacts are built for x86-64 Linux.
+To build for macOS Big Sur, provide the `TARGET` parameter:
 
-2.  Compile and install ATerm in the default locations
-
-    ```bash
-    cd aterm/
-    ./configure
-    make
-    make install
-    cd ../
-    ```
-
-3.  Ensure `libATerm.so` is on the dynamic library path
-
-    ```bash
-    find / -name libATerm.so
-    # /usr/local/lib/libATerm.so
-    echo $LD_LIBRARY_PATH
-    # <empty>
-    export LD_LIBRARY_PATH=/usr/local/lib
-    echo $LD_LIBRARY_PATH
-    ```
-
-4.  Configure this project using the following command:
-
-    ```
-    ./configure CPPFLAGS="-std=gnu90 -fPIC" --target=x86_64-apple-darwin20.3.0
-    make
-    make install
-    ```
+```bash
+make TARGET=x86_64-apple-darwin20.3.0
+```

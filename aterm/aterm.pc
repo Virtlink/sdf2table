@@ -6,6 +6,6 @@ Description: Abstract data type for exchanging tree-like data structures
 Version: 2.6
 Libs: -L${prefix}/lib -lATerm
 Cflags: -I${prefix}/include
-#uninstalled Libs: -L/sdf2bundle/aterm-2.6/aterm -lATerm
-#uninstalled Cflags: -I/sdf2bundle/aterm-2.6/aterm
+#uninstalled Libs: -L/repo/aterm/aterm -lATerm
+#uninstalled Cflags: -I/repo/aterm/aterm
 PkgConfigPath=

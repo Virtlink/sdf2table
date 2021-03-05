@@ -1,6 +1,6 @@
 # Image for building sdf2table and related tools
 #
-# Run this image with the repository mounted to `/sdf2bundle`
+# Run this image with the repository mounted to `/repo`
 FROM ubuntu:focal
 
 RUN apt-get update \
@@ -18,4 +18,4 @@ SHELL ["/bin/bash", "-c"]
 
 ENV LD_LIBRARY_PATH=/usr/local/lib
 
-CMD cd /sdf2bundle/ && ./build.sh
+CMD cd /repo/ && bash build.sh
