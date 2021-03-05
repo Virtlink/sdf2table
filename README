@@ -11,7 +11,7 @@ To compile:
 2.  Compile and install ATerm in the default locations
 
     ```bash
-    cd aterm-2.5/
+    cd aterm/
     ./configure
     make
     make install
