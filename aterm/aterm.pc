@@ -1,0 +1,11 @@
+prefix=/usr/local
+Maintainers=e.t.j.scheffers@TUE.nl,jurgenv@cwi.nl
+
+Name: aterm
+Description: Abstract data type for exchanging tree-like data structures
+Version: 2.6
+Libs: -L${prefix}/lib -lATerm
+Cflags: -I${prefix}/include
+#uninstalled Libs: -L/sdf2bundle/aterm-2.6/aterm -lATerm
+#uninstalled Cflags: -I/sdf2bundle/aterm-2.6/aterm
+PkgConfigPath=

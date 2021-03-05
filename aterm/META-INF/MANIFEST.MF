@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: aterm
+Eclipse-LazyStart: true
+Bundle-SymbolicName: aterm;singleton:=true
+Bundle-Version: 2.6
+Bundle-ClassPath: .
