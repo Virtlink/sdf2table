@@ -5,8 +5,8 @@ To build, invoke `make`. The artifacts will appear in the `dist/` directory.
 This build requires Docker.
 
 By default, the artifacts are built for x86-64 Linux.
-To build for macOS Big Sur, provide the `TARGET` parameter:
+To build for macOS Big Sur, provide the `HOST` parameter:
 
 ```bash
-make TARGET=x86_64-apple-darwin20.3.0
+make HOST=x86_64-apple-darwin
 ```

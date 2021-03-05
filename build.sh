@@ -14,7 +14,7 @@ cd ../
 
 cd sdf2bundle/
 echo "Building sdf2table..."
-./configure CPPFLAGS="-std=gnu90 -fPIC" --target=${TARGET:-}
+./configure CPPFLAGS="-std=gnu90 -fPIC" --host=${HOST:-}
 make
 make install
 cd ../
