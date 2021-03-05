@@ -10,7 +10,7 @@ To compile:
 
 2.  Compile and install ATerm in the default locations
 
-    ```
+    ```bash
     cd aterm-2.5/
     ./configure
     make
@@ -20,14 +20,13 @@ To compile:
 
 3.  Ensure `libATerm.so` is on the dynamic library path
 
-    ```
+    ```bash
     find / -name libATerm.so
     # /usr/local/lib/libATerm.so
     echo $LD_LIBRARY_PATH
     # <empty>
     export LD_LIBRARY_PATH=/usr/local/lib
     echo $LD_LIBRARY_PATH
-    /usr/local/bin/baffle --help
     ```
 
 4.  Configure this project using the following command:
