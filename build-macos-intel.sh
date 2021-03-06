@@ -28,6 +28,5 @@ echo "Building sdf2table..."
   --disable-shared \
   --prefix="$DIR/dist/" 
 make
-make install
 cd "$DIR"
 echo "Done!"
