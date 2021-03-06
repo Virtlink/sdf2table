@@ -16,6 +16,4 @@ RUN apt-get update \
 
 SHELL ["/bin/bash", "-c"]
 
-ENV LD_LIBRARY_PATH=/usr/local/lib
-
-CMD cd /repo/ && bash build.sh
+CMD cd /repo/ && bash build-linux-intel.sh
