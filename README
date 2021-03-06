@@ -1,25 +1,11 @@
 # SDF2Table
 This is the legacy `sdf2table` tool.
 
-Build ATerm:
-```bash
-cd aterm/
-./configure
-make
-make install
-cd ../
-```
 
-Build sdf2bundle:
-```
-cd sdf2bundle/
-./configure CFLAGS="-std=gnu89" --host=x86_64-apple-darwin
-make
-cd ../
-```
+## Build
+On macOS, ensure the XCode command-line tools are installed (`xcode-select --install`).
+Invoke:
 
-Find the files:
 ```bash
-mkdir -p dist/
-cp sdf2bundle/pgen/src/.libs/sdf2table dist/sdf2table
+./build-macos-intel.sh
 ```
