@@ -11,7 +11,6 @@ mkdir -p "$DIR/dist/"
 
 cd "$DIR/aterm/"
 echo "Building ATerm library..."
-autoreconf -vfi
 ./configure --prefix="$DIR/dist/"
 make
 make install
@@ -22,7 +21,6 @@ export PKG_CONFIG_PATH="$DIR/dist/lib/pkgconfig"
 
 cd "$DIR/sdf2bundle/"
 echo "Building sdf2table..."
-autoreconf -vfi
 ./configure \
   CFLAGS="-std=gnu89 -fbracket-depth=512" \
   --build=x86_64-apple-darwin \
