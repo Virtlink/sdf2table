@@ -1,12 +1,25 @@
 # SDF2Table
 This is the legacy `sdf2table` tool.
 
-To build, invoke `make`. The artifacts will appear in the `dist/` directory.
-This build requires Docker.
-
-By default, the artifacts are built for x86-64 Linux.
-To build for macOS Big Sur, provide the `HOST` parameter:
-
+Build ATerm:
 ```bash
-make HOST=x86_64-apple-darwin
+cd aterm/
+./configure
+make
+make install
+cd ../
+```
+
+Build sdf2bundle:
+```
+cd sdf2bundle/
+./configure CFLAGS="-std=gnu89" --host=x86_64-apple-darwin
+make
+cd ../
+```
+
+Find the files:
+```bash
+mkdir -p dist/
+cp sdf2bundle/pgen/src/.libs/sdf2table dist/sdf2table
 ```
