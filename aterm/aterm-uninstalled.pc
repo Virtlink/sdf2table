@@ -1,8 +1,0 @@
-prefix=/usr/local
-Maintainers=e.t.j.scheffers@TUE.nl,jurgenv@cwi.nl
-
-Name: aterm
-Description: Abstract data type for exchanging tree-like data structures
-Version: 2.6
-Libs: -L/repo/aterm/aterm -lATerm
-Cflags: -I/repo/aterm/aterm

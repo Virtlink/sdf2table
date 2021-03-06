@@ -1,5 +1,0 @@
-libATerm_la-version.lo: version.c /usr/include/stdc-predef.h version.h
-
-/usr/include/stdc-predef.h:
-
-version.h:
