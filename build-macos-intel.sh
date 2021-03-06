@@ -28,5 +28,6 @@ echo "Building sdf2table..."
   --disable-shared \
   --prefix="$DIR/dist/" 
 make
+cp "$DIR/sdf2bundle/pgen/src/sdf2table" "$DIR/dist/sdf2table"
 cd "$DIR"
 echo "Done!"
