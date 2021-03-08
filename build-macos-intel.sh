@@ -8,16 +8,17 @@ set -o xtrace
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 mkdir -p "$DIR/dist/"
+mkdir -p "$DIR/tmp/"
 
 cd "$DIR/aterm/"
 echo "Building ATerm library..."
-./configure --prefix="$DIR/dist/"
+./configure --prefix="$DIR/tmp/"
 make
 make install
 cd "$DIR"
 
-export LD_LIBRARY_PATH="$DIR/dist/lib"
-export PKG_CONFIG_PATH="$DIR/dist/lib/pkgconfig"
+export LD_LIBRARY_PATH="$DIR/tmp/lib"
+export PKG_CONFIG_PATH="$DIR/tmp/lib/pkgconfig"
 
 cd "$DIR/sdf2bundle/"
 echo "Building sdf2table..."
@@ -26,8 +27,10 @@ echo "Building sdf2table..."
   --build=x86_64-apple-darwin \
   --enable-static \
   --disable-shared \
-  --prefix="$DIR/dist/" 
+  --prefix="$DIR/tmp/" 
 make
+
+mkdir -p "$DIR/dist/"
 cp "$DIR/sdf2bundle/pgen/src/sdf2table" "$DIR/dist/sdf2table"
 cd "$DIR"
 echo "Done!"

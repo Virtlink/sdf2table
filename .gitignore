@@ -90,4 +90,5 @@ lt~obsolete.m4
 
 # Distribution
 /dist/
+/tmp/
 !/Makefile
