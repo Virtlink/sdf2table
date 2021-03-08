@@ -8,7 +8,7 @@ set -o xtrace
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 [ ! -z "$DIR" ]
 
-mkdir -p "$DIR/dist/"
+rm -rf "$DIR/tmp/"
 mkdir -p "$DIR/tmp/"
 
 cd "$DIR/aterm/"
