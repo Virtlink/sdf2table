@@ -7,6 +7,7 @@ RUN apt-get update \
  && apt-get install --no-install-recommends --yes \
     bash \
     sudo \
+    git \
     wget \
     curl \
     pkg-config \
