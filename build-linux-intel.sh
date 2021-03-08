@@ -6,6 +6,7 @@ set -o nounset
 set -o xtrace
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+[ ! -z "$DIR" ]
 
 mkdir -p "$DIR/dist/"
 mkdir -p "$DIR/tmp/"
