@@ -38,4 +38,8 @@ make
 mkdir -p "$DIR/dist/"
 cp "$DIR/sdf2bundle/pgen/src/sdf2table" "$DIR/dist/sdf2table"
 cd "$DIR"
+
+echo "Testing..."
+"$DIR/dist/sdf2table" -v -t -i "$DIR/test/SDF-permissive.def" -m SDF -o "$DIR/test/sdf.tbl"
+
 echo "Done!"
