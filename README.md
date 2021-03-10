@@ -44,12 +44,12 @@ And then execute the image. It will mount the current directory as a volume
 and produce the resulting binaries in their appropriate locations upon exit.
 
 ```bash
-docker run -it -v `pwd`:/repo sdf2bundle_dev
+docker run --rm -it -v `pwd`:/repo sdf2bundle_dev
 ```
 
 Or on Fish shell:
 
 ```fish
-docker run -it -v (pwd):/repo sdf2bundle_dev
+docker run --rm -it -v (pwd):/repo sdf2bundle_dev
 ```
 
